@@ -1,0 +1,11 @@
+{
+  "window_size": 60,
+  "hidden_size": 32,
+  "num_layers": 1,
+  "val_mae_scaled": 0.282523357055404,
+  "val_mae_rupees": 373.8870849609375,
+  "val_mape": 40.06924057006836,
+  "data_samples": 1805,
+  "transform": "log1p + StandardScaler",
+  "loss": "L1 (MAE)"
+}
