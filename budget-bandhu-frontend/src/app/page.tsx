@@ -370,7 +370,7 @@ export default function DashboardPage() {
                 initial={{ opacity: 0, y: 80 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.9, ease: MM_EASING }}
                 className="card-3d"
               >
                 <SpendingDonutChart data={dashboardData.category_breakdown} />
@@ -381,7 +381,7 @@ export default function DashboardPage() {
                 initial={{ opacity: 0, y: 80 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.9, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.9, delay: 0.15, ease: MM_EASING }}
                 className="card-3d"
               >
                 <CashflowLineChart data={spendingTrend} />
@@ -393,7 +393,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 100 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-120px" }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.8, ease: MM_EASING }}
               className="mb-12"
             >
               <BudgetProgressBars allocations={budgetAllocations} />
@@ -405,7 +405,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.7, ease: MM_EASING }}
               className="mb-12"
             >
               <EmergencyFundBarometer goal={emergencyFundGoal} />
@@ -419,7 +419,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 100, scale: 0.95 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.8, ease: MM_EASING }}
           style={{
             background: 'linear-gradient(180deg, #F5E6FA 0%, #EDD9F5 50%, #F5E6FA 100%)',
             borderRadius: '48px 48px 0 0',
@@ -488,7 +488,7 @@ export default function DashboardPage() {
                 initial={{ opacity: 0, y: 80, scale: 0.9 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.6, ease: MM_EASING }}
                 style={{ transformOrigin: 'center top' }}
               >
                 <SpendingInsights insights={dashboardData?.insights} />
@@ -498,7 +498,7 @@ export default function DashboardPage() {
                 initial={{ opacity: 0, y: 80, scale: 0.9 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.6, delay: 0.15, ease: MM_EASING }}
                 style={{ transformOrigin: 'center top' }}
               >
                 <FinancialTimeMachine forecast={dashboardData?.forecast} />
@@ -510,7 +510,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 80, scale: 0.9 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.6, delay: 0.3, ease: MM_EASING }}
               style={{ transformOrigin: 'center top' }}
               className="mt-12"
             >
@@ -547,7 +547,7 @@ export default function DashboardPage() {
                   initial={{ opacity: 0, y: 60 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.8, delay: i * 0.1, ease: MM_EASING }}
                   className="mm-card card-3d"
                 >
                   <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-6 text-mm-purple">
@@ -571,7 +571,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.8, ease: MM_EASING }}
             >
               <h2 className="mm-mega-heading mb-12">
                 START YOUR

@@ -18,6 +18,7 @@ import { Balloons } from "@/components/animations/Balloons";
 
 // Demo user ID
 const DEMO_USER_ID = "696a022c3c758e29b2ca8d50";
+const MM_EASING = [0.16, 1, 0.3, 1] as const;
 
 export interface Goal {
     id: string;
@@ -342,7 +343,7 @@ export default function GoalsPage() {
                             initial={{ opacity: 0, y: 60 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ duration: 0.8, ease: MM_EASING }}
                             className="mm-card-colored bg-gradient-to-br from-emerald-500 from-10% via-emerald-600 to-teal-700 shadow-2xl shadow-emerald-900/20 card-3d p-8"
                         >
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -460,7 +461,7 @@ export default function GoalsPage() {
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     whileInView={{ opacity: 1, scale: 1 }}
                                     viewport={{ once: true }}
-                                    transition={{ delay: index * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                                    transition={{ delay: index * 0.1, duration: 0.6, ease: MM_EASING }}
                                 >
                                     <GoalCard
                                         goal={goal}

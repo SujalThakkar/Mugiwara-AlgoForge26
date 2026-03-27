@@ -22,7 +22,8 @@ export function OpeningAnimation({
 
     // MetaMask's EXACT easing with slight overshoot
     // This creates the smooth "bounce" effect
-    const metaMaskEasing = [0.25, 0.46, 0.45, 0.94];
+    const metaMaskEasing = [0.25, 0.46, 0.45, 0.94] as const;
+    const smoothEasing = [0.16, 1, 0.3, 1] as const;
 
     return (
         <AnimatePresence>
@@ -49,7 +50,7 @@ export function OpeningAnimation({
                         exit={{ opacity: 0, y: -8 }}
                         transition={{
                             duration: 0.5,
-                            ease: [0.16, 1, 0.3, 1]
+                            ease: smoothEasing
                         }}
                     >
                         <h1

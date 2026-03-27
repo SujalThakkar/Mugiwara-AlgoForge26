@@ -19,6 +19,7 @@ import { MicPulse } from "@/components/animations/MicPulse";
 
 // Demo user ID - replace with actual user from auth
 const DEMO_USER_ID = "696a022c3c758e29b2ca8d50";
+const MM_EASING = [0.16, 1, 0.3, 1] as const;
 
 export default function TransactionsPage() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -202,7 +203,7 @@ export default function TransactionsPage() {
                             initial={{ opacity: 0, y: 60 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ duration: 0.8, ease: MM_EASING }}
                             whileHover={{ y: -6 }}
                             onClick={() => setShowCSVUpload(!showCSVUpload)}
                             className="mm-card-hover relative h-[200px] rounded-2xl p-6 cursor-pointer overflow-hidden
@@ -237,7 +238,7 @@ export default function TransactionsPage() {
                             initial={{ opacity: 0, x: -60 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ duration: 0.8, ease: MM_EASING }}
                             whileHover={{ y: -6 }}
                             onHoverStart={() => setIsHoveringScan(true)}
                             onHoverEnd={() => setIsHoveringScan(false)}
@@ -277,7 +278,7 @@ export default function TransactionsPage() {
                             initial={{ opacity: 0, x: 60 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ duration: 0.8, ease: MM_EASING }}
                             whileHover={{ y: -6 }}
                             onHoverStart={() => setIsHoveringVoice(true)}
                             onHoverEnd={() => setIsHoveringVoice(false)}
@@ -346,7 +347,7 @@ export default function TransactionsPage() {
                         initial={{ opacity: 0, y: 60 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{ duration: 0.8, ease: MM_EASING }}
                         className="mm-card card-3d"
                     >
                         <div className="flex items-center justify-between mb-8">
@@ -419,7 +420,7 @@ export default function TransactionsPage() {
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{ duration: 0.8, ease: MM_EASING }}
                     >
                         <h2 className="text-5xl md:text-6xl font-black text-mm-black mb-6 leading-tight">
                             Add Your

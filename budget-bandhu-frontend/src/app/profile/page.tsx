@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import {
-    TrendingUp,
     Target,
     Award,
     Calendar,
@@ -14,12 +13,30 @@ import {
     Share2,
     Settings,
     ChevronRight,
+    Wallet,
+    LogOut,
+    AlertCircle,
 } from 'lucide-react';
 import { useSettingsStore } from '@/lib/store/useSettingsStore';
+import { useMetaMaskWallet } from '@/lib/hooks/useMetaMaskWallet';
 import Link from 'next/link';
 
 export default function ProfilePage() {
     const { profile } = useSettingsStore();
+    const {
+        address: walletAddress,
+        connect,
+        disconnect,
+        error: walletError,
+        isAvailable: isWalletAvailable,
+        isConnected: isWalletConnected,
+        status: walletStatus,
+        walletName,
+    } = useMetaMaskWallet();
+
+    const truncateAddress = (address: string) => {
+        return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    };
 
     const stats = [
         { label: 'Total Savings', value: '₹2,45,680', change: '+12.5%', icon: DollarSign, color: 'from-emerald-500 to-green-600' },
@@ -141,6 +158,69 @@ export default function ProfilePage() {
                         );
                     })}
                 </div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="backdrop-blur-xl bg-white/70 rounded-3xl shadow-xl border border-white/50 p-8"
+                >
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="flex items-center gap-6">
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg">
+                                <Wallet className="w-8 h-8 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-800">Crypto Wallet</h2>
+                                <p className="text-gray-600">Use the new MetaMask connection to link your wallet and view the connected address.</p>
+                            </div>
+                        </div>
+
+                        {!isWalletConnected || !walletAddress ? (
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => void connect()}
+                                disabled={walletStatus === 'checking' || walletStatus === 'connecting' || walletStatus === 'disconnecting' || !isWalletAvailable}
+                                className="px-8 py-4 rounded-2xl bg-[#E2761B] hover:bg-[#D16812] text-white font-bold shadow-lg transition-all flex items-center gap-3 disabled:opacity-60"
+                            >
+                                <img
+                                    src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Logo.svg"
+                                    alt="MetaMask"
+                                    className="w-6 h-6"
+                                />
+                                {walletStatus === 'checking' && 'Checking for MetaMask...'}
+                                {walletStatus === 'connecting' && 'Connecting...'}
+                                {walletStatus === 'disconnecting' && 'Disconnecting...'}
+                                {walletStatus !== 'checking' && walletStatus !== 'connecting' && walletStatus !== 'disconnecting' && !isWalletAvailable && 'MetaMask Not Found'}
+                                {walletStatus !== 'checking' && walletStatus !== 'connecting' && walletStatus !== 'disconnecting' && isWalletAvailable && `Connect ${walletName}`}
+                            </motion.button>
+                        ) : (
+                            <div className="flex flex-col md:flex-row items-center gap-4">
+                                <div className="text-right">
+                                    <div className="text-sm font-bold text-gray-500 uppercase tracking-wider">Connected Wallet</div>
+                                    <div className="text-xl font-mono font-bold text-gray-800">{truncateAddress(walletAddress)}</div>
+                                </div>
+                                <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => void disconnect()}
+                                    className="p-4 rounded-2xl bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-all"
+                                    title="Disconnect Wallet"
+                                >
+                                    <LogOut className="w-6 h-6" />
+                                </motion.button>
+                            </div>
+                        )}
+                    </div>
+                    {(walletError || !isWalletAvailable) && (
+                        <div className="mt-4 flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                            <AlertCircle className="h-4 w-4 shrink-0" />
+                            <span>
+                                {walletError ?? 'MetaMask extension was not detected. Open this page in a browser where MetaMask is installed.'}
+                            </span>
+                        </div>
+                    )}
+                </motion.div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Achievements */}

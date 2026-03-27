@@ -7,6 +7,7 @@ import { Logo3D } from "@/components/shared/Logo3D";
 import { RotatingCard } from "@/components/animations/RotatingCard";
 
 export default function InsightsPage() {
+    const MM_EASING = [0.16, 1, 0.3, 1] as const;
     const insights = [
         { icon: TrendingUp, title: "Spending Up 40%", desc: "Shopping increased this week", color: "mm-orange" },
         { icon: AlertCircle, title: "Budget Alert", desc: "Food budget 90% used", color: "mm-orange" },
@@ -77,7 +78,7 @@ export default function InsightsPage() {
                                                 initial={{ opacity: 0, y: 60 }}
                                                 whileInView={{ opacity: 1, y: 0 }}
                                                 viewport={{ once: true }}
-                                                transition={{ delay: index * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                                                transition={{ delay: index * 0.1, duration: 0.8, ease: MM_EASING }}
                                             >
                                                 <div className="mm-card card-3d h-full">
                                                     <div className={`w-16 h-16 bg-${item.color}/10 rounded-2xl flex items-center justify-center mb-6`}>
@@ -98,7 +99,7 @@ export default function InsightsPage() {
                                         initial={{ opacity: 0, y: 60 }}
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true }}
-                                        transition={{ delay: index * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                                        transition={{ delay: index * 0.1, duration: 0.8, ease: MM_EASING }}
                                         className="mm-card card-3d"
                                     >
                                         <div className={`w-16 h-16 bg-${item.color}/10 rounded-2xl flex items-center justify-center mb-6`}>
@@ -123,7 +124,7 @@ export default function InsightsPage() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ duration: 0.8, ease: MM_EASING }}
                         >
                             <h2 className="text-5xl md:text-6xl font-black text-mm-black mb-6 leading-tight">
                                 Get Full

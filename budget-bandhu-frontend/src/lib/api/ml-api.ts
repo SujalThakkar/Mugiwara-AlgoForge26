@@ -1,0 +1,774 @@
+import { mockData } from './mock-data';
+import { ChatMessage } from '../types/chat';
+import { useConfigStore } from '../store/useConfigStore';
+
+const ML_API_BASE = process.env.NEXT_PUBLIC_ML_API_URL || 'http://localhost:8000';
+
+async function callApi<T>(endpoint: string, fallbackData: T, options?: RequestInit): Promise<T> {
+    const { isMockMode } = useConfigStore.getState();
+
+    if (isMockMode) {
+        return fallbackData;
+    }
+
+    try {
+        const body = options?.body;
+        const shouldSetJsonHeader = !(typeof FormData !== 'undefined' && body instanceof FormData);
+
+        const response = await fetch(`${ML_API_BASE}${endpoint}`, {
+            ...options,
+            headers: shouldSetJsonHeader
+                ? {
+                    'Content-Type': 'application/json',
+                    ...options?.headers,
+                }
+                : options?.headers,
+        });
+
+        if (!response.ok) {
+            return fallbackData;
+        }
+
+        return await response.json() as T;
+    } catch {
+        return fallbackData;
+    }
+}
+
+export interface User {
+    id: string;
+    mobile_number: string;
+    name: string;
+    email?: string;
+    income: number;
+    currency: string;
+    created_at: string;
+}
+
+export interface UserCreateData {
+    name: string;
+    mobile_number: string;
+    password: string;
+    income?: number;
+}
+
+export interface TranslationResult {
+    translatedText: string;
+    detectedLanguage?: string;
+}
+
+export interface OCRResult {
+    amount?: number;
+    description?: string;
+    date?: string;
+    merchant?: string;
+    rawText: string;
+}
+
+export interface Transaction {
+    id: string;
+    user_id: string;
+    date: string;
+    amount: number;
+    description: string;
+    type: 'debit' | 'credit';
+    category: string;
+    category_confidence: number;
+    is_anomaly: boolean;
+    anomaly_severity: 'normal' | 'low' | 'medium' | 'high';
+    notes?: string;
+    created_at: string;
+}
+
+export interface TransactionUpload {
+    date: string;
+    amount: number;
+    description: string;
+    type?: 'debit' | 'credit';
+    category?: string;
+    notes?: string;
+}
+
+export interface TransactionStats {
+    total_transactions: number;
+    total_anomalies: number;
+    anomaly_rate: number;
+    category_breakdown: Record<string, { total: number; count: number }>;
+}
+
+export interface Insight {
+    type: string;
+    title: string;
+    description: string;
+    severity: 'info' | 'success' | 'warning' | 'error';
+    icon: string;
+}
+
+export interface DashboardData {
+    user: {
+        id: string;
+        name: string;
+        income: number;
+    };
+    stats: {
+        current_balance: number;
+        month_spent: number;
+        month_saved: number;
+        savings_rate: number;
+        financial_score: number;
+        total_transactions: number;
+    };
+    category_breakdown: Record<string, { total: number; count: number }>;
+    anomalies: {
+        count: number;
+        rate: number;
+    };
+    insights: Insight[];
+    forecast: {
+        horizon: string;
+        predicted_savings: number;
+        confidence: number;
+    } | null;
+    budget_summary: {
+        total_allocated: number;
+        total_spent: number;
+    } | null;
+    goals_summary: {
+        total: number;
+        total_saved: number;
+        total_target: number;
+    };
+}
+
+export interface BudgetAllocation {
+    category: string;
+    allocated: number;
+    spent: number;
+}
+
+export interface Budget {
+    id: string;
+    user_id: string;
+    total_income: number;
+    allocations: BudgetAllocation[];
+    savings_target: number;
+    current_savings: number;
+}
+
+export interface BudgetRecommendation {
+    category: string;
+    current_allocation: number;
+    actual_spent: number;
+    recommended: number;
+    multiplier: number;
+    change: 'increase' | 'decrease' | 'maintain';
+    reason: string;
+}
+
+export interface Goal {
+    id: string;
+    user_id: string;
+    name: string;
+    icon: string;
+    target: number;
+    current: number;
+    deadline: string;
+    priority: 'low' | 'medium' | 'high';
+    color: string;
+    progress_percentage: number;
+    remaining: number;
+    on_track: boolean;
+    eta_days: number | null;
+    milestones: Array<{ amount: number; reached: boolean; date: string | null }>;
+}
+
+export interface GoalCreate {
+    user_id: string;
+    name: string;
+    icon?: string;
+    target: number;
+    deadline: string;
+    priority?: 'low' | 'medium' | 'high';
+    color?: string;
+}
+
+export interface LevelInfo {
+    level: number;
+    current_xp: number;
+    xp_to_next_level: number;
+    title: string;
+}
+
+export interface Badge {
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    unlocked: boolean;
+    unlocked_at: string | null;
+    trigger_description: string;
+}
+
+export interface Gamification {
+    id: string;
+    user_id: string;
+    level_info: LevelInfo;
+    total_xp: number;
+    badges: Badge[];
+    challenges_completed: number;
+    streak_days: number;
+}
+
+type GoogleTranslateResponse = [
+    Array<[string, string?, unknown?, unknown?]>,
+    unknown,
+    string?,
+];
+
+function getMockTransactions(userId: string): Transaction[] {
+    return mockData.transactions.map((transaction) => ({
+        id: transaction.id,
+        user_id: userId,
+        date: transaction.date,
+        amount: transaction.amount,
+        description: transaction.merchant,
+        type: transaction.type,
+        category: transaction.category,
+        category_confidence: 1,
+        is_anomaly: transaction.isAnomaly,
+        anomaly_severity: transaction.isAnomaly ? 'high' : 'normal',
+        notes: transaction.notes,
+        created_at: transaction.date,
+    }));
+}
+
+function getMockDashboardData(userId: string): DashboardData {
+    return {
+        user: {
+            id: userId,
+            name: mockData.user.name,
+            income: mockData.user.monthlyIncome,
+        },
+        stats: {
+            current_balance: mockData.dashboardSummary.currentBalance,
+            month_spent: mockData.dashboardSummary.monthSpent,
+            month_saved: mockData.dashboardSummary.monthSaved,
+            savings_rate: mockData.dashboardSummary.savingsRate * 100,
+            financial_score: mockData.dashboardSummary.financialScore,
+            total_transactions: mockData.transactions.length,
+        },
+        category_breakdown: mockData.budget.allocations.reduce<Record<string, { total: number; count: number }>>(
+            (accumulator, allocation) => ({
+                ...accumulator,
+                [allocation.category]: { total: allocation.spent, count: 1 },
+            }),
+            {}
+        ),
+        anomalies: {
+            count: mockData.anomalies.length,
+            rate: (mockData.anomalies.length / Math.max(mockData.transactions.length, 1)) * 100,
+        },
+        insights: mockData.insights.map((insight) => ({
+            type: insight.type,
+            title: insight.title,
+            description: insight.description,
+            severity: insight.severity as DashboardData['insights'][number]['severity'],
+            icon: insight.icon,
+        })),
+        forecast: {
+            horizon: '30 days',
+            predicted_savings: mockData.savingsForecast['30day'].predicted,
+            confidence: mockData.savingsForecast['30day'].confidence,
+        },
+        budget_summary: {
+            total_allocated: mockData.budget.allocations.reduce((sum, item) => sum + item.allocated, 0),
+            total_spent: mockData.budget.allocations.reduce((sum, item) => sum + item.spent, 0),
+        },
+        goals_summary: {
+            total: mockData.goals.length,
+            total_saved: mockData.goals.reduce((sum, goal) => sum + goal.current, 0),
+            total_target: mockData.goals.reduce((sum, goal) => sum + goal.target, 0),
+        },
+    };
+}
+
+export const mlApi = {
+    user: {
+        register: async (data: UserCreateData): Promise<User> => {
+            const payload = {
+                name: data.name,
+                password: data.password,
+                mobile: data.mobile_number,
+                income: data.income ?? 50000,
+            };
+
+            return callApi<User>(
+                '/api/v1/user/register',
+                {
+                    id: data.mobile_number,
+                    mobile_number: data.mobile_number,
+                    name: data.name,
+                    email: mockData.user.email,
+                    income: data.income ?? mockData.user.monthlyIncome,
+                    currency: 'INR',
+                    created_at: new Date().toISOString(),
+                },
+                { method: 'POST', body: JSON.stringify(payload) }
+            );
+        },
+
+        login: async (mobile_number: string, password: string): Promise<{ message: string; user: User }> => {
+            return callApi(
+                '/api/v1/user/login',
+                {
+                    message: 'Logged in (Mock)',
+                    user: {
+                        id: mobile_number,
+                        mobile_number,
+                        name: mockData.user.name,
+                        email: mockData.user.email,
+                        income: mockData.user.monthlyIncome,
+                        currency: 'INR',
+                        created_at: new Date().toISOString(),
+                    },
+                },
+                { method: 'POST', body: JSON.stringify({ mobile: mobile_number, password }) }
+            );
+        },
+
+        getProfile: async (userId: string): Promise<User> => {
+            return callApi(
+                `/api/v1/user/${userId}`,
+                {
+                    id: userId,
+                    mobile_number: userId,
+                    name: mockData.user.name,
+                    email: mockData.user.email,
+                    income: mockData.user.monthlyIncome,
+                    currency: 'INR',
+                    created_at: new Date().toISOString(),
+                }
+            );
+        },
+
+        updateIncome: async (userId: string, income: number): Promise<{ message: string }> => {
+            return callApi(
+                `/api/v1/user/${userId}/income?income=${income}`,
+                { message: 'Income updated (Mock)' },
+                { method: 'PUT' }
+            );
+        },
+    },
+
+    transactions: {
+        add: async (userId: string, transaction: TransactionUpload) => {
+            return callApi(
+                `/api/v1/transactions?user_id=${encodeURIComponent(userId)}`,
+                {
+                    transaction_id: `txn_mock_${Date.now()}`,
+                    category: transaction.category || 'Others',
+                    is_anomaly: false,
+                    anomaly_severity: 'normal',
+                },
+                { method: 'POST', body: JSON.stringify(transaction) }
+            );
+        },
+
+        addBulk: async (userId: string, transactions: TransactionUpload[]) => {
+            return callApi(
+                '/api/v1/transactions/bulk',
+                {
+                    inserted_count: transactions.length,
+                    categorization_stats: {},
+                    anomaly_stats: {},
+                },
+                { method: 'POST', body: JSON.stringify({ user_id: userId, transactions }) }
+            );
+        },
+
+        uploadCsv: async (userId: string, file: File) => {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            return callApi(
+                `/api/v1/transactions/upload-csv?user_id=${encodeURIComponent(userId)}`,
+                {
+                    inserted_count: 24,
+                    categorization_stats: {},
+                    anomaly_stats: {},
+                    message: 'CSV processed (Mock)',
+                },
+                { method: 'POST', body: formData }
+            );
+        },
+
+        getAll: async (userId: string, options?: { limit?: number; skip?: number; category?: string; anomaliesOnly?: boolean }): Promise<Transaction[]> => {
+            let transactions = getMockTransactions(userId);
+
+            if (options?.category) {
+                transactions = transactions.filter((transaction) => transaction.category === options.category);
+            }
+
+            if (options?.anomaliesOnly) {
+                transactions = transactions.filter((transaction) => transaction.is_anomaly);
+            }
+
+            if (options?.limit) {
+                transactions = transactions.slice(0, options.limit);
+            }
+
+            const params = new URLSearchParams();
+            if (options?.limit) params.set('limit', String(options.limit));
+            if (options?.skip) params.set('skip', String(options.skip));
+            if (options?.category) params.set('category', options.category);
+            if (options?.anomaliesOnly) params.set('anomalies_only', 'true');
+
+            return callApi(`/api/v1/transactions/${userId}?${params.toString()}`, transactions);
+        },
+
+        getStats: async (userId: string): Promise<TransactionStats> => {
+            return callApi(
+                `/api/v1/transactions/${userId}/stats`,
+                {
+                    total_transactions: mockData.transactions.length,
+                    total_anomalies: mockData.anomalies.length,
+                    anomaly_rate: (mockData.anomalies.length / Math.max(mockData.transactions.length, 1)) * 100,
+                    category_breakdown: mockData.budget.allocations.reduce<Record<string, { total: number; count: number }>>(
+                        (accumulator, allocation) => ({
+                            ...accumulator,
+                            [allocation.category]: { total: allocation.spent, count: 1 },
+                        }),
+                        {}
+                    ),
+                }
+            );
+        },
+
+        getAnomalies: async (userId: string): Promise<Transaction[]> => {
+            return callApi(
+                `/api/v1/transactions/${userId}/anomalies`,
+                getMockTransactions(userId).filter((transaction) => transaction.is_anomaly)
+            );
+        },
+    },
+
+    dashboard: {
+        get: async (userId: string): Promise<DashboardData> => {
+            return callApi(`/api/v1/dashboard/${userId}`, getMockDashboardData(userId));
+        },
+
+        getSpendingTrend: async (userId: string, days: number = 30): Promise<Array<{ date: string; amount: number }>> => {
+            return callApi(`/api/v1/dashboard/${userId}/spending-trend?days=${days}`, mockData.spendingTrend);
+        },
+    },
+
+    budget: {
+        get: async (userId: string): Promise<Budget> => {
+            return callApi(
+                `/api/v1/budget/${userId}`,
+                {
+                    id: 'budget_mock',
+                    user_id: userId,
+                    total_income: mockData.budget.totalIncome,
+                    allocations: mockData.budget.allocations.map((allocation) => ({
+                        category: allocation.category,
+                        allocated: allocation.allocated,
+                        spent: allocation.spent,
+                    })),
+                    savings_target: mockData.budget.savingsTarget,
+                    current_savings: mockData.budget.currentSavings,
+                }
+            );
+        },
+
+        update: async (userId: string, budget: { total_income: number; allocations: Array<{ category: string; allocated: number; spent?: number }> }) => {
+            return callApi(
+                `/api/v1/budget/${userId}`,
+                {
+                    message: 'Budget updated (Mock)',
+                    total_allocated: budget.allocations.reduce((sum, allocation) => sum + allocation.allocated, 0),
+                },
+                { method: 'PUT', body: JSON.stringify({ ...budget, user_id: userId }) }
+            );
+        },
+
+        getRecommendations: async (userId: string) => {
+            return callApi(
+                `/api/v1/budget/${userId}/recommend`,
+                {
+                    user_id: userId,
+                    recommendations: [
+                        {
+                            category: 'Shopping',
+                            current_allocation: 5000,
+                            actual_spent: 5420,
+                            recommended: 4200,
+                            multiplier: 0.84,
+                            change: 'decrease' as const,
+                            reason: 'Recent shopping spend is above target and can be trimmed safely.',
+                        },
+                    ],
+                    total_savings_potential: 800,
+                    method: 'mock-analysis',
+                }
+            );
+        },
+
+        submitFeedback: async (userId: string, category: string, feedback: 'accepted' | 'rejected') => {
+            return callApi(
+                `/api/v1/budget/${userId}/feedback?category=${encodeURIComponent(category)}&feedback=${feedback}`,
+                { message: 'Feedback submitted (Mock)' },
+                { method: 'POST' }
+            );
+        },
+
+        reset: async (userId: string) => {
+            return callApi(
+                `/api/v1/budget/${userId}/reset`,
+                {
+                    message: 'Budget reset (Mock)',
+                    allocations: mockData.budget.allocations.map((allocation) => ({
+                        category: allocation.category,
+                        allocated: allocation.allocated,
+                        spent: allocation.spent,
+                    })),
+                },
+                { method: 'POST' }
+            );
+        },
+    },
+
+    goals: {
+        getAll: async (userId: string): Promise<Goal[]> => {
+            return callApi(
+                `/api/v1/goals/${userId}`,
+                mockData.goals.map((goal) => ({
+                    id: goal.id,
+                    user_id: userId,
+                    name: goal.name,
+                    icon: goal.icon,
+                    target: goal.target,
+                    current: goal.current,
+                    deadline: goal.deadline,
+                    priority: goal.priority as Goal['priority'],
+                    color: goal.color,
+                    progress_percentage: (goal.current / goal.target) * 100,
+                    remaining: goal.target - goal.current,
+                    on_track: goal.priority !== 'high' || goal.current / goal.target > 0.35,
+                    eta_days: goal.priority === 'high' ? 95 : 140,
+                    milestones: goal.milestones,
+                }))
+            );
+        },
+
+        create: async (goal: GoalCreate) => {
+            return callApi(
+                '/api/v1/goals',
+                { goal_id: `goal_mock_${Date.now()}`, name: goal.name, target: goal.target },
+                { method: 'POST', body: JSON.stringify(goal) }
+            );
+        },
+
+        contribute: async (goalId: string, amount: number) => {
+            const goal = mockData.goals.find((item) => item.id === goalId) || mockData.goals[0];
+            const newCurrent = Math.min(goal.current + amount, goal.target);
+            return callApi(
+                `/api/v1/goals/${goalId}/contribute`,
+                {
+                    new_current: newCurrent,
+                    progress_percentage: (newCurrent / goal.target) * 100,
+                    milestones_reached: [],
+                    is_complete: newCurrent >= goal.target,
+                    xp_earned: Math.min(Math.floor(amount / 1000), 50),
+                },
+                { method: 'PUT', body: JSON.stringify({ amount }) }
+            );
+        },
+
+        getEta: async (goalId: string) => {
+            return callApi(
+                `/api/v1/goals/${goalId}/eta`,
+                { eta_days: 60, days_until_deadline: 120, on_track: true, message: 'On track!' }
+            );
+        },
+
+        delete: async (goalId: string) => {
+            return callApi(
+                `/api/v1/goals/${goalId}`,
+                { message: 'Goal deleted (Mock)' },
+                { method: 'DELETE' }
+            );
+        },
+    },
+
+    gamification: {
+        get: async (userId: string): Promise<Gamification> => {
+            return callApi(
+                `/api/v1/gamification/${userId}`,
+                {
+                    id: 'gamify_mock',
+                    user_id: userId,
+                    level_info: {
+                        level: 5,
+                        current_xp: 450,
+                        xp_to_next_level: 1000,
+                        title: 'Budget Ninja',
+                    },
+                    total_xp: 4450,
+                    badges: [],
+                    challenges_completed: 2,
+                    streak_days: 15,
+                }
+            );
+        },
+
+        addXp: async (userId: string, amount: number, reason: string) => {
+            return callApi(
+                `/api/v1/gamification/${userId}/xp?amount=${amount}&reason=${encodeURIComponent(reason)}`,
+                {
+                    new_total_xp: 4450 + amount,
+                    level_info: { level: 5, current_xp: 450 + amount, xp_to_next_level: 1000, title: 'Budget Ninja' },
+                    leveled_up: false,
+                    new_level: null,
+                },
+                { method: 'POST' }
+            );
+        },
+
+        checkBadges: async (userId: string) => {
+            return callApi(
+                `/api/v1/gamification/${userId}/check-badges`,
+                { checked: 10, newly_unlocked: [], xp_earned: 0 },
+                { method: 'POST' }
+            );
+        },
+
+        getLeaderboard: async (userId: string, limit: number = 10) => {
+            return callApi(
+                `/api/v1/gamification/leaderboard/${userId}?limit=${limit}`,
+                {
+                    leaderboard: [
+                        { rank: 1, user_id: 'user_2', name: 'Aarav', total_xp: 6200, level: 7, is_current_user: false },
+                        { rank: 2, user_id: 'user_3', name: 'Diya', total_xp: 5720, level: 6, is_current_user: false },
+                        { rank: 3, user_id: userId, name: mockData.user.name, total_xp: 4450, level: 5, is_current_user: true },
+                    ],
+                    user_rank: { rank: 3, total_xp: 4450, level: 5 },
+                }
+            );
+        },
+    },
+
+    health: async () => {
+        return callApi('/health', {
+            status: 'healthy',
+            version: '1.0.0-mock',
+            database: 'mock',
+            agent_available: true,
+            ml_components: {},
+        });
+    },
+
+    chat: {
+        send: async (
+            userId: string,
+            query: string | { original_text: string; translated_text: string; language: string },
+            sessionId?: string
+        ): Promise<{
+            response: string;
+            session_id: string;
+            confidence: number;
+            context_used?: { episodic_count: number; semantic_count: number };
+            memory_used?: Record<string, number>;
+        }> => {
+            const payload = typeof query === 'string'
+                ? { user_id: userId, query, session_id: sessionId }
+                : { user_id: userId, ...query, query: query.translated_text, session_id: sessionId };
+
+            return callApi(
+                '/api/v1/chat',
+                {
+                    response: 'I am in mock mode. Please start the backend for real AI responses!',
+                    session_id: 'mock_session',
+                    confidence: 1,
+                    context_used: { episodic_count: 0, semantic_count: 0 },
+                    memory_used: {},
+                },
+                { method: 'POST', body: JSON.stringify(payload) }
+            );
+        },
+
+        getHistory: async (userId: string): Promise<ChatMessage[]> => {
+            return callApi(
+                `/api/v1/chat/history/${userId}`,
+                mockData.chatHistory.map((message) => ({
+                    id: message.id,
+                    role: message.role as ChatMessage['role'],
+                    content: message.content,
+                    timestamp: message.timestamp,
+                }))
+            );
+        },
+    },
+
+    translate: {
+        text: async (text: string, targetLang: string = 'hi', sourceLang: string = 'auto'): Promise<TranslationResult> => {
+            try {
+                const encodedText = encodeURIComponent(text);
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodedText}`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Translation failed');
+                const data = await response.json() as GoogleTranslateResponse;
+                const translatedText = data[0]?.map((item) => item[0]).join('') || text;
+                const detectedLanguage = data[2] || sourceLang;
+                return { translatedText, detectedLanguage };
+            } catch {
+                return { translatedText: text, detectedLanguage: 'unknown' };
+            }
+        },
+
+        languages: [
+            { code: 'hi', name: 'Hindi' },
+            { code: 'mr', name: 'Marathi' },
+            { code: 'ta', name: 'Tamil' },
+            { code: 'te', name: 'Telugu' },
+            { code: 'bn', name: 'Bengali' },
+            { code: 'gu', name: 'Gujarati' },
+            { code: 'kn', name: 'Kannada' },
+            { code: 'ml', name: 'Malayalam' },
+            { code: 'pa', name: 'Punjabi' },
+            { code: 'en', name: 'English' },
+        ],
+    },
+
+    ocr: {
+        scanReceipt: async (imageFile: File): Promise<OCRResult> => {
+            const formData = new FormData();
+            formData.append('image', imageFile);
+
+            return callApi(
+                '/api/v1/ocr/scan-receipt',
+                { rawText: 'OCR service unavailable (Mock Mode)' },
+                { method: 'POST', body: formData }
+            );
+        },
+
+        extractAmount: (text: string): number | null => {
+            const patterns = [
+                /₹\s*([\d,]+(?:\.\d{2})?)/,
+                /Rs\.?\s*([\d,]+(?:\.\d{2})?)/i,
+                /INR\s*([\d,]+(?:\.\d{2})?)/i,
+                /Total[:\s]*([\d,]+(?:\.\d{2})?)/i,
+                /Amount[:\s]*([\d,]+(?:\.\d{2})?)/i,
+            ];
+
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    return parseFloat(match[1].replace(/,/g, ''));
+                }
+            }
+
+            return null;
+        },
+    },
+};

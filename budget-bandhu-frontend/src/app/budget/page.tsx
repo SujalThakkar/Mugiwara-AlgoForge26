@@ -15,6 +15,7 @@ import { formatCurrency } from "@/lib/utils";
 
 // Demo user ID
 const DEMO_USER_ID = "696a022c3c758e29b2ca8d50";
+const MM_EASING = [0.16, 1, 0.3, 1] as const;
 
 export default function BudgetPage() {
     // Get user from store or use demo
@@ -107,7 +108,7 @@ export default function BudgetPage() {
                                 initial={{ opacity: 0, y: 60 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                                transition={{ duration: 0.8, ease: MM_EASING }}
                                 className="mm-card mm-card-medium card-3d"
                             >
                                 <div className="w-16 h-16 bg-mm-purple/10 rounded-2xl flex items-center justify-center mb-6">
@@ -124,7 +125,7 @@ export default function BudgetPage() {
                                 initial={{ opacity: 0, y: 60 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                                transition={{ duration: 0.8, delay: 0.1, ease: MM_EASING }}
                                 className="mm-card-colored mm-card-green mm-card-medium card-3d"
                             >
                                 <div className="text-6xl mb-4">💰</div>
@@ -142,7 +143,7 @@ export default function BudgetPage() {
                                 initial={{ opacity: 0, y: 60 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                                transition={{ duration: 0.8, delay: 0.2, ease: MM_EASING }}
                                 className="mm-card mm-card-medium card-3d bg-gradient-to-br from-mm-purple to-mm-lavender text-white"
                             >
                                 <Sparkles className="w-12 h-12 mb-6" />
@@ -167,7 +168,7 @@ export default function BudgetPage() {
                                 initial={{ opacity: 0, x: -60 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                                transition={{ duration: 0.8, ease: MM_EASING }}
                                 className="mm-card card-3d"
                             >
                                 <div className="flex items-center gap-3 mb-6">
@@ -185,7 +186,7 @@ export default function BudgetPage() {
                                 initial={{ opacity: 0, x: 60 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                                transition={{ duration: 0.8, ease: MM_EASING }}
                                 className="mm-card card-3d"
                             >
                                 <div className="flex items-center justify-between mb-6">
@@ -213,7 +214,7 @@ export default function BudgetPage() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ duration: 0.8, ease: MM_EASING }}
                             className="text-center mb-8"
                         >
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full text-sm font-bold text-mm-purple shadow-lg mb-6">
