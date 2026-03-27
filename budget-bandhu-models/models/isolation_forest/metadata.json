@@ -1,0 +1,23 @@
+{
+  "trained_at": "2026-03-27T13:46:10.508972",
+  "n_estimators": 200,
+  "contamination": 0.1,
+  "n_train_samples": 300,
+  "n_features": 6,
+  "feature_names": [
+    "amount_normalized",
+    "hour_of_day",
+    "day_of_week",
+    "amount_zscore",
+    "days_since_same_merchant",
+    "amount_vs_median_ratio"
+  ],
+  "categories": [
+    "Food & Dining",
+    "Transport",
+    "Shopping",
+    "Utilities & Bills",
+    "Healthcare",
+    "Entertainment"
+  ]
+}

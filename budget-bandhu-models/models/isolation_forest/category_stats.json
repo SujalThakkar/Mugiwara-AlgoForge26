@@ -1,0 +1,32 @@
+{
+  "Food & Dining": {
+    "mean": 506.47,
+    "std": 826.09,
+    "median": 287.68
+  },
+  "Transport": {
+    "mean": 327.36,
+    "std": 719.87,
+    "median": 150.19
+  },
+  "Shopping": {
+    "mean": 1466.25,
+    "std": 1451.08,
+    "median": 1190.53
+  },
+  "Utilities & Bills": {
+    "mean": 1073.22,
+    "std": 1178.6,
+    "median": 836.8
+  },
+  "Healthcare": {
+    "mean": 917.62,
+    "std": 1193.24,
+    "median": 531.25
+  },
+  "Entertainment": {
+    "mean": 436.87,
+    "std": 422.88,
+    "median": 365.94
+  }
+}

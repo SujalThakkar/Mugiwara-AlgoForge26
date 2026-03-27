@@ -1,0 +1,23 @@
+{
+  "trained_at": "2026-03-27T13:50:08.356080",
+  "framework": "PyTorch",
+  "architecture": "BiLSTM(128x2) + BN + Dense(64)",
+  "trained_on": "cuda",
+  "best_val_mae": 0.0291,
+  "categories": [
+    "Food & Dining",
+    "Transport",
+    "Shopping",
+    "Entertainment",
+    "Utilities & Bills",
+    "Groceries"
+  ],
+  "mae_per_category": {
+    "Food & Dining": 112.6,
+    "Transport": 52.76,
+    "Shopping": 204.85,
+    "Entertainment": 59.43,
+    "Utilities & Bills": 105.93,
+    "Groceries": 78.48
+  }
+}

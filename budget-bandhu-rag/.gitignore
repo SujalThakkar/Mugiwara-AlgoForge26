@@ -1,0 +1,40 @@
+# Environments
+venv/
+.env
+.venv
+env/
+ENV/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.log
+
+# VS Code
+.vscode/
+
+# Models & Large Data
+models/
+data/
+offload_dir/
+*.gguf
+*.bin
+*.pt
+*.onnx
+*.weights
+
+# Local Databases
+budget_bandhu_production.db
+dashboard_test.db
+test_agent_e2e.db
+memory.db
+working_memory.db
+
+# Misc
+ngrok_url.txt
+merge.txt
+.DS_Store
+Thumbs.db

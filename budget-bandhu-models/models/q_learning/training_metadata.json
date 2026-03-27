@@ -1,0 +1,11 @@
+{
+  "trained_at": "2026-03-27T13:50:11.242955",
+  "n_episodes": 12000,
+  "steps_per_episode": 12,
+  "alpha": 0.12,
+  "gamma": 0.95,
+  "final_epsilon": 0.05,
+  "avg_reward_last500": 134.716,
+  "n_states": 240,
+  "n_actions": 12
+}

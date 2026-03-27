@@ -1,0 +1,33 @@
+# BudgetBandhu Financial Cognitive OS — Python Dependencies
+# Python 3.11+
+
+# ── Core API ──────────────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.7.0
+python-dotenv>=1.0.0
+httpx>=0.27.0
+python-multipart>=0.0.9
+
+# ── MongoDB Atlas (Motor async driver) ───────────────────────────────
+motor>=3.3.0
+pymongo>=4.6.0
+
+# ── SQLite async (Tier 1 working memory only) ────────────────────────
+aiosqlite>=0.20.0
+
+# ── Embeddings (all-MiniLM-L6-v2, 384-dim) ──────────────────────────
+sentence-transformers>=2.7.0
+numpy>=1.26.0
+
+# ── LangGraph / LangChain ─────────────────────────────────────────────
+langgraph>=0.1.0
+langchain-core>=0.2.0
+
+# ── Scheduling (memory decay jobs) ───────────────────────────────────
+APScheduler>=3.10.0
+
+# ── REMOVED from previous version ────────────────────────────────────
+# faiss-cpu     → replaced by Atlas $vectorSearch
+# rank_bm25     → replaced by Atlas $search (Lucene BM25)
+# networkx      → replaced by Atlas $graphLookup
