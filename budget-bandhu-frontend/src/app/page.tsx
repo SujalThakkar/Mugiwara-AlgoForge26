@@ -16,7 +16,7 @@ import { EmergencyFundBarometer } from "@/components/dashboard/EmergencyFundBaro
 import { SpendingInsights } from "@/components/dashboard/SpendingInsights";
 import { FinancialTimeMachine } from "@/components/dashboard/FinancialTimeMachine";
 import { TaxOptimizerDashboard } from "@/components/dashboard/TaxOptimizerDashboard";
-import { useDashboard, useBudget, useGoals } from "@/lib/hooks/useMLApi";
+import { useDashboard, useBudget, useGoals, useBills, useTax80C } from "@/lib/hooks/useMLApi";
 import { mlApi } from "@/lib/api/ml-api";
 import { useUserStore } from "@/lib/store/useUserStore";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
@@ -74,6 +74,8 @@ export default function DashboardPage() {
 
   const { budget: apiBudget } = useBudget(activeUserId);
   const { goals: apiGoals } = useGoals(activeUserId);
+  const { bills, loading: billsLoading } = useBills(activeUserId);
+  const { taxData } = useTax80C(activeUserId);
 
   useEffect(() => {
     if (!activeUserId) return;
@@ -96,19 +98,24 @@ export default function DashboardPage() {
   // Find Emergency Fund goal
   const emergencyFundGoal = goals.find(g => g.name.toLowerCase().includes('emergency') || g.priority === 'high');
 
-  // Calculate budget progress - Use real categories from spending if budget is empty
-  const hasBudgetAllocations = budget?.allocations && budget.allocations.length > 0;
-  const budgetAllocations = hasBudgetAllocations
-    ? budget.allocations
-    : Object.entries(dashboardData.category_breakdown).map(([category, data]: [string, any]) => ({
-      category,
-      spent: data.total,
-      allocated: (apiData?.user.income || 50000) / 4 // Simple heuristic: divide income into 4 slots
-    })).slice(0, 6);
+  // Calculate budget progress — prefer live allocations from dashboard API
+  // dashboard.py now returns budget_summary.allocations with live $group aggregation
+  const dashboardAllocations = apiData?.budget_summary?.allocations;
+  const hasBudgetAllocations = apiBudget?.allocations && apiBudget.allocations.length > 0;
+  const budgetAllocations: Array<{ category: string; spent: number; allocated: number }> =
+    dashboardAllocations && dashboardAllocations.length > 0
+      ? dashboardAllocations
+      : hasBudgetAllocations
+        ? (apiBudget?.allocations || []).map(a => ({ ...a }))
+        : Object.entries(dashboardData.category_breakdown).map(([category, data]: [string, any]) => ({
+            category,
+            spent: data.total,
+            allocated: (apiData?.user.income || 50000) / 4
+          })).slice(0, 6);
 
-  const totalBudget = hasBudgetAllocations 
-    ? (budget?.total_income || 50000) 
-    : (apiData?.user.income || 50000); 
+  const totalBudget = hasBudgetAllocations
+    ? (apiBudget?.total_income || 50000)
+    : (apiData?.user.income || 50000);
 
   // Refs for each section's scroll-zoom
   const financesSectionRef = useRef<HTMLDivElement>(null);
@@ -383,9 +390,12 @@ export default function DashboardPage() {
               initialTranslateX={[-20, 0, 20]}
               pushDistance={60}
             >
-              <SpendingSparkline data={spendingTrend} />
+              <SpendingSparkline
+                data={spendingTrend}
+                forecastConfidence={apiData?.forecast?.confidence ?? undefined}
+              />
               <BudgetHealthGauge spent={dashboardData.monthSpent} budget={totalBudget} />
-              <UpcomingBillsCarousel />
+              <UpcomingBillsCarousel bills={bills} loading={billsLoading} />
             </BounceDashboardCards>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
@@ -538,7 +548,7 @@ export default function DashboardPage() {
               style={{ transformOrigin: 'center top' }}
               className="mt-12"
             >
-              <TaxOptimizerDashboard />
+              <TaxOptimizerDashboard taxData={taxData} />
             </motion.div>
           </div>
         </motion.section>

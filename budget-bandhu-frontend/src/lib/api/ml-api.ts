@@ -172,6 +172,7 @@ export interface DashboardData {
     budget_summary: {
         total_allocated: number;
         total_spent: number;
+        allocations?: Array<{ category: string; allocated: number; spent: number }>;
     } | null;
     goals_summary: {
         total: number;
@@ -193,6 +194,34 @@ export interface Budget {
     allocations: BudgetAllocation[];
     savings_target: number;
     current_savings: number;
+}
+
+// ── Bills (Chat → Dashboard sync) ────────────────────────────────────────────
+export interface Bill {
+    id: string;
+    title: string;
+    amount: number;
+    due_date: string;        // YYYY-MM-DD
+    category: string;
+    status: 'upcoming' | 'due-soon' | 'overdue' | 'future';
+    days_until_due: number;
+    source?: string;
+}
+
+// ── 80C Tax Tracker ───────────────────────────────────────────────────────────
+export interface Tax80CData {
+    fy: string;
+    user_id: string;
+    total_invested: number;
+    eligible_amount: number;
+    limit_80c: number;
+    remaining_limit: number;
+    percentage_used: number;
+    slab_rate: number;
+    tax_saved: number;
+    potential_additional_saving: number;
+    breakdown: Record<string, { amount: number; count: number }>;
+    recommendations: Array<{ instrument: string; reason: string; potential_tax_saving: number }>;
 }
 
 export interface BudgetRecommendation {
@@ -816,6 +845,48 @@ export const mlApi = {
                 { method: 'POST', body: JSON.stringify({ user_id: userId, session_id: sessionId, score, total }) }
             );
         }
+    },
+
+    bills: {
+        getAll: async (userId: string): Promise<Bill[]> =>
+            ragCallApi<Bill[]>(`/api/v1/bills/${userId}`, []),
+
+        create: async (userId: string, bill: Omit<Bill, 'id' | 'status' | 'days_until_due'>): Promise<{ status: string; bill: Bill }> =>
+            ragCallApi(
+                `/api/v1/bills/${userId}`,
+                { status: 'created', bill: { ...bill, id: 'mock', status: 'upcoming', days_until_due: 7 } },
+                { method: 'POST', body: JSON.stringify(bill) }
+            ),
+
+        delete: async (userId: string, billId: string): Promise<{ status: string }> =>
+            ragCallApi(
+                `/api/v1/bills/${userId}/${billId}`,
+                { status: 'deleted' },
+                { method: 'DELETE' }
+            ),
+    },
+
+    tax: {
+        get80C: async (userId: string): Promise<Tax80CData> =>
+            ragCallApi<Tax80CData>(
+                `/api/v1/tax/${userId}/80c`,
+                {
+                    fy: 'FY 2025-2026',
+                    user_id: userId,
+                    total_invested: 0,
+                    eligible_amount: 0,
+                    limit_80c: 150000,
+                    remaining_limit: 150000,
+                    percentage_used: 0,
+                    slab_rate: 0.1,
+                    tax_saved: 0,
+                    potential_additional_saving: 15000,
+                    breakdown: {},
+                    recommendations: [
+                        { instrument: 'ELSS', reason: 'Shortest lock-in, market-linked returns', potential_tax_saving: 15000 }
+                    ]
+                }
+            ),
     },
 
     ocr: {
