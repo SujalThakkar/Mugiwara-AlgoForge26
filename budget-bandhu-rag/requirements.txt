@@ -24,6 +24,12 @@ langchain-core>=0.2.0
 # ── Scheduling (memory decay jobs) ───────────────────────────────────
 APScheduler>=3.10.0
 
+# ── Web3 / Blockchain (backend minting) ──────────────────────────────
+web3>=6.20.0              # backend wallet minting (GoalBadgeSBT via HTTP provider)
+
+# ── Image Generation (badge + certificate NFT art) ────────────────────
+Pillow>=10.3.0            # PIL — generates badge (400×400) / certificate (800×560) PNGs
+
 # ── Other Utils ──────────────────────────────────────────────────────
 certifi
 pyngrok

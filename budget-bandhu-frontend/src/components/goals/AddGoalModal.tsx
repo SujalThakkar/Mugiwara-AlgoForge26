@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check } from 'lucide-react';
-import { Goal } from '@/app/goals/page';
+import { Goal } from '@/lib/types/goal';
 
 interface AddGoalModalProps {
     isOpen: boolean;

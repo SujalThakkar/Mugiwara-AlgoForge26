@@ -1,0 +1,208 @@
+# On-Chain Goals & Escrow System with SBT Badges
+
+Rebuild the goals system to use Polygon Amoy smart contracts for both personal savings goals and multi-user escrow pools, with SBT badge minting on completion and ML-powered progress tracking.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **This is a multi-phase build** covering Solidity contracts, backend API, and frontend. We should tackle it in phases so you can test each layer before moving to the next. Phase 1 (contracts) is the foundation everything else depends on.
+
+> [!WARNING]
+> **Escrow contracts hold real funds on-chain.** Even on testnet, the contract logic must be airtight — no reentrancy, no early withdrawal exploits. We'll use OpenZeppelin's `ReentrancyGuard`.
+
+> [!CAUTION]
+> **Your existing [GoalBadgeSBT.sol](file:///Users/aditya4/Desktop/blockchain1st/contracts/GoalBadgeSBT.sol) in `blockchain1st/` stores massive SVG data URIs on-chain** (causing the 0.28 POL gas issue we debugged). The new contracts will store ONLY minimal metadata on-chain — the badge SVG will be rendered client-side.
+
+## Architecture Overview
+
+```
+Frontend (Next.js :3000)
+    │
+    ├── MetaMask / Ethers.js ──────────── Polygon Amoy (Contracts)
+    │       │                                   │
+    │       ├── PersonalGoalSBT.sol ────────── Single user goals + SBT
+    │       └── EscrowPool.sol ─────────────── Group goals + escrow + SBT
+    │
+    └── REST API ──────────────────────── Backend (FastAPI :8000)
+            │                                   │
+            ├── /api/v1/goals/* ────────────── Goal CRUD + progress
+            ├── /api/v1/escrow/* ───────────── Group pool management
+            └──── ML Models Service (:8001) ── Forecaster for savings calc
+```
+
+### Progress Tracking Logic (2 modes):
+
+| Mode | When | How savings are calculated |
+|---|---|---|
+| **Short-term** (≤4 weeks) | User uploads CSV daily/weekly | `savings = forecasted_budget - actual_spend` from CSV |
+| **Long-term** (monthly) | User provides salary + CSV | `savings = salary - total_monthly_spend` from CSV |
+
+Both modes apply to personal AND escrow goals.
+
+---
+
+## Proposed Changes
+
+### Phase 1: Smart Contracts (Solidity)
+
+New contracts directory inside the monorepo.
+
+---
+
+#### [NEW] [PersonalGoalSBT.sol](file:///Users/aditya4/Desktop/Budget-Bandhu/contracts/PersonalGoalSBT.sol)
+
+Personal savings goal contract + soulbound badge minting.
+
+**Key design:**
+- User calls [createGoal(name, targetAmount, deadline)](file:///Users/aditya4/Desktop/blockchain1st/components/GoalBadgeDemo.js#36-56) — stores goal on-chain
+- Backend/frontend calls `updateProgress(goalId, newSavedAmount)` — updates off-chain calculated savings
+- Only the goal owner OR a trusted verifier can call `updateProgress`
+- When `current >= target`, calls `completeGoal(goalId)` → mints an SBT badge to the user
+- SBT uses OZ ERC-721 with transfers disabled (soulbound)
+- `tokenURI` is a lightweight JSON (NO SVG on-chain) — ~200 bytes, not 9KB
+- Inherits `Ownable`, `ReentrancyGuard`
+
+**Functions:**
+```
+createGoal(string name, uint256 target, uint256 deadline) → uint256 goalId
+updateProgress(uint256 goalId, uint256 savedAmount)
+completeGoal(uint256 goalId) → mints SBT
+getGoal(uint256 goalId) → GoalInfo struct
+getUserGoals(address user) → uint256[] goalIds
+```
+
+---
+
+#### [NEW] [EscrowPool.sol](file:///Users/aditya4/Desktop/Budget-Bandhu/contracts/EscrowPool.sol)
+
+Multi-party escrow pool contract for group savings goals.
+
+**Key design:**
+- Creator calls `createPool(name, targetAmount, deadline, maxMembers)` → generates a `poolId`
+- Other users join via `joinPool(poolId)` — invite link contains the poolId
+- Members contribute via `contribute(poolId)` sending POL with the tx (actual on-chain funds)
+- **Nobody can withdraw** until `pool.totalContributed >= pool.target` — this is the escrow guarantee
+- On completion, creator calls `completePool(poolId)` → funds released to creator, SBT badges minted to ALL members
+- Emergency: if deadline passes and target not met, members can call `refund(poolId)` to get their individual contributions back
+
+**Functions:**
+```
+createPool(string name, uint256 target, uint256 deadline, uint8 maxMembers) → uint256 poolId
+joinPool(uint256 poolId) payable
+contribute(uint256 poolId) payable
+completePool(uint256 poolId) → release funds + mint SBTs
+refund(uint256 poolId) → return individual contributions if deadline expired
+getPool(uint256 poolId) → PoolInfo struct
+getPoolMembers(uint256 poolId) → address[]
+```
+
+---
+
+#### [NEW] [hardhat.config.js](file:///Users/aditya4/Desktop/Budget-Bandhu/contracts/hardhat.config.js)
+
+Hardhat project config targeting Polygon Amoy with deployment scripts.
+
+---
+
+### Phase 2: Backend API (FastAPI)
+
+---
+
+#### [MODIFY] [goals.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/goals.py)
+
+Add on-chain awareness to existing goal routes:
+- `POST /api/v1/goals/{user_id}` — now also stores `contract_goal_id`, `tx_hash`, `goal_type: "personal" | "escrow"`
+- `POST /api/v1/goals/{goal_id}/progress` — **new** — accepts CSV upload or manual salary input, runs ML savings calculation, updates MongoDB + calls smart contract `updateProgress`
+- `GET /api/v1/goals/{goal_id}/chain-status` — reads on-chain goal state
+
+---
+
+#### [NEW] [escrow.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/escrow.py)
+
+New route file for group escrow pools:
+- `POST /api/v1/escrow/create` — stores pool in MongoDB, returns `poolId` for invite link
+- `GET /api/v1/escrow/{pool_id}` — pool details + member list + contribution status
+- `POST /api/v1/escrow/{pool_id}/progress` — calculates group savings progress via ML
+- `GET /api/v1/escrow/invite/{pool_id}` — generates shareable invite link data
+
+---
+
+### Phase 3: Frontend (Next.js)
+
+---
+
+#### [MODIFY] [goals/page.tsx](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-frontend/src/app/goals/page.tsx)
+
+Major rewrite — split into tabs:
+1. **My Goals** tab — personal on-chain goals with MetaMask integration
+2. **Group Pools** tab — escrow pools with invite/join flow
+3. **Achievements** tab — SBT badges earned (read from chain)
+
+Each goal card shows:
+- On-chain status badge (✅ On-chain / ⏳ Pending)
+- Progress bar from ML savings calculation
+- "Complete & Mint SBT" button when target reached
+- Link to Polygonscan for the goal's contract interaction
+
+---
+
+#### [NEW] [lib/contracts/](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-frontend/src/lib/contracts/)
+
+New directory with:
+- `personalGoal.ts` — ABI + contract address + helper functions for PersonalGoalSBT
+- `escrowPool.ts` — ABI + contract address + helper functions for EscrowPool
+- `useGoalContract.ts` — React hook wrapping ethers.js calls for personal goals
+- `useEscrowContract.ts` — React hook wrapping ethers.js calls for escrow pools
+
+---
+
+#### [NEW] [components/goals/CreateGoalModal.tsx](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-frontend/src/components/goals/CreateGoalModal.tsx)
+
+New modal with toggle: "Personal Goal" vs "Group Pool". Personal sends a [createGoal](file:///Users/aditya4/Desktop/blockchain1st/components/GoalBadgeDemo.js#36-56) tx via MetaMask. Group sends `createPool` tx + generates invite link.
+
+---
+
+#### [NEW] [components/goals/EscrowPoolCard.tsx](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-frontend/src/components/goals/EscrowPoolCard.tsx)
+
+Card showing: pool name, members (avatars), total contributed, target, deadline, contribute button, and completion/refund actions.
+
+---
+
+#### [NEW] [app/escrow/join/[poolId]/page.tsx](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-frontend/src/app/escrow/join/[poolId]/page.tsx)
+
+Invite landing page — shows pool details, "Connect Wallet & Join" button.
+
+---
+
+## Implementation Order
+
+| Phase | What | Estimated Work |
+|---|---|---|
+| **1a** | Write + test `PersonalGoalSBT.sol` | ~2 hours |
+| **1b** | Write + test `EscrowPool.sol` | ~3 hours |
+| **1c** | Deploy both to Amoy, save addresses | ~30 min |
+| **2a** | Backend: modify goals.py + add escrow.py | ~2 hours |
+| **2b** | Backend: ML savings calculation endpoint | ~1 hour |
+| **3a** | Frontend: contract hooks + ABIs | ~1 hour |
+| **3b** | Frontend: rebuild goals page (3 tabs) | ~3 hours |
+| **3c** | Frontend: escrow invite/join flow | ~2 hours |
+| **3d** | Frontend: SBT badge display + gamification | ~1 hour |
+
+**Total: ~15-16 hours of work across ~4-5 sessions**
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- Hardhat unit tests for both contracts: `npx hardhat test` — test goal creation, progress update, completion, SBT minting, escrow contribute/complete/refund, edge cases (double-complete, early withdrawal)
+- This is the MOST critical verification since contracts are immutable once deployed
+
+### Manual Verification
+1. **Contract deployment**: Deploy to Amoy → verify on [amoy.polygonscan.com](https://amoy.polygonscan.com) → call `Read Contract` to confirm initial state
+2. **Personal goal flow**: Create goal via frontend → MetaMask popup → confirm on Polygonscan → upload CSV → see progress update → complete → see SBT in wallet
+3. **Escrow flow**: Create pool → share invite link → open in incognito with different MetaMask account → join → both contribute → complete → both receive SBTs
+4. **Edge case**: Let deadline expire on an incomplete escrow pool → verify refund works
+
+> [!IMPORTANT]
+> You will need **testnet POL** in at least 2 MetaMask accounts to test the escrow flow. Get from [faucet.polygon.technology](https://faucet.polygon.technology).

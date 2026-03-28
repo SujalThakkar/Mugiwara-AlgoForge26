@@ -1,0 +1,20 @@
+{
+  "name": "budget-bandhu-web3",
+  "version": "1.0.0",
+  "description": "BudgetBandhu smart contracts — GoalBadgeSBT + GroupEscrow on Polygon Amoy",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:sbt": "hardhat run scripts/deploy_sbt.js --network amoy",
+    "deploy:escrow": "hardhat run scripts/deploy_escrow.js --network amoy",
+    "deploy:all": "hardhat run scripts/deploy_all.js --network amoy",
+    "verify:sbt": "hardhat verify --network amoy",
+    "lint": "hardhat check"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.5"
+  }
+}

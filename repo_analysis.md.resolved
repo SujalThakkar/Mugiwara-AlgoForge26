@@ -1,0 +1,252 @@
+# Budget-Bandhu — Complete Repository Analysis
+
+> **Date:** 2026-03-29 | **Version:** v4.2 Unified API | **Focus:** Full repo map for merging prep
+
+---
+
+## 🏗️ Architecture Overview
+
+```mermaid
+graph TB
+    subgraph Frontend ["budget-bandhu-frontend (Next.js 16.1)"]
+        FE_Pages["Pages (13 routes)"]
+        FE_Comps["Components (~60)"]
+        FE_Wallet["MetaMask Integration"]
+    end
+
+    subgraph Backend ["budget-bandhu-rag (FastAPI v4.2)"]
+        API["14 Routers"]
+        Agents["Agent Controller + Phi3 RAG"]
+        DB["MongoDB (motor async)"]
+        Services["IPFS + Minting Services"]
+    end
+
+    subgraph ML ["budget-bandhu-models (PyTorch/sklearn)"]
+        Forecaster["BiLSTM Forecaster"]
+        Categorizer["SentenceTransformer Categorizer"]
+        Anomaly["IsolationForest Anomaly"]
+        QLearning["Q-Learning Policy"]
+    end
+
+    subgraph Web3 ["budget-bandhu-web3 (Hardhat/Solidity)"]
+        SBT["GoalBadgeSBT (ERC-721)"]
+        Escrow["GroupEscrow"]
+    end
+
+    FE_Pages --> API
+    FE_Wallet --> SBT & Escrow
+    API --> DB
+    API --> Services
+    Services --> SBT
+    API --> ML
+```
+
+---
+
+## 📁 Directory Map (4 Sub-Projects)
+
+### 1. `budget-bandhu-frontend/` — Next.js 16.1 + Tailwind
+
+| Directory | Files | Purpose |
+|-----------|-------|---------|
+| `src/app/` | 13 pages | Auth (login/signup/verify), Budget, Chat, Goals, Insights, Transactions, Profile, Settings, Gamification, Literacy (calculators), Friends, Escrow join |
+| `src/components/` | ~60 | Animations (12), Budget (4), Chat (2), Goals (3), Dashboard (6), Layout (3), 3D models |
+| `src/lib/` | ~5 | Contracts config, types, utilities |
+
+**Key pages:**
+
+| Route | File | Lines | Description |
+|-------|------|-------|-------------|
+| `/goals` | [page.tsx](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-frontend/src/app/goals/page.tsx) | 822 | **Goals 2.0** — 3 tabs (My Goals, Group Pools, Achievements), MetaMask wallet ID, CSV upload, Sync Wallet, SBT badge minting popup |
+| `/chat` | [page.tsx](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-frontend/src/app/chat/page.tsx) | — | AI chatbot powered by Phi3 RAG |
+| `/budget` | [page.tsx](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-frontend/src/app/budget/page.tsx) | — | Budget allocation sliders + recommendations |
+| `/transactions` | [page.tsx](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-frontend/src/app/transactions/page.tsx) | — | Transaction list with OCR upload |
+| `/insights` | [page.tsx](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-frontend/src/app/insights/page.tsx) | — | Spending insights + charts |
+| `/gamification` | [page.tsx](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-frontend/src/app/gamification/page.tsx) | — | XP, badges, streaks, leaderboard |
+| `/literacy` | [page.tsx](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-frontend/src/app/literacy/page.tsx) | — | Financial literacy courses + 6 calculators (SIP, EMI, compound, tax, retirement, lumpsum) |
+
+---
+
+### 2. `budget-bandhu-rag/` — Python Backend (FastAPI)
+
+**14 API Routers registered in** [main.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/main.py):
+
+| Router | Prefix | File | Lines | Key Endpoints |
+|--------|--------|------|-------|---------------|
+| user | `/api/v1/users` | [user.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/user.py) | — | Registration, login, profile |
+| transactions | `/api/v1/transactions` | [transactions.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/transactions.py) | — | CRUD + anomaly detection |
+| chat | `/api/v1/chat` | [chat.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/chat.py) | — | AI chat via AgentController |
+| forecast | `/api/v1/forecast` | [forecast.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/forecast.py) | — | Spending forecasts |
+| insights | `/api/v1/insights` | [insights.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/insights.py) | — | Spending analysis |
+| ocr | `/api/v1/ocr` | [ocr.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/ocr.py) | — | Receipt OCR |
+| dashboard | `/api/v1/dashboard` | [dashboard.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/dashboard.py) | — | Dashboard stats |
+| budget | `/api/v1/budget` | [budget.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/budget.py) | — | Budget allocation |
+| **goals** | `/api/v1/goals` | [goals.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/goals.py) | 515 | CRUD, CSV progress, manual progress, complete+mint, ETA |
+| **escrow** | `/api/v1/escrow` | [escrow.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/escrow.py) | 365 | Pool CRUD, join, chain-link, complete+batch mint |
+| **savings** | `/api/v1/savings` | [savings.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/savings.py) | 118 | Gross savings (Stream A: forecast + Stream B: hard) |
+| gamification | `/api/v1/gamification` | [gamification.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/gamification.py) | — | XP, badges, streaks |
+| whatsapp | `/api/v1/whatsapp` | [whatsapp.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/whatsapp.py) | — | WhatsApp webhook |
+| telegram | `/api/v1/telegram` | [telegram.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/telegram.py) | — | Telegram webhook |
+
+**Backend Services:**
+
+| Service | File | Lines | Purpose |
+|---------|------|-------|---------|
+| IPFS Service | [ipfs_service.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/services/ipfs_service.py) | 365 | PIL badge/certificate generation → Pinata IPFS upload |
+| Minting Service | [minting_service.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/services/minting_service.py) | 163 | web3.py v6 → GoalBadgeSBT.mintBadge / batchMintBadge |
+
+**Core Components (non-route):**
+
+| Component | Path | Purpose |
+|-----------|------|---------|
+| Agent Controller | [core/agent_controller.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/core/agent_controller.py) | Orchestrates multi-agent pipeline |
+| Phi3 RAG | `intelligence/phi3_rag.py` | Ollama-based LLM with RAG |
+| Memory Manager | `memory/memory_manager.py` | User memory persistence |
+| Conversation Manager | `memory/conversation_manager.py` | Chat history management |
+| Mongo Manager | `database/mongo_manager.py` | MongoDB connection + collections |
+| Causal Engine | [causal/causal_engine.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/causal/causal_engine.py) | Causal analysis of spending |
+
+---
+
+### 3. `budget-bandhu-models/` — ML Microservice
+
+| Model | File | Architecture | Purpose |
+|-------|------|-------------|---------|
+| **Forecaster** | [forecaster.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-models/intelligence/forecaster.py) | BiLSTM (PyTorch), 2-layer bidirectional, 128 hidden → 7-day forecast × 6 categories | Spending forecast per category |
+| **Categorizer** | [categorizer.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-models/intelligence/categorizer.py) | all-MiniLM-L6-v2 → LogisticRegression → 10 Indian UPI categories | Auto-categorization of transactions |
+| **Anomaly Detector** | [anomaly_detector.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-models/intelligence/anomaly_detector.py) | IsolationForest + 5 rule-based checks (SPIKE, DUPLICATE, OFF_HOURS, NEW_MERCHANT, VELOCITY) | Fraud/anomaly detection |
+| **Policy Learner** | [intelligence/policy_learner.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-models/intelligence/policy_learner.py) | Q-Learning | Budget recommendations |
+| **ML Pipeline** | [intelligence/ml_pipeline.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-models/intelligence/ml_pipeline.py) | Orchestrates all models | Unified inference pipeline |
+
+**Pre-trained model artifacts** in [models/](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-models/intelligence/forecaster.py#86-109):
+- `isolation_forest/` — model.joblib, scaler.joblib, category_stats.json
+- `lstm_forecaster/` — scaler.joblib, categories.json (no model.pt = moving average fallback)
+- `phi3_categorizer/` — classifier.joblib, label_encoder.joblib
+- `q_learning/` — state_encoder.joblib, training_metadata.json
+
+---
+
+### 4. `budget-bandhu-web3/` — Smart Contracts (Hardhat + OpenZeppelin v5)
+
+| Contract | File | Lines | Address (Amoy) | Purpose |
+|----------|------|-------|----------------|---------|
+| **GoalBadgeSBT** | [GoalBadgeSBT.sol](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-web3/contracts/GoalBadgeSBT.sol) | 149 | `0xB9b2550d61deB460168182fC68F99c6636727788` | Soulbound ERC-721 badges — single + batch mint, non-transferable |
+| **GroupEscrow** | [GroupEscrow.sol](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-web3/contracts/GroupEscrow.sol) | 207 | `0x88BE64988359fFfA919D72d0512550B65b11f74b` | Multi-party escrow — create/contribute/complete/refund, max 50 members |
+
+**Test coverage:** 41 tests passing (17 SBT + 24 Escrow)
+
+---
+
+## 🔗 Data Flow Map
+
+```mermaid
+sequenceDiagram
+    participant U as User/MetaMask
+    participant FE as Frontend (Next.js)
+    participant BE as Backend (FastAPI)
+    participant DB as MongoDB
+    participant ML as ML Models
+    participant IPFS as Pinata IPFS
+    participant BC as Polygon Amoy
+
+    Note over U,BC: Personal CSV Goal Flow
+    U->>FE: Create goal (target ₹20k, salary ₹40k)
+    FE->>BE: POST /goals
+    BE->>DB: Insert goal doc
+    U->>FE: Upload CSV
+    FE->>BE: POST /goals/{id}/progress
+    BE->>BE: Parse CSV → savings = salary - spend
+    BE->>DB: Update goal.current
+    BE-->>FE: {is_complete: true}
+    U->>FE: Click "Mint Badge"
+    FE->>BE: POST /goals/{id}/complete
+    BE->>BE: PIL generates badge image
+    BE->>IPFS: Upload image → imageCID
+    BE->>IPFS: Upload metadata → metaCID
+    BE->>BC: mintBadge(wallet, tokenURI)
+    BC-->>BE: tx_hash
+    BE->>DB: Store badge_tx_hash, token_uri
+    BE-->>FE: Success + badge data
+    FE->>U: Badge popup (image, download, Polygonscan)
+
+    Note over U,BC: Personal Crypto Goal Flow
+    U->>FE: Click "Sync Wallet"
+    FE->>U: MetaMask → switch to Amoy
+    FE->>BC: eth_getBalance
+    BC-->>FE: Balance in wei
+    FE->>BE: PUT /goals/{id}/progress/manual {amount, mode: "set"}
+    BE->>DB: Update goal.current
+```
+
+---
+
+## 📊 MongoDB Collections
+
+| Collection | Used By | Key Fields |
+|-----------|---------|------------|
+| [goals](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/routes/goals.py#118-164) | goals.py | user_id, name, target, current, goal_type, salary, chain_status, badge_tx_hash, token_uri |
+| `escrow_pools` | escrow.py | creator_user_id, members[], target_amount, chain_pool_id, chain_status |
+| `transactions` | transactions.py | user_id, amount, description, category, type, created_at |
+| `users` | user.py | _id (wallet/email), name, profile |
+| `memories` | memory_manager.py | User memory for agent context |
+| `conversations` | conversation_manager.py | Chat history |
+| `messages` | conversation_manager.py | Individual messages |
+
+---
+
+## ⚠️ Critical Integration Points for Merging
+
+> [!IMPORTANT]
+> These are the key coupling points to pay attention to during the merge.
+
+### 1. Dual Backend Problem
+- `budget-bandhu-rag/` runs on `:8000` — the main API server
+- `budget-bandhu-models/` has its own [api/main.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-rag/api/main.py) with [ml_routes.py](file:///Users/aditya4/Desktop/Budget-Bandhu/budget-bandhu-models/api/ml_routes.py) — designed to run as a separate ML microservice on `:8001`
+- **Current state:** ML models are wired via `intelligence/ml_client.py` in the RAG backend (calls `:8001`), but falls back gracefully if unavailable
+
+### 2. Shared Model Code Duplication
+- `budget-bandhu-rag/intelligence/` has local copies of some intelligence modules
+- `budget-bandhu-models/intelligence/` has the canonical ML model code
+- `budget-bandhu-rag/core/agent_controller.py` ≠ `budget-bandhu-rag/api/core/agent_controller.py` — duplicate controller files
+
+### 3. Frontend User Identity Split
+- Goals page uses wallet address (MetaMask) as `user_id`
+- Other pages may use email/username as user identity
+- Fallback: `demo_user_001` if no wallet saved
+
+### 4. Environment Variables Scattered
+- 3 separate `.env` files across frontend/backend/web3
+- Private keys, API URLs, contract addresses need to stay in sync
+
+---
+
+## ❌ Known Issues & Remaining Work
+
+### P0 — Must Fix
+- [ ] Sync Wallet crypto goals — intermittently shows 0.0000 POL
+- [ ] Delete stale test goals from MongoDB
+
+### P1 — Should Do
+- [ ] Full E2E group escrow test on frontend
+- [ ] Verify contracts on Polygonscan
+- [ ] Wire escrow contribute/complete buttons to actual contract
+- [ ] Backfill `token_uri` for old goals
+
+### P2 — Polish
+- [ ] "Behind" pace detection UI polish
+- [ ] Auto-refresh after Sync Wallet
+- [ ] ML microservice integration for forecast savings
+- [ ] Mobile responsiveness
+- [ ] THREE.js WebGL crash on goals page (pre-existing)
+
+---
+
+## 📈 File Count Summary
+
+| Sub-Project | Source Files | Lines (key files) | Tests |
+|-------------|-------------|-------------------|-------|
+| `budget-bandhu-frontend` | ~115 | 822 (goals page) | — |
+| `budget-bandhu-rag` | ~103 | 515 + 365 + 212 + 365 + 163 | test scripts |
+| `budget-bandhu-models` | ~36 | 201 + 194 + 483 | tests/ dir |
+| `budget-bandhu-web3` | 11 | 149 + 207 | 41 tests (Hardhat) |
+| **Total** | **~265** | — | **41 on-chain** |

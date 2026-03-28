@@ -1,3 +1,7 @@
+import dotenv
+import os
+dotenv.load_dotenv(override=True)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging, sys
@@ -9,13 +13,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger("BudgetBandhu")
 
-import os
 import threading
 try:
     from pyngrok import ngrok
-    from dotenv import load_dotenv
-    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
-    load_dotenv(env_path)
 except ImportError:
     pass
 
@@ -28,7 +28,6 @@ def start_ngrok():
         if not token:
             logger.warning("[NGROK] LORDAKJ05_GMAIL_COM_AUTHTOKEN not set — skipping tunnel")
             return
-        # Use a dedicated config so this agent never shares a session with the ML backend
         rag_root = os.path.dirname(os.path.dirname(__file__))
         config_path = os.path.join(rag_root, "ngrok_rag.yml")
         pyngrok_config = pyngrok_conf.PyngrokConfig(
@@ -63,6 +62,9 @@ from api.routes.goals        import router as goals_router
 from api.routes.budget       import router as budget_router
 from api.routes.insights     import router as insights_router
 from api.routes.literacy     import router as literacy_router
+# Web3 / Goals 2.0 routers
+from api.routes.escrow       import router as escrow_router
+from api.routes.savings      import router as savings_router
 
 app.include_router(chat_router)
 app.include_router(transactions_router)
@@ -71,6 +73,8 @@ app.include_router(goals_router)
 app.include_router(budget_router)
 app.include_router(insights_router)
 app.include_router(literacy_router)
+app.include_router(escrow_router)
+app.include_router(savings_router)
 
 
 # ── Health ───────────────────────────────────────────────────
@@ -95,9 +99,17 @@ async def health_db():
 # ── Startup: pre-warm AgentController ───────────────────────
 @app.on_event("startup")
 async def startup():
-    logger.info("[MAIN] Pre-warming AgentController...")
+    logger.info("[MAIN] Starting up...")
+    # Connect to MongoDB (needed by get_database() dependency in all routes)
+    from api.database import Database
+    await Database.connect()
     # Start ngrok in background
     threading.Thread(target=start_ngrok, daemon=True).start()
-    from api.routes.chat import get_controller
-    get_controller()
-    logger.info("[MAIN] \u2705 Ready")
+    # Pre-warm AgentController
+    try:
+        from api.routes.chat import get_controller
+        get_controller()
+    except Exception as e:
+        logger.warning(f"[MAIN] AgentController pre-warm failed (non-fatal): {e}")
+    logger.info("[MAIN] ✅ Ready")
+

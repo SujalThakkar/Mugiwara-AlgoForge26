@@ -1,566 +1,825 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { GoalCard } from "@/components/goals/GoalCard";
-import { AddGoalModal } from "@/components/goals/AddGoalModal";
-import { mockData } from "@/lib/api/mock-data";
-import { useGoals } from "@/lib/hooks/useMLApi";
-import { useUserStore } from "@/lib/store/useUserStore";
-import { Target, Trophy, TrendingUp, Plus, Sparkles, Wallet, Lightbulb, AlertTriangle, CheckCircle, ArrowRight, Loader2 } from "lucide-react";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import { formatCurrency } from "@/lib/utils";
-import { useConfetti } from "@/lib/hooks/useConfetti";
-import { useFireworks } from "@/lib/hooks/useFireworks";
-import { useBalloons } from "@/lib/hooks/useBalloons";
-import { FireworksEffect } from "@/components/animations/FireworksEffect";
-import { useXPTriggers } from "@/lib/hooks/useXPTriggers";
-import { Balloons } from "@/components/animations/Balloons";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Target, Users, Trophy, Plus, Upload, CheckCircle2, Clock,
+  ExternalLink, Coins, Loader2, Wallet
+} from "lucide-react";
+import { POLYGONSCAN_BASE } from "@/lib/contracts/config";
+import SavingsPanel from "@/components/goals/SavingsPanel";
+import GroupGoalPanel from "@/components/goals/GroupGoalPanel";
 
-// Demo user ID
-const DEMO_USER_ID = "696a022c3c758e29b2ca8d50";
-const MM_EASING = [0.16, 1, 0.3, 1] as const;
+// ── Types ─────────────────────────────────────────────────────────────────────
+type GoalType = "personal_csv" | "personal_crypto" | "group_csv" | "group_escrow";
 
-export interface Goal {
-    id: string;
-    name: string;
-    icon: string;
-    target: number;
-    current: number;
-    deadline: string;
-    priority: string;
-    color: string;
-    milestones: Array<{
-        amount: number;
-        reached: boolean;
-        date: string | null;
-    }>;
-    // ML Forecast Data
-    eta_days?: number | null;
-    on_track?: boolean;
-    projected_completion_date?: string | null;
-    shortfall_risk?: string | null;
-    ai_verified?: boolean;
+interface Goal {
+  id: string;
+  name: string;
+  icon: string;
+  target: number;
+  current: number;
+  deadline: string;
+  priority: string;
+  goal_type: GoalType;
+  progress_percentage: number;
+  remaining: number;
+  on_track: boolean;
+  eta_days: number | null;
+  chain_status: "pending" | "badge_minted";
+  badge_tx_hash: string | null;
+  wallet_address: string | null;
+  token_uri: string | null;
+  badge_image_url: string | null;
+  // ML ETA fields (upstream)
+  projected_completion_date?: string | null;
+  shortfall_risk?: string | null;
+  ai_verified?: boolean;
 }
 
+interface EscrowPoolSummary {
+  pool_id: string;
+  name: string;
+  target_amount: number;
+  currency: string;
+  deadline: string;
+  member_count: number;
+  chain_status: "pending" | "funded" | "completed";
+  badge_tx_hash: string | null;
+  is_creator: boolean;
+}
+
+// Full enriched pool (from GET /escrow/{pool_id})
+interface EnrichedPool {
+  pool_id: string;
+  name: string;
+  target_amount: number;
+  target_currency: string;
+  target_date: string;
+  max_members: number;
+  member_count: number;
+  members: {
+    user_id: string;
+    wallet: string;
+    display_name: string;
+    avatar_initials: string;
+    joined_at: string;
+    pledge_amount: number;
+    saved_amount: number;
+    status: "fulfilled" | "on_track" | "behind";
+  }[];
+  total_pledged: number;
+  total_saved: number;
+  completion_pct: number;
+  is_complete: boolean;
+  invite_code?: string;
+  chain_pool_id: number | null;
+  chain_status: "pending" | "funded" | "completed";
+  badge_tx_hash: string | null;
+  creator_user_id: string;
+}
+
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+const GOAL_TYPE_LABELS: Record<GoalType, { label: string; icon: string; color: string }> = {
+  personal_csv:    { label: "Personal",        icon: "📊", color: "#6366f1" },
+  personal_crypto: { label: "Crypto Goal",     icon: "🔷", color: "#8b5cf6" },
+  group_csv:       { label: "Group Savings",   icon: "👥", color: "#10b981" },
+  group_escrow:    { label: "Escrow Pool",     icon: "🔒", color: "#f59e0b" },
+};
+
+// ── Utility ───────────────────────────────────────────────────────────────────
+const fmt = (n: number) =>
+  n >= 1e7 ? `₹${(n / 1e7).toFixed(1)}Cr`
+  : n >= 1e5 ? `₹${(n / 1e5).toFixed(1)}L`
+  : `₹${n.toLocaleString("en-IN")}`;
+
+const daysLeft = (deadline: string) =>
+  Math.max(0, Math.ceil((new Date(deadline).getTime() - Date.now()) / 86400000));
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+function ChainBadge({ status }: { status: string }) {
+  if (status === "badge_minted" || status === "completed")
+    return <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full"><CheckCircle2 size={11} /> On-chain</span>;
+  return <span className="flex items-center gap-1 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full"><Clock size={11} /> Pending</span>;
+}
+
+function ProgressBar({ pct, color = "#6366f1" }: { pct: number; color?: string }) {
+  return (
+    <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+      <motion.div
+        className="h-full rounded-full"
+        style={{ background: color }}
+        initial={{ width: 0 }}
+        animate={{ width: `${Math.min(pct, 100)}%` }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      />
+    </div>
+  );
+}
+
+// ── Main Page ─────────────────────────────────────────────────────────────────
 export default function GoalsPage() {
-    // Get user from store or use demo
-    const { userId } = useUserStore();
-    const activeUserId = userId || DEMO_USER_ID;
+  const [tab, setTab]               = useState<"goals" | "pools" | "achievements">("goals");
+  const [goals, setGoals]           = useState<Goal[]>([]);
+  const [poolSummaries, setPoolSummaries] = useState<EscrowPoolSummary[]>([]);
+  const [enrichedPools, setEnrichedPools] = useState<EnrichedPool[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [mintingGoalId, setMintingGoalId]     = useState<string | null>(null);
+  const [mintMsg, setMintMsg]       = useState<string | null>(null);
 
-    // Fetch real goals from API
-    const {
-        goals: apiGoals,
-        loading,
-        refetch,
-        createGoal: createGoalApi,
-        contributeToGoal
-    } = useGoals(activeUserId);
+  // Badge popup state
+  const [badgePopup, setBadgePopup] = useState<{
+    show: boolean; imageUrl: string; goalName: string; txHash: string; tokenUri: string;
+  } | null>(null);
 
-    // Use API data if available, fallback to mock for UI
-    const [goals, setGoals] = useState<Goal[]>(mockData.goals as unknown as Goal[]);
+  // ── Wallet-based identity ────────────────────────────────────────────────
+  const [userId, setUserId]         = useState<string | null>(null);
+  const [walletConnecting, setWalletConnecting] = useState(false);
 
-    // Sync API goals to local state when available
-    useEffect(() => {
-        if (apiGoals.length > 0) {
-            setGoals(apiGoals.map(g => ({
-                id: g.id,
-                name: g.name,
-                icon: g.icon,
-                target: g.target,
-                current: g.current,
-                deadline: g.deadline,
-                priority: g.priority,
-                color: g.color,
-                milestones: g.milestones || [],
-                eta_days: g.eta_days,
-                on_track: g.on_track,
-                projected_completion_date: g.projected_completion_date,
-                shortfall_risk: g.shortfall_risk,
-                ai_verified: g.ai_verified
-            })));
-        }
-    }, [apiGoals]);
-    const { fireCelebration, fireConfetti } = useConfetti();
-    const { isActive: fireworksActive, launch: launchFireworks } = useFireworks();
-    const { isActive: balloonsActive, launch: launchBalloons } = useBalloons();
+  const connectWallet = async () => {
+    if (typeof window === "undefined" || !window.ethereum) {
+      alert("MetaMask not found. Please install MetaMask.");
+      return;
+    }
+    setWalletConnecting(true);
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      if (accounts?.[0]) {
+        setUserId(accounts[0].toLowerCase());
+        localStorage.setItem("budget_bandhu_user", accounts[0].toLowerCase());
+      }
+    } catch (e) {
+      console.error("Wallet connect failed:", e);
+    }
+    setWalletConnecting(false);
+  };
 
-    const { onGoalContribution, onGoalCompleted } = useXPTriggers();
+  // Check for saved wallet on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("budget_bandhu_user");
+    if (saved) {
+      setUserId(saved);
+    } else {
+      // Fallback to demo user for development
+      setUserId("demo_user_001");
+    }
+  }, []);
 
-    // Add Goal Modal State
-    const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
+  // ── Data fetching ────────────────────────────────────────────────────────
+  const fetchGoals = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const [gRes, pRes] = await Promise.all([
+        fetch(`${API}/api/v1/goals/${userId}`),
+        fetch(`${API}/api/v1/escrow/user/${userId}`),
+      ]);
+      if (gRes.ok) setGoals(await gRes.json());
+      if (pRes.ok) {
+        const summaries: EscrowPoolSummary[] = await pRes.json();
+        setPoolSummaries(summaries);
 
-    const handleAddGoal = async (newGoal: Omit<Goal, 'id' | 'current' | 'milestones'>) => {
-        try {
-            const created = await createGoalApi({
-                name: newGoal.name,
-                target: newGoal.target,
-                deadline: newGoal.deadline,
-                icon: newGoal.icon,
-                priority: newGoal.priority.toLowerCase() as 'low' | 'medium' | 'high',
-                color: newGoal.color
+        // Fetch enriched data for each pool
+        const enriched = await Promise.all(
+          summaries.map(async (s) => {
+            try {
+              const r = await fetch(`${API}/api/v1/escrow/${s.pool_id}`);
+              if (r.ok) return await r.json();
+            } catch {}
+            return null;
+          })
+        );
+        setEnrichedPools(enriched.filter(Boolean));
+      }
+    } catch {}
+    setLoading(false);
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      setLoading(true);
+      void fetchGoals();
+    }
+  }, [userId, fetchGoals]);
+
+  const handleMintBadge = async (goal: Goal) => {
+    const wallet = window.prompt("Enter your wallet address to receive the SBT badge:");
+    if (!wallet) return;
+    setMintingGoalId(goal.id);
+    setMintMsg(null);
+    try {
+      const res = await fetch(`${API}/api/v1/goals/${goal.id}/complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet_address: wallet }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMintMsg(`🎉 Badge minted! TX: ${data.badge_tx_hash?.slice(0, 10)}...`);
+        // Show badge popup with IPFS image
+        const metadataUrl = data.token_uri?.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
+        if (metadataUrl) {
+          try {
+            const metaRes = await fetch(metadataUrl);
+            const meta = await metaRes.json();
+            const imgUrl = meta.image?.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
+            setBadgePopup({
+              show: true,
+              imageUrl: imgUrl || metadataUrl,
+              goalName: goal.name,
+              txHash: data.badge_tx_hash || "",
+              tokenUri: data.token_uri || "",
             });
-
-            // Re-fetch handled by hook or add manually if needed
-            // But hook should auto-update if it refetches. 
-            // Better to trust re-fetch or optimistically update.
-            // For now, let's call refetch
-            refetch();
-
-            fireConfetti({ particleCount: 100, spread: 70, origin: { x: 0.5, y: 0.5 } });
-        } catch (error) {
-            console.error("Failed to create goal", error);
+          } catch {
+            // Fallback: use metadata URL directly as image
+            setBadgePopup({
+              show: true,
+              imageUrl: metadataUrl,
+              goalName: goal.name,
+              txHash: data.badge_tx_hash || "",
+              tokenUri: data.token_uri || "",
+            });
+          }
         }
-    };
+        fetchGoals();
+      } else {
+        setMintMsg(`❌ ${data.detail || "Mint failed"}`);
+      }
+    } catch {
+      setMintMsg("❌ Network error");
+    }
+    setMintingGoalId(null);
+  };
 
-    const totalTarget = goals.reduce((acc, g) => acc + g.target, 0);
-    const totalCurrent = goals.reduce((acc, g) => acc + g.current, 0);
-    const overallProgress = (totalCurrent / totalTarget) * 100;
+  const achievements = goals.filter(g => g.chain_status === "badge_minted");
 
-    // Scroll animations
-    const heroRef = useRef<HTMLDivElement>(null);
-    const { scrollYProgress } = useScroll({
-        target: heroRef,
-        offset: ["start end", "end start"]
-    });
+  const tabs = [
+    { key: "goals",        label: "My Goals",     icon: <Target size={15} />,   count: goals.length },
+    { key: "pools",        label: "Group Pools",  icon: <Users size={15} />,    count: enrichedPools.length },
+    { key: "achievements", label: "Achievements", icon: <Trophy size={15} />,   count: achievements.length },
+  ] as const;
 
-    const textScale = useSpring(
-        useTransform(scrollYProgress, [0, 0.4, 0.8, 1], [0.5, 0.75, 0.95, 1.0]),
-        { stiffness: 100, damping: 30 }
-    );
-    const textOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0.5]);
-
-    const cardScale = useSpring(
-        useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 0.98, 1.0]),
-        { stiffness: 100, damping: 30 }
-    );
-
-    const checkMilestones = (goal: Goal, oldCurrent: number, newCurrent: number) => {
-        const milestones = [25, 50, 75];
-        for (const milestone of milestones) {
-            const oldPercentage = (oldCurrent / goal.target) * 100;
-            const newPercentage = (newCurrent / goal.target) * 100;
-            if (oldPercentage < milestone && newPercentage >= milestone) {
-                return milestone;
-            }
-        }
-        return null;
-    };
-
-    const handleAddMoney = async (goalId: string, amount: number) => {
-        try {
-            const result = await contributeToGoal(goalId, amount);
-
-            // Find goal for animation logic
-            const goal = goals.find(g => g.id === goalId);
-            if (!goal) return;
-
-            const oldCurrent = goal.current;
-            const newCurrent = result.new_current;
-
-            // Trigger animations
-            onGoalContribution(amount);
-            const milestoneReached = checkMilestones(goal, oldCurrent, newCurrent);
-            if (milestoneReached) {
-                setTimeout(() => launchBalloons(5000), 200);
-            }
-            if (result.is_complete || (newCurrent >= goal.target && oldCurrent < goal.target)) {
-                setTimeout(() => onGoalCompleted(), 500);
-                setTimeout(() => fireCelebration(), 300);
-
-                // Check all complete
-                // This is hard to do with just one update, but we can approximate or refetch
-            } else if (!milestoneReached) {
-                fireConfetti({
-                    particleCount: 50,
-                    spread: 50,
-                    origin: { x: 0.5, y: 0.7 },
-                });
-            }
-
-            refetch();
-
-        } catch (error) {
-            console.error("Contribution failed", error);
-        }
-    };
-
-    const getGoalInsight = (goal: Goal) => {
-        const percentage = (goal.current / goal.target) * 100;
-        const remaining = goal.target - goal.current;
-
-        // 1. Goal Achieved
-        if (percentage >= 100) return {
-            title: "Goal Achieved!",
-            message: "Great job! Consider moving these funds to a high-yield instrument.",
-            type: "success",
-            icon: CheckCircle,
-            color: "text-emerald-600",
-            bg: "bg-emerald-100"
-        };
-
-        // 2. ML Forecast: Not on Track
-        if (goal.on_track === false && goal.eta_days) {
-            const delayDays = goal.eta_days - 30; // Rough estimate of delay
-            return {
-                title: "Risk of Delay",
-                message: `Forecast suggests you might miss the deadline by ~${Math.max(5, Math.round(delayDays))} days. Increase contribution!`,
-                type: "warning",
-                icon: AlertTriangle,
-                color: "text-amber-600",
-                bg: "bg-amber-100"
-            };
-        }
-
-        // 3. ML Forecast: On Track
-        if (goal.on_track === true && goal.ai_verified) {
-            return {
-                title: "On Track (AI Verified)",
-                message: `You are projected to hit this goal in ${goal.eta_days} days. Keep it up!`,
-                type: "success",
-                icon: Sparkles,
-                color: "text-indigo-600",
-                bg: "bg-indigo-100"
-            };
-        }
-
-        // 4. Fallback Rules
-        if (goal.priority === "High" && percentage < 40) return {
-            title: "Boost Required",
-            message: `Increase monthly savings by ₹${Math.round(remaining / 12)} to hit target on time.`,
-            type: "warning",
-            icon: AlertTriangle,
-            color: "text-amber-600",
-            bg: "bg-amber-100"
-        };
-
-        if (goal.name.toLowerCase().includes("trip") || goal.icon === "✈️") return {
-            title: "Travel Hack",
-            message: "Book flights 3 months in advance to save up to 20%.",
-            type: "tips",
-            icon: Lightbulb,
-            color: "text-blue-600",
-            bg: "bg-blue-100"
-        };
-
-        if (goal.name.toLowerCase().includes("home") || goal.icon === "🏠") return {
-            title: "Market Watch",
-            message: "Home loan interest rates have stabilized. Good time to review options.",
-            type: "tips",
-            icon: TrendingUp,
-            color: "text-purple-600",
-            bg: "bg-purple-100"
-        };
-
-        return {
-            title: "On Track",
-            message: "Consistent contributions will get you there. Keep it up!",
-            type: "info",
-            icon: Sparkles,
-            color: "text-indigo-600",
-            bg: "bg-indigo-100"
-        };
-    };
-
+  // ── Wallet Connect Prompt ─────────────────────────────────────────────────
+  if (!userId) {
     return (
-        <>
-            <div className="space-y-0">
-                {/* SECTION 1: Hero - Mint Background */}
-                <section ref={heroRef} className="mm-section-mint relative perspective-container overflow-hidden">
-                    <div className="mm-container px-8 pt-8 pb-2 w-full max-w-7xl mx-auto">
-                        {/* Hero Two-Column Layout */}
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 mb-2">
-                            {/* Left: Massive Headline */}
-                            <motion.div
-                                style={{
-                                    scale: textScale,
-                                    opacity: textOpacity
-                                }}
-                                className="flex-1"
-                            >
-                                <h1 className="mm-section-heading !text-left leading-none tracking-tight pl-0 ml-0">
-                                    <span className="text-7xl lg:text-8xl xl:text-9xl block text-mm-black mb-2 pl-0 ml-0">DREAM BIG</span>
-                                    <span className="text-7xl lg:text-8xl xl:text-9xl block bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent transform origin-left hover:scale-[1.02] transition-transform duration-300 cursor-default pl-0 ml-0">
-                                        SAVE SMART
-                                    </span>
-                                </h1>
-                                <p className="text-left text-2xl lg:text-3xl text-mm-black/70 mt-6 max-w-2xl font-medium leading-relaxed pl-0 ml-0">
-                                    Turning your financial dreams into achievable milestones
-                                </p>
-                            </motion.div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 flex items-center justify-center">
+        <motion.div
+          className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-sm"
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+        >
+          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+            <Wallet size={28} className="text-white" />
+          </div>
+          <h2 className="text-xl font-black text-gray-900 mb-2">Connect Wallet</h2>
+          <p className="text-sm text-gray-500 mb-6">Connect your MetaMask wallet to access Goals 2.0</p>
+          <button
+            onClick={connectWallet}
+            disabled={walletConnecting}
+            className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {walletConnecting ? <Loader2 size={16} className="animate-spin" /> : <Wallet size={16} />}
+            {walletConnecting ? "Connecting..." : "Connect MetaMask"}
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
-                            {/* Right: Stats Card - Premium Interactions */}
-                            <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.5, duration: 0.8 }}
-                                className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8 lg:p-10 flex flex-col gap-6 min-w-[320px] self-start mt-8 lg:mt-12 mr-8 lg:mr-12 hover:shadow-2xl transition-all duration-500 hover:-translate-y-1"
-                            >
-                                {/* Stat 1 - Active Goals */}
-                                <div className="group flex items-center gap-5 cursor-default">
-                                    <motion.div
-                                        whileHover={{ scale: 1.1, rotate: -5, boxShadow: "0 10px 25px -5px rgba(124, 58, 237, 0.4)" }}
-                                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg transition-all duration-300"
-                                    >
-                                        <Target className="w-8 h-8 text-white" />
-                                    </motion.div>
-                                    <div>
-                                        <span className="text-3xl font-black text-mm-black group-hover:text-purple-600 transition-colors">{goals.length}</span>
-                                        <span className="text-gray-500 ml-2 font-bold text-sm uppercase tracking-wider block">Active Goals</span>
-                                    </div>
-                                </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50">
+      {/* Header */}
+      <div className="bg-white/80 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-black text-gray-900">Goals 2.0</h1>
+              <p className="text-sm text-gray-500">On-chain proof of financial discipline</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-gray-400 font-mono bg-gray-50 px-2 py-1 rounded-lg">
+                {userId.startsWith("0x") ? `${userId.slice(0, 6)}...${userId.slice(-4)}` : userId}
+              </span>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+              >
+                <Plus size={16} /> New Goal
+              </button>
+            </div>
+          </div>
 
-                                <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+          {/* Tabs */}
+          <div className="flex gap-1 mt-4 bg-gray-100 p-1 rounded-xl w-fit">
+            {tabs.map(t => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  tab === t.key
+                    ? "bg-white text-indigo-700 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {t.icon} {t.label}
+                {t.count > 0 && (
+                  <span className={`px-1.5 py-0.5 rounded-full text-xs ${tab === t.key ? "bg-indigo-100 text-indigo-700" : "bg-gray-200 text-gray-600"}`}>
+                    {t.count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
-                                {/* Stat 2 - Saved */}
-                                <div className="group flex items-center gap-5 cursor-default">
-                                    <motion.div
-                                        whileHover={{ scale: 1.1, rotate: 5, boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.4)" }}
-                                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg transition-all duration-300"
-                                    >
-                                        <Wallet className="w-8 h-8 text-white" />
-                                    </motion.div>
-                                    <div>
-                                        <span className="text-3xl font-black text-mm-black group-hover:text-emerald-600 transition-colors">{formatCurrency(totalCurrent)}</span>
-                                        <span className="text-gray-500 ml-2 font-bold text-sm uppercase tracking-wider block">Total Saved</span>
-                                    </div>
-                                </div>
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="animate-spin text-indigo-500" size={32} />
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
 
-                                <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+            {/* ── MY GOALS TAB ───────────────────────────────────────── */}
+            {tab === "goals" && (
+              <motion.div key="goals" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                {/* Savings Panel at the top */}
+                <SavingsPanel userId={userId} />
 
-                                {/* Stat 3 - On Track */}
-                                <div className="group flex items-center gap-5 cursor-default">
-                                    <motion.div
-                                        whileHover={{ scale: 1.1, rotate: -5, boxShadow: "0 10px 25px -5px rgba(249, 115, 22, 0.4)" }}
-                                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg transition-all duration-300"
-                                    >
-                                        <TrendingUp className="w-8 h-8 text-white" />
-                                    </motion.div>
-                                    <div>
-                                        <span className="text-3xl font-black text-mm-black group-hover:text-orange-600 transition-colors">{goals.filter(g => (g.current / g.target) >= 0.4).length}</span>
-                                        <span className="text-gray-500 ml-2 font-bold text-sm uppercase tracking-wider block">On Track</span>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </div>
-
-                        {/* Overall Progress Card - Redesigned */}
+                {mintMsg && (
+                  <div className={`mb-4 px-4 py-3 rounded-xl text-sm font-medium ${mintMsg.startsWith("🎉") ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
+                    {mintMsg}
+                  </div>
+                )}
+                {goals.length === 0 ? (
+                  <EmptyState message="No goals yet. Create your first goal!" action={() => setShowCreateModal(true)} />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    {goals.map(goal => {
+                      const typeInfo = GOAL_TYPE_LABELS[goal.goal_type] || GOAL_TYPE_LABELS.personal_csv;
+                      const isComplete = goal.progress_percentage >= 100;
+                      return (
                         <motion.div
-                            style={{ scale: cardScale }}
-                            initial={{ opacity: 0, y: 60 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8, ease: MM_EASING }}
-                            className="mm-card-colored bg-gradient-to-br from-emerald-500 from-10% via-emerald-600 to-teal-700 shadow-2xl shadow-emerald-900/20 card-3d p-8"
+                          key={goal.id}
+                          className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all"
+                          whileHover={{ y: -2 }}
                         >
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                                {/* Left: Progress Circle (Expanded) */}
-                                <div className="lg:col-span-5 flex items-center justify-center p-4">
-                                    <div className="relative w-64 h-64 lg:w-72 lg:h-72">
-                                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 160 160">
-                                            <circle
-                                                cx="80"
-                                                cy="80"
-                                                r="70"
-                                                stroke="currentColor"
-                                                strokeWidth="12"
-                                                fill="transparent"
-                                                className="text-emerald-900/30"
-                                            />
-                                            <circle
-                                                cx="80"
-                                                cy="80"
-                                                r="70"
-                                                stroke="currentColor"
-                                                strokeWidth="12"
-                                                fill="transparent"
-                                                strokeDasharray={440}
-                                                strokeDashoffset={440 - (440 * overallProgress) / 100}
-                                                className="text-white transition-all duration-1000 ease-out"
-                                                strokeLinecap="round"
-                                            />
-                                        </svg>
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                            <span className="text-6xl font-black text-white">{overallProgress.toFixed(0)}%</span>
-                                            <span className="text-sm font-medium text-white/80 mt-1 uppercase tracking-widest">Goal Completion</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Center: Stat Bubbles (Expanded to Right) */}
-                                <div className="lg:col-span-7 flex flex-col gap-6 justify-center">
-                                    {/* Total Saved Bubble */}
-                                    <motion.div
-                                        className="bg-gradient-to-br from-white/60 to-white/30 backdrop-blur-sm rounded-3xl p-4 lg:p-5 hover:from-white/70 hover:to-white/40 transition-all cursor-pointer group shadow-xl"
-                                        whileHover={{ scale: 1.02, y: -2 }}
-                                    >
-                                        <div className="flex items-center gap-5">
-                                            <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg coin-wiggle relative sparkle-on-hover shrink-0">
-                                                <span className="text-xl">💰</span>
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] lg:text-xs font-bold text-emerald-900/70 uppercase tracking-wider">Total Saved</p>
-                                                <h3 className="text-2xl lg:text-3xl font-black text-emerald-900 mt-0.5">{formatCurrency(totalCurrent)}</h3>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-
-                                    {/* Goal Distance Bubble */}
-                                    <motion.div
-                                        className="bg-gradient-to-br from-white/60 to-white/30 backdrop-blur-sm rounded-3xl p-4 lg:p-5 hover:from-white/70 hover:to-white/40 transition-all cursor-pointer group shadow-xl"
-                                        whileHover={{ scale: 1.02, y: -2 }}
-                                    >
-                                        <div className="flex items-center gap-5">
-                                            <div className="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center shadow-lg group-hover:animate-pulse shrink-0">
-                                                <span className="text-xl">🎯</span>
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] lg:text-xs font-bold text-emerald-900/70 uppercase tracking-wider">Goal Distance</p>
-                                                <h3 className="text-2xl lg:text-3xl font-black text-emerald-900 mt-0.5">{formatCurrency(totalTarget - totalCurrent)}</h3>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-
-                                    {/* On Track Message */}
-                                    <motion.div
-                                        className="bg-emerald-800/20 backdrop-blur-sm rounded-2xl px-6 py-4 hover:bg-emerald-800/30 transition-all cursor-pointer border border-emerald-400/30"
-                                        whileHover={{ scale: 1.01 }}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <TrendingUp className="w-6 h-6 text-white" />
-                                            <span className="text-white font-medium text-lg">
-                                                On track to hit <strong className="text-yellow-200">Emergency Fund</strong> by July 2024!
-                                            </span>
-                                        </div>
-                                    </motion.div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                </section>
-
-                {/* SECTION 2: Active Milestones - Premium Light */}
-                <section className="mm-section-midnight overflow-hidden relative bg-[#0f0f13]">
-                    {/* Massive Cosmic Glow */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-[120%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-[#0f0f13] to-[#0f0f13] pointer-events-none" />
-
-                    <div className="mm-container px-8 py-16 w-full max-w-7xl mx-auto relative z-10">
-                        {/* Header Row */}
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-                            <div>
-                                <h2 className="text-5xl md:text-6xl font-black text-white mb-2 tracking-tight">
-                                    Active Milestones
-                                </h2>
-                                <p className="text-gray-400 text-lg">Tracks your progress towards your dreams</p>
-                            </div>
-                            <button
-                                onClick={() => setIsAddGoalOpen(true)}
-                                className="mm-btn py-4 px-8 rounded-2xl bg-white text-black font-bold flex items-center gap-2 hover:bg-gray-100 shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all group"
-                            >
-                                <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                                Add New Goal
-                            </button>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {goals.map((goal, index) => (
-                                <motion.div
-                                    key={goal.id}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: index * 0.1, duration: 0.6, ease: MM_EASING }}
-                                >
-                                    <GoalCard
-                                        goal={goal}
-                                        onAddMoney={handleAddMoney}
-                                    />
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* SECTION 3: AI Coach - Vibrant Peach/Orange */}
-                <section className="relative overflow-hidden bg-gradient-to-b from-orange-50 to-white py-20">
-                    {/* Floating background elements */}
-                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-200/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                    <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-rose-200/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
-
-                    <div className="mm-container px-8 w-full max-w-7xl mx-auto relative z-10">
-                        <div className="text-center mb-16">
-                            <motion.div
-                                whileHover={{ scale: 1.05 }}
-                                className="inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-orange-100 rounded-full text-sm font-bold text-orange-600 mb-6 shadow-md hover:shadow-lg transition-all"
-                            >
-                                <Sparkles className="w-4 h-4" />
-                                AI WEALTH COACH
-                            </motion.div>
-
-                            <h3 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight">
-                                <span className="text-gray-900 block mb-2">Personalized Strategy</span>
-                                <span className="bg-gradient-to-r from-orange-500 via-rose-500 to-purple-600 bg-clip-text text-transparent">
-                                    Tailored Financial Advice
+                          {/* Header */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="text-3xl">{goal.icon}</div>
+                              <div>
+                                <h3 className="font-bold text-gray-900 text-base leading-tight">{goal.name}</h3>
+                                <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: typeInfo.color + "18", color: typeInfo.color }}>
+                                  {typeInfo.icon} {typeInfo.label}
                                 </span>
-                            </h3>
+                              </div>
+                            </div>
+                            <ChainBadge status={goal.chain_status} />
+                          </div>
 
-                            <p className="text-gray-600 font-medium text-xl max-w-2xl mx-auto leading-relaxed">
-                                Smart insights derived from your spending patterns to accelerate your goals
-                            </p>
+                          {/* Progress */}
+                          <div className="mb-3">
+                            <div className="flex justify-between text-sm mb-1.5">
+                              <span className="font-bold text-gray-900">{fmt(goal.current)}</span>
+                              <span className="text-gray-400">of {fmt(goal.target)}</span>
+                            </div>
+                            <ProgressBar pct={goal.progress_percentage} color={typeInfo.color} />
+                            <div className="flex justify-between mt-1.5">
+                              <span className="text-xs font-semibold" style={{ color: isComplete ? "#10b981" : "#6b7280" }}>
+                                {isComplete ? "✅ Complete!" : `${goal.progress_percentage.toFixed(1)}%`}
+                              </span>
+                              <span className="text-xs text-gray-400">
+                                {goal.on_track ? "🟢 On track" : "🔴 Behind"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Deadline */}
+                          <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
+                            <Clock size={12} />
+                            {daysLeft(goal.deadline)} days left · {new Date(goal.deadline).toLocaleDateString("en-IN", { month: "short", year: "numeric" })}
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex gap-2">
+                            {isComplete && goal.chain_status !== "badge_minted" && (
+                              <button
+                                onClick={() => handleMintBadge(goal)}
+                                disabled={mintingGoalId === goal.id}
+                                className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg text-xs font-bold hover:opacity-90 transition disabled:opacity-50"
+                              >
+                                {mintingGoalId === goal.id ? <Loader2 size={12} className="animate-spin" /> : <Trophy size={12} />}
+                                Mint Badge
+                              </button>
+                            )}
+                            {goal.badge_tx_hash && (
+                              <a
+                                href={`${POLYGONSCAN_BASE}/tx/${goal.badge_tx_hash}`}
+                                target="_blank" rel="noreferrer"
+                                className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                              >
+                                <ExternalLink size={11} /> View on chain
+                              </a>
+                            )}
+                            {goal.goal_type === "personal_csv" && (
+                              <UploadCSVButton goalId={goal.id} onDone={fetchGoals} />
+                            )}
+                            {goal.goal_type === "personal_crypto" && !isComplete && (
+                              <SyncWalletButton goalId={goal.id} onDone={fetchGoals} />
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* ── GROUP POOLS TAB ────────────────────────────────────── */}
+            {tab === "pools" && (
+              <motion.div key="pools" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                {enrichedPools.length === 0 ? (
+                  <EmptyState message="No group pools yet. Create one and invite friends!" action={() => setShowCreateModal(true)} />
+                ) : (
+                  <div className="space-y-4">
+                    {enrichedPools.map(pool => (
+                      <GroupGoalPanel
+                        key={pool.pool_id}
+                        pool={pool}
+                        onRefresh={fetchGoals}
+                      />
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* ── ACHIEVEMENTS TAB ───────────────────────────────────── */}
+            {tab === "achievements" && (
+              <motion.div key="achievements" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                {achievements.length === 0 ? (
+                  <EmptyState message="No badges yet. Complete a goal to earn your first SBT!" action={() => setTab("goals")} actionLabel="View Goals" />
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {achievements.map(goal => (
+                      <motion.div
+                        key={goal.id}
+                        className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center"
+                        whileHover={{ scale: 1.03 }}
+                      >
+                        {/* Show IPFS badge image if available, else emoji */}
+                        {goal.badge_image_url ? (
+                          <div className="w-24 h-24 mx-auto mb-3 rounded-xl overflow-hidden shadow-md">
+                            <img
+                              src={goal.badge_image_url}
+                              alt={`${goal.name} badge`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="text-5xl mb-3">{goal.icon}</div>
+                        )}
+                        <h4 className="font-bold text-gray-900 text-sm mb-1">{goal.name}</h4>
+                        <p className="text-xs text-gray-500 mb-3">{fmt(goal.target)}</p>
+                        <div className="flex items-center justify-center gap-1 mb-3">
+                          <CheckCircle2 size={14} className="text-emerald-500" />
+                          <span className="text-xs font-semibold text-emerald-600">Soulbound Badge</span>
                         </div>
+                        {goal.badge_tx_hash && (
+                          <a
+                            href={`${POLYGONSCAN_BASE}/tx/${goal.badge_tx_hash}`}
+                            target="_blank" rel="noreferrer"
+                            className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-1 font-medium"
+                          >
+                            <ExternalLink size={10} /> Verify on-chain
+                          </a>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {goals.map((goal, index) => {
-                                const insight = getGoalInsight(goal);
-                                return (
-                                    <motion.div
-                                        key={goal.id}
-                                        initial={{ opacity: 0, y: 40 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true, margin: "-50px" }}
-                                        transition={{ delay: index * 0.1, duration: 0.5, type: "spring", stiffness: 100 }}
-                                        whileHover={{ y: -12, scale: 1.02 }}
-                                        className="bg-white rounded-[2rem] p-8 shadow-xl hover:shadow-2xl transition-all border border-orange-50/50 flex flex-col relative overflow-hidden group"
-                                    >
-                                        {/* Hover Gradient Overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+          </AnimatePresence>
+        )}
+      </div>
 
-                                        <div className="relative z-10">
-                                            <div className="flex items-center justify-between mb-8">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="text-4xl filter drop-shadow-sm group-hover:scale-110 transition-transform duration-300">{goal.icon}</div>
-                                                    <h4 className="font-bold text-xl text-gray-900 line-clamp-1">{goal.name}</h4>
-                                                </div>
-                                                <div className={`p-3 rounded-2xl ${insight.bg} border border-transparent group-hover:scale-110 transition-transform`}>
-                                                    <insight.icon className={`w-6 h-6 ${insight.color}`} />
-                                                </div>
-                                            </div>
+      {/* Create Modal */}
+      {showCreateModal && <CreateGoalModal userId={userId} onClose={() => setShowCreateModal(false)} onCreated={fetchGoals} />}
 
-                                            <h5 className={`font-bold text-lg mb-3 ${insight.color}`}>{insight.title}</h5>
-                                            <p className="text-gray-500 text-base leading-relaxed mb-8 flex-1 font-medium">
-                                                {insight.message}
-                                            </p>
+      {/* Badge Popup after minting */}
+      {badgePopup?.show && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setBadgePopup(null)}>
+          <motion.div
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 text-center"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-4xl mb-2">🎉</div>
+            <h2 className="text-xl font-black text-gray-900 mb-1">Badge Minted!</h2>
+            <p className="text-sm text-gray-500 mb-4">{badgePopup.goalName}</p>
 
-                                            <button className="w-full py-3.5 rounded-xl bg-gray-900 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 group-hover:bg-orange-600 group-hover:shadow-lg shadow-gray-900/10">
-                                                Action Plan <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                            </button>
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </section>
+            {/* Badge Image */}
+            <div className="w-48 h-48 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg border-4 border-indigo-100">
+              <img
+                src={badgePopup.imageUrl}
+                alt="Your SBT Badge"
+                className="w-full h-full object-cover"
+              />
             </div>
 
-            {/* Animations */}
-            <FireworksEffect isActive={fireworksActive} duration={8000} />
-            <Balloons isActive={balloonsActive} duration={5000} count={15} />
+            {/* Actions */}
+            <div className="space-y-2">
+              <a
+                href={badgePopup.imageUrl}
+                download={`${badgePopup.goalName.replace(/\s+/g, '_')}_badge.png`}
+                target="_blank" rel="noreferrer"
+                className="w-full block py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition"
+              >
+                ⬇️ Download Badge
+              </a>
+              <a
+                href={`${POLYGONSCAN_BASE}/tx/${badgePopup.txHash}`}
+                target="_blank" rel="noreferrer"
+                className="w-full block py-2.5 border border-gray-200 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50 transition"
+              >
+                🔗 View on Polygonscan
+              </a>
+              <button
+                onClick={() => setBadgePopup(null)}
+                className="w-full py-2 text-sm text-gray-400 hover:text-gray-600 transition"
+              >
+                Close
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </div>
+  );
+}
 
-            {/* Modals */}
-            <AddGoalModal
-                isOpen={isAddGoalOpen}
-                onClose={() => setIsAddGoalOpen(false)}
-                onAddGoal={handleAddGoal}
+// ── CSV Upload Button ─────────────────────────────────────────────────────────
+function UploadCSVButton({ goalId, onDone }: { goalId: string; onDone: () => void }) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const form = new FormData();
+    form.append("file", file);
+    try {
+      await fetch(`${API}/api/v1/goals/${goalId}/progress`, { method: "POST", body: form });
+      onDone();
+    } catch {}
+    setUploading(false);
+  };
+
+  return (
+    <>
+      <input ref={inputRef} type="file" accept=".csv" className="hidden" onChange={handleFile} />
+      <button
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="flex items-center gap-1 px-2.5 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-100 transition disabled:opacity-50"
+      >
+        {uploading ? <Loader2 size={11} className="animate-spin" /> : <Upload size={11} />} CSV
+      </button>
+    </>
+  );
+}
+
+// ── Sync Wallet Button (for crypto goals — reads on-chain balance) ──────────
+function SyncWalletButton({ goalId, onDone }: { goalId: string; onDone: () => void }) {
+  const [syncing, setSyncing] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const handleSync = async () => {
+    setMsg(null);
+    if (!window.ethereum) {
+      setMsg("Install MetaMask");
+      return;
+    }
+
+    setSyncing(true);
+    try {
+      // 1. Connect to MetaMask
+      const accounts: string[] = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const wallet = accounts[0];
+      if (!wallet) { setMsg("No wallet connected"); setSyncing(false); return; }
+
+      // 2. Switch to Polygon Amoy (chain ID 80002 = 0x13882)
+      const AMOY_CHAIN_ID = "0x13882";
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: AMOY_CHAIN_ID }],
+        });
+      } catch {
+        // Chain not added yet — add it
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: AMOY_CHAIN_ID,
+            chainName: "Polygon Amoy Testnet",
+            nativeCurrency: { name: "POL", symbol: "POL", decimals: 18 },
+            rpcUrls: ["https://rpc-amoy.polygon.technology"],
+            blockExplorerUrls: ["https://amoy.polygonscan.com"],
+          }],
+        });
+      }
+
+      // 3. Read raw balance (hex wei) via MetaMask RPC
+      const balanceHex: string = await window.ethereum.request({
+        method: "eth_getBalance",
+        params: [wallet, "latest"],
+      });
+      // Convert hex wei → POL (18 decimals)
+      const balanceWei = BigInt(balanceHex);
+      const balancePOL = Number(balanceWei) / 1e18;
+
+      // 3. Send to backend
+      const res = await fetch(`${API}/api/v1/goals/${goalId}/progress/manual`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: parseFloat(balancePOL.toFixed(6)), mode: "set" }),
+      });
+      const data = await res.json();
+
+      if (data.is_complete) {
+        setMsg(`✅ ${balancePOL.toFixed(4)} POL — Goal complete!`);
+      } else {
+        setMsg(`${balancePOL.toFixed(4)} POL synced`);
+      }
+      onDone();
+    } catch (e) {
+      setMsg("Sync failed");
+      console.error(e);
+    }
+    setSyncing(false);
+  };
+
+  return (
+    <div className="flex flex-col items-end gap-1">
+      <button
+        onClick={handleSync}
+        disabled={syncing}
+        className="flex items-center gap-1 px-3 py-2 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-100 transition disabled:opacity-50"
+      >
+        {syncing ? <Loader2 size={11} className="animate-spin" /> : <Wallet size={11} />} Sync Wallet
+      </button>
+      {msg && <span className="text-[10px] text-gray-500">{msg}</span>}
+    </div>
+  );
+}
+
+// ── Empty State ───────────────────────────────────────────────────────────────
+function EmptyState({ message, action, actionLabel = "Create Now" }: { message: string; action: () => void; actionLabel?: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-64 text-center">
+      <div className="text-5xl mb-4">🎯</div>
+      <p className="text-gray-600 mb-4 max-w-xs">{message}</p>
+      <button onClick={action} className="px-5 py-2 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 transition">
+        {actionLabel}
+      </button>
+    </div>
+  );
+}
+
+// ── Create Goal Modal ─────────────────────────────────────────────────────────
+function CreateGoalModal({ userId, onClose, onCreated }: { userId: string; onClose: () => void; onCreated: () => void }) {
+  const [goalType, setGoalType] = useState<GoalType>("personal_csv");
+  const [name, setName]         = useState("");
+  const [target, setTarget]     = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [wallet, setWallet]     = useState("");
+  const [salary, setSalary]     = useState("");
+  const [loading, setLoading]   = useState(false);
+
+  const submit = async () => {
+    if (!name || !target || !deadline) return;
+    setLoading(true);
+    try {
+      const endpoint = goalType === "group_escrow"
+        ? `${API}/api/v1/escrow`
+        : `${API}/api/v1/goals`;
+
+      const body = goalType === "group_escrow"
+        ? {
+            creator_user_id:  userId,
+            creator_wallet:   wallet,
+            name, target_amount: parseFloat(target),
+            target_currency: "POL",
+            deadline,
+            max_members: 10,
+          }
+        : {
+            user_id: userId, name,
+            target: parseFloat(target),
+            deadline, goal_type: goalType,
+            wallet_address: wallet || null,
+            salary: salary ? parseFloat(salary) : null,
+          };
+
+      await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      onCreated();
+      onClose();
+    } catch {}
+    setLoading(false);
+  };
+
+  const types: { key: GoalType; label: string; icon: string; desc: string }[] = [
+    { key: "personal_csv",    icon: "📊", label: "Personal",     desc: "Upload CSV to track savings" },
+    { key: "personal_crypto", icon: "🔷", label: "Crypto Goal",  desc: "Track via wallet / manual confirm" },
+    { key: "group_escrow",    icon: "🔒", label: "Group Pool",   desc: "Lock POL on-chain together" },
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <motion.div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md"
+        initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+      >
+        <div className="p-6 border-b border-gray-100">
+          <h2 className="text-xl font-black text-gray-900">New Goal</h2>
+          <p className="text-sm text-gray-500 mt-1">Choose your goal type</p>
+        </div>
+
+        <div className="p-6 space-y-5">
+          {/* Goal type selector — 3 types (dropped group_csv) */}
+          <div className="grid grid-cols-3 gap-2">
+            {types.map(t => (
+              <button
+                key={t.key}
+                onClick={() => setGoalType(t.key)}
+                className={`text-left p-3 rounded-xl border-2 transition-all ${goalType === t.key ? "border-indigo-500 bg-indigo-50" : "border-gray-200 hover:border-gray-300"}`}
+              >
+                <div className="text-xl mb-1">{t.icon}</div>
+                <div className="text-xs font-bold text-gray-900">{t.label}</div>
+                <div className="text-xs text-gray-500 mt-0.5">{t.desc}</div>
+              </button>
+            ))}
+          </div>
+
+          {/* Fields */}
+          <div className="space-y-3">
+            <input
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-indigo-400"
+              placeholder="Goal name (e.g. Goa Trip)"
+              value={name} onChange={e => setName(e.target.value)}
             />
-        </>
-    );
+            <div className="flex gap-2">
+              <input
+                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-indigo-400"
+                placeholder={goalType === "group_escrow" ? "Target (POL)" : "Target (₹)"}
+                type="number" value={target} onChange={e => setTarget(e.target.value)}
+              />
+              <input
+                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-indigo-400"
+                type="date" value={deadline} onChange={e => setDeadline(e.target.value)}
+              />
+            </div>
+
+            {(goalType === "personal_csv" || goalType === "personal_crypto") && (
+              <input
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-indigo-400"
+                placeholder="Monthly salary (optional, for long-term mode)"
+                type="number" value={salary} onChange={e => setSalary(e.target.value)}
+              />
+            )}
+
+            <input
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-indigo-400"
+              placeholder={goalType === "group_escrow" ? "Your wallet address (required)" : "Wallet address (for SBT badge)"}
+              value={wallet} onChange={e => setWallet(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="p-6 border-t border-gray-100 flex gap-3">
+          <button onClick={onClose} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition">Cancel</button>
+          <button
+            onClick={submit} disabled={loading}
+            className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+            Create Goal
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
 }

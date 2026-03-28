@@ -1,0 +1,12 @@
+{
+  "network": "amoy",
+  "GoalBadgeSBT": "0xB9b2550d61deB460168182fC68F99c6636727788",
+  "deployer": "0x0C811D28046a77FA27A3CaF089E79DC664CF8178",
+  "verifier": "0x35C98a0033e5DB26d9E31adb0e04bBc3bC74D0dc",
+  "deployedAt": "2026-03-28T12:04:05.444Z",
+  "txHash": "0xc31916f120ee2de84821c2d9cf749c3cf0bcbcf1985fe394f0dc1dfcf68d71a9",
+  "GroupEscrow": "0x88BE64988359fFfA919D72d0512550B65b11f74b",
+  "escrowDeployer": "0x61695C2be63f5143360c36dD1691315Ca701A099",
+  "escrowDeployedAt": "2026-03-28T13:58:11.796Z",
+  "escrowTxHash": "0x413105afd99e3e8371def4369eeba846dd36a9cda93e403e360f78bcafda92c7"
+}
