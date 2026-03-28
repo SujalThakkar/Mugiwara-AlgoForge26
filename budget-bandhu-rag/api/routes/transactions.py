@@ -102,7 +102,19 @@ async def process_through_ml_pipeline(transactions: List[dict], user_id: str = N
     try:
         # We run the basic remote isolation forest first
         anomaly_result = await detect_anomalies(categorized)
-        enriched = anomaly_result.get("anomalies", categorized)
+        
+        remote_anomalies = anomaly_result.get("anomalies", [])
+        enriched = []
+        for i, t in enumerate(categorized):
+            t_copy = t.copy()
+            if i < len(remote_anomalies):
+                anom = remote_anomalies[i]
+                t_copy["is_anomaly"] = anom.get("is_anomaly", False)
+                t_copy["anomaly_score"] = anom.get("anomaly_score", 0.0)
+                t_copy["severity"] = anom.get("severity", "LOW")
+                t_copy["reason"] = anom.get("reason", "")
+            enriched.append(t_copy)
+            
         anomaly_stats = anomaly_result.get("stats", {})
         
         # Overlay user anomaly detector if history is passed

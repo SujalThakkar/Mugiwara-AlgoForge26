@@ -60,6 +60,8 @@ from api.routes.goals        import router as goals_router
 from api.routes.budget       import router as budget_router
 from api.routes.insights     import router as insights_router
 from api.routes.literacy     import router as literacy_router
+from api.routes.bills        import router as bills_router
+from api.routes.tax          import router as tax_router
 # Web3 / Goals 2.0 routers
 from api.routes.escrow       import router as escrow_router
 from api.routes.savings      import router as savings_router
@@ -71,6 +73,8 @@ app.include_router(goals_router)
 app.include_router(budget_router)
 app.include_router(insights_router)
 app.include_router(literacy_router)
+app.include_router(bills_router)
+app.include_router(tax_router)
 app.include_router(escrow_router)
 app.include_router(savings_router)
 

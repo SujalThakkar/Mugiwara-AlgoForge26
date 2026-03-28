@@ -41,10 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 
-# MetaMask reference files - DO NOT PUSH
-src/components/metamask/
-src/app/metamask-demo/
-src/components/metamask-ui/
-src/styles/metamask-theme.css
-src/styles/metamask-layout.css
-src/assets/fox.json
+

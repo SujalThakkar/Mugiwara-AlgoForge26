@@ -56,18 +56,20 @@ async def get_dashboard(user_id: str, db=Depends(get_database)):
             user = {"_id": user_id, "name": "User", "income": 50000, "created_at": datetime.utcnow()}
             await db["users"].insert_one(user)
 
-        # 2. Get transactions (last 30 days)
-        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        # 2. Get transactions (last 30 days) - Query by actual transaction date
+        thirty_days_ago = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%d")
         txn_cursor = db["transactions"].find({
             "user_id": user_id,
-            "created_at": {"$gte": thirty_days_ago}
-        }).sort("created_at", -1)
-        transactions = await txn_cursor.to_list(length=500)
+            "date": {"$gte": thirty_days_ago}
+        }).sort("date", -1)
+        transactions = await txn_cursor.to_list(length=1000)
 
-        # 3. Calculate stats
-        total_debit = sum(t.get("amount", 0) for t in transactions if t.get("type") == "debit")
-        total_credit = sum(t.get("amount", 0) for t in transactions if t.get("type") == "credit")
+        # 3. Calculate stats — use actual credits, not assumed income
+        total_debit  = round(sum(t.get("amount", 0) for t in transactions if t.get("type") == "debit"), 2)
+        total_credit = round(sum(t.get("amount", 0) for t in transactions if t.get("type") == "credit"), 2)
         income = user.get("income", 50000)
+        # If no credit transactions yet, fall back to income as baseline
+        effective_credit = total_credit if total_credit > 0 else income
 
         # 4. Category breakdown
         category_breakdown = {}
@@ -104,15 +106,45 @@ async def get_dashboard(user_id: str, db=Depends(get_database)):
                 "icon": "trending-up"
             })
 
-        # 7. Budget summary
+        # 7. Budget summary — live aggregation via $group so spent is always accurate
         budget = await db["budgets"].find_one({"user_id": user_id})
+
+        # Aggregate actual spending per category this month from transactions
+        agg_pipeline = [
+            {"$match": {"user_id": user_id, "type": "debit", "date": {"$gte": thirty_days_ago}}},
+            {"$group": {"_id": "$category", "total_spent": {"$sum": "$amount"}}}
+        ]
+        agg_result = await db["transactions"].aggregate(agg_pipeline).to_list(length=100)
+        live_spend_by_cat = {r["_id"]: round(r["total_spent"], 2) for r in agg_result}
+
         budget_summary = None
         if budget:
-            total_allocated = sum(a.get("allocated", 0) for a in budget.get("allocations", []))
-            total_spent = sum(a.get("spent", 0) for a in budget.get("allocations", []))
+            # Merge live spend into stored allocations
+            merged_allocs = []
+            for a in budget.get("allocations", []):
+                cat = a.get("category", "Other")
+                merged_allocs.append({
+                    "category": cat,
+                    "allocated": a.get("allocated", 0),
+                    "spent": live_spend_by_cat.get(cat, 0)
+                })
+            total_allocated = sum(a["allocated"] for a in merged_allocs)
+            total_spent_budget = sum(a["spent"] for a in merged_allocs)
             budget_summary = {
                 "total_allocated": total_allocated,
-                "total_spent": total_spent
+                "total_spent": total_spent_budget,
+                "allocations": merged_allocs
+            }
+        else:
+            # Synthesize from category breakdown if no budget set
+            synth_allocs = [
+                {"category": cat, "spent": round(data["total"], 2), "allocated": round(income / 4, 0)}
+                for cat, data in list(category_breakdown.items())[:6]
+            ]
+            budget_summary = {
+                "total_allocated": income,
+                "total_spent": total_debit,
+                "allocations": synth_allocs
             }
 
         # 8. Goals summary
@@ -129,15 +161,15 @@ async def get_dashboard(user_id: str, db=Depends(get_database)):
         try:
             forecast_data = await _get_cached_forecast(db, user_id)
             if forecast_data is None:
-                # Fetch last 90 days for forecaster
-                ninety_days_ago = datetime.utcnow() - timedelta(days=90)
+                # Fetch last 90 days for forecaster - Query by date
+                ninety_days_ago = (datetime.utcnow() - timedelta(days=90)).strftime("%Y-%m-%d")
                 forecast_txn_cursor = db["transactions"].find({
                     "user_id": user_id,
-                    "created_at": {"$gte": ninety_days_ago}
+                    "date": {"$gte": ninety_days_ago}
                 })
                 forecast_txns = await forecast_txn_cursor.to_list(length=2000)
 
-                if len(forecast_txns) >= 7:
+                if len(forecast_txns) >= 3:  # Lower threshold for demoing trend
                     # Serialize for ML service
                     serialized = []
                     for t in forecast_txns:
@@ -167,17 +199,21 @@ async def get_dashboard(user_id: str, db=Depends(get_database)):
                 "income": income
             },
             "stats": {
-                "current_balance": income - total_debit + total_credit,
+                "current_balance": round(total_credit - total_debit, 2),
                 "month_spent": total_debit,
-                "month_saved": income - total_debit,
-                "savings_rate": ((income - total_debit) / income * 100) if income > 0 else 0,
-                "financial_score": min(100, max(0, 50 + (income - total_debit) / 1000)),
+                "month_income": total_credit if total_credit > 0 else income,
+                "month_saved": round(effective_credit - total_debit, 2),
+                "savings_rate": round(max(0.0, min(100.0, (effective_credit - total_debit) / max(1, effective_credit) * 100)), 2),
+                "financial_score": round(max(20, min(100, 60 + (max(0, (effective_credit - total_debit) / max(1, effective_credit) * 100)) / 2)), 0),
                 "total_transactions": len(transactions)
             },
-            "category_breakdown": category_breakdown,
+            "category_breakdown": {
+                cat: {"total": round(val["total"], 2), "count": val["count"]}
+                for cat, val in category_breakdown.items()
+            },
             "anomalies": {
                 "count": len(anomalies),
-                "rate": (len(anomalies) / len(transactions) * 100) if transactions else 0
+                "rate": round((len(anomalies) / len(transactions) * 100), 2) if transactions else 0
             },
             "insights": insights,
             "forecast": forecast_data,
@@ -196,13 +232,13 @@ async def get_dashboard(user_id: str, db=Depends(get_database)):
 async def get_spending_trend(user_id: str, days: int = 30, db=Depends(get_database)):
     """Get daily spending trend for the specified period"""
     try:
-        start_date = datetime.utcnow() - timedelta(days=days)
+        start_date = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
 
         txn_cursor = db["transactions"].find({
             "user_id": user_id,
             "type": "debit",
-            "created_at": {"$gte": start_date}
-        }).sort("created_at", 1)
+            "date": {"$gte": start_date}
+        }).sort("date", 1)
 
         transactions = await txn_cursor.to_list(length=1000)
 

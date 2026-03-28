@@ -180,7 +180,7 @@ async def forecast_from_transactions(
             for d, cats in sorted(daily.items())
         ]
 
-        if len(daily_history) < 7:
+        if len(daily_history) < 3:
             return {"predicted_spending": 0, "predicted_savings": 0, "confidence": 0,
                     "forecast_7d": [], "monthly_summary": None, "processing_ms": 0}
 

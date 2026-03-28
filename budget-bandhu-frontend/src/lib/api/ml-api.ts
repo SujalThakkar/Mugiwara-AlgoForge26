@@ -32,6 +32,39 @@ async function callApi<T>(endpoint: string, fallbackData: T, options?: RequestIn
     }
 }
 
+const RAG_API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+async function ragCallApi<T>(endpoint: string, fallbackData: T, options?: RequestInit): Promise<T> {
+    try {
+        const body = options?.body;
+        const shouldSetJsonHeader = !(typeof FormData !== 'undefined' && body instanceof FormData);
+
+        const response = await fetch(`${RAG_API_BASE}${endpoint}`, {
+            ...options,
+            headers: shouldSetJsonHeader
+                ? {
+                    'Content-Type': 'application/json',
+                    'ngrok-skip-browser-warning': '1',
+                    ...options?.headers,
+                }
+                : {
+                    'ngrok-skip-browser-warning': '1',
+                    ...options?.headers,
+                },
+        });
+
+        if (!response.ok) {
+            console.warn(`[RAG API Fallback] ${endpoint} returned ${response.status}`, await response.text().catch(() => ''));
+            return fallbackData;
+        }
+
+        return await response.json() as T;
+    } catch (e) {
+        console.error(`[RAG API Fallback] fetch failed for ${endpoint}:`, e);
+        return fallbackData;
+    }
+}
+
 
 export interface User {
     id: string;
@@ -316,7 +349,7 @@ export const mlApi = {
                 income: data.income ?? 50000,
             };
 
-            return callApi<User>(
+            return ragCallApi<User>(
                 '/api/v1/user/register',
                 {
                     id: data.mobile_number,
@@ -332,7 +365,7 @@ export const mlApi = {
         },
 
         login: async (mobile_number: string, password: string): Promise<{ message: string; user: User }> => {
-            return callApi(
+            return ragCallApi(
                 '/api/v1/user/login',
                 {
                     message: 'Logged in (Mock)',
@@ -351,7 +384,7 @@ export const mlApi = {
         },
 
         getProfile: async (userId: string): Promise<User> => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/user/${userId}`,
                 {
                     id: userId,
@@ -366,7 +399,7 @@ export const mlApi = {
         },
 
         updateIncome: async (userId: string, income: number): Promise<{ message: string }> => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/user/${userId}/income?income=${income}`,
                 { message: 'Income updated (Mock)' },
                 { method: 'PUT' }
@@ -376,7 +409,7 @@ export const mlApi = {
 
     transactions: {
         add: async (userId: string, transaction: TransactionUpload) => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/transactions?user_id=${encodeURIComponent(userId)}`,
                 {
                     transaction_id: `txn_mock_${Date.now()}`,
@@ -389,7 +422,7 @@ export const mlApi = {
         },
 
         addBulk: async (userId: string, transactions: TransactionUpload[]) => {
-            return callApi(
+            return ragCallApi(
                 '/api/v1/transactions/bulk',
                 {
                     inserted_count: transactions.length,
@@ -404,7 +437,7 @@ export const mlApi = {
             const formData = new FormData();
             formData.append('file', file);
 
-            return callApi(
+            return ragCallApi(
                 `/api/v1/transactions/upload-csv?user_id=${encodeURIComponent(userId)}`,
                 {
                     inserted_count: 24,
@@ -417,18 +450,18 @@ export const mlApi = {
         },
 
         getAll: async (userId: string, options?: { limit?: number; skip?: number; category?: string; anomaliesOnly?: boolean }): Promise<Transaction[]> => {
-            let transactions = getMockTransactions(userId);
+            let mockFallback = getMockTransactions(userId);
 
             if (options?.category) {
-                transactions = transactions.filter((transaction) => transaction.category === options.category);
+                mockFallback = mockFallback.filter((transaction) => transaction.category === options.category);
             }
 
             if (options?.anomaliesOnly) {
-                transactions = transactions.filter((transaction) => transaction.is_anomaly);
+                mockFallback = mockFallback.filter((transaction) => transaction.is_anomaly);
             }
 
             if (options?.limit) {
-                transactions = transactions.slice(0, options.limit);
+                mockFallback = mockFallback.slice(0, options.limit);
             }
 
             const params = new URLSearchParams();
@@ -437,11 +470,11 @@ export const mlApi = {
             if (options?.category) params.set('category', options.category);
             if (options?.anomaliesOnly) params.set('anomalies_only', 'true');
 
-            return callApi(`/api/v1/transactions/${userId}?${params.toString()}`, transactions);
+            return ragCallApi(`/api/v1/transactions/${userId}?${params.toString()}`, mockFallback);
         },
 
         getStats: async (userId: string): Promise<TransactionStats> => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/transactions/${userId}/stats`,
                 {
                     total_transactions: mockData.transactions.length,
@@ -459,7 +492,7 @@ export const mlApi = {
         },
 
         getAnomalies: async (userId: string): Promise<Transaction[]> => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/transactions/${userId}/anomalies`,
                 getMockTransactions(userId).filter((transaction) => transaction.is_anomaly)
             );
@@ -468,17 +501,17 @@ export const mlApi = {
 
     dashboard: {
         get: async (userId: string): Promise<DashboardData> => {
-            return callApi(`/api/v1/dashboard/${userId}`, getMockDashboardData(userId));
+            return ragCallApi(`/api/v1/dashboard/${userId}`, getMockDashboardData(userId));
         },
 
         getSpendingTrend: async (userId: string, days: number = 30): Promise<Array<{ date: string; amount: number }>> => {
-            return callApi(`/api/v1/dashboard/${userId}/spending-trend?days=${days}`, mockData.spendingTrend);
+            return ragCallApi(`/api/v1/dashboard/${userId}/spending-trend?days=${days}`, mockData.spendingTrend);
         },
     },
 
     budget: {
         get: async (userId: string): Promise<Budget> => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/budget/${userId}`,
                 {
                     id: 'budget_mock',
@@ -496,7 +529,7 @@ export const mlApi = {
         },
 
         update: async (userId: string, budget: { total_income: number; allocations: Array<{ category: string; allocated: number; spent?: number }> }) => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/budget/${userId}`,
                 {
                     message: 'Budget updated (Mock)',
@@ -507,7 +540,7 @@ export const mlApi = {
         },
 
         getRecommendations: async (userId: string) => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/budget/${userId}/recommend`,
                 {
                     user_id: userId,
@@ -529,7 +562,7 @@ export const mlApi = {
         },
 
         submitFeedback: async (userId: string, category: string, feedback: 'accepted' | 'rejected') => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/budget/${userId}/feedback?category=${encodeURIComponent(category)}&feedback=${feedback}`,
                 { message: 'Feedback submitted (Mock)' },
                 { method: 'POST' }
@@ -537,7 +570,7 @@ export const mlApi = {
         },
 
         reset: async (userId: string) => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/budget/${userId}/reset`,
                 {
                     message: 'Budget reset (Mock)',
@@ -554,7 +587,7 @@ export const mlApi = {
 
     goals: {
         getAll: async (userId: string): Promise<Goal[]> => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/goals/${userId}`,
                 mockData.goals.map((goal) => ({
                     id: goal.id,
@@ -579,7 +612,7 @@ export const mlApi = {
         },
 
         create: async (goal: GoalCreate) => {
-            return callApi(
+            return ragCallApi(
                 '/api/v1/goals',
                 { goal_id: `goal_mock_${Date.now()}`, name: goal.name, target: goal.target },
                 { method: 'POST', body: JSON.stringify(goal) }
@@ -589,7 +622,7 @@ export const mlApi = {
         contribute: async (goalId: string, amount: number) => {
             const goal = mockData.goals.find((item) => item.id === goalId) || mockData.goals[0];
             const newCurrent = Math.min(goal.current + amount, goal.target);
-            return callApi(
+            return ragCallApi(
                 `/api/v1/goals/${goalId}/contribute`,
                 {
                     new_current: newCurrent,
@@ -603,14 +636,14 @@ export const mlApi = {
         },
 
         getEta: async (goalId: string) => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/goals/${goalId}/eta`,
                 { eta_days: 60, days_until_deadline: 120, on_track: true, message: 'On track!' }
             );
         },
 
         delete: async (goalId: string) => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/goals/${goalId}`,
                 { message: 'Goal deleted (Mock)' },
                 { method: 'DELETE' }
@@ -620,7 +653,7 @@ export const mlApi = {
 
     gamification: {
         get: async (userId: string): Promise<Gamification> => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/gamification/${userId}`,
                 {
                     id: 'gamify_mock',
@@ -640,7 +673,7 @@ export const mlApi = {
         },
 
         addXp: async (userId: string, amount: number, reason: string) => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/gamification/${userId}/xp?amount=${amount}&reason=${encodeURIComponent(reason)}`,
                 {
                     new_total_xp: 4450 + amount,
@@ -653,7 +686,7 @@ export const mlApi = {
         },
 
         checkBadges: async (userId: string) => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/gamification/${userId}/check-badges`,
                 { checked: 10, newly_unlocked: [], xp_earned: 0 },
                 { method: 'POST' }
@@ -661,7 +694,7 @@ export const mlApi = {
         },
 
         getLeaderboard: async (userId: string, limit: number = 10) => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/gamification/leaderboard/${userId}?limit=${limit}`,
                 {
                     leaderboard: [
@@ -676,7 +709,7 @@ export const mlApi = {
     },
 
     health: async () => {
-        return callApi('/health', {
+        return ragCallApi('/health', {
             status: 'healthy',
             version: '1.0.0-mock',
             database: 'mock',
@@ -701,7 +734,7 @@ export const mlApi = {
                 ? { user_id: userId, query, session_id: sessionId }
                 : { user_id: userId, ...query, query: query.translated_text, session_id: sessionId };
 
-            return callApi(
+            return ragCallApi(
                 '/api/v1/chat',
                 {
                     response: 'I am in mock mode. Please start the backend for real AI responses!',
@@ -715,7 +748,7 @@ export const mlApi = {
         },
 
         getHistory: async (userId: string): Promise<ChatMessage[]> => {
-            return callApi(
+            return ragCallApi(
                 `/api/v1/chat/history/${userId}`,
                 mockData.chatHistory.map((message) => ({
                     id: message.id,

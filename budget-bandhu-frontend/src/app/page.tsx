@@ -16,7 +16,8 @@ import { EmergencyFundBarometer } from "@/components/dashboard/EmergencyFundBaro
 import { SpendingInsights } from "@/components/dashboard/SpendingInsights";
 import { FinancialTimeMachine } from "@/components/dashboard/FinancialTimeMachine";
 import { TaxOptimizerDashboard } from "@/components/dashboard/TaxOptimizerDashboard";
-import { useDashboard } from "@/lib/hooks/useMLApi";
+import { useDashboard, useBudget, useGoals } from "@/lib/hooks/useMLApi";
+import { mlApi } from "@/lib/api/ml-api";
 import { useUserStore } from "@/lib/store/useUserStore";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { TrendingUp, Wallet, Target, Sparkles, PiggyBank, Shield, Loader2 } from "lucide-react";
@@ -42,7 +43,7 @@ export default function DashboardPage() {
     monthSpent: apiData?.stats.month_spent || 0,
     monthSaved: apiData?.stats.month_saved || 0,
     savingsRate: apiData?.stats.savings_rate || 0,
-    budgetAdherence: 0,
+    budgetAdherence: Math.min(100, Math.max(0, (apiData?.stats.month_spent || 0) / (apiData?.user.income || 50000) * 100)),
     financialScore: apiData?.stats.financial_score || 0,
     trend: {
       balance: '+0%',
@@ -71,17 +72,43 @@ export default function DashboardPage() {
   const [budget, setBudget] = useState<any>(null);
   const [goals, setGoals] = useState<any[]>([]);
 
+  const { budget: apiBudget } = useBudget(activeUserId);
+  const { goals: apiGoals } = useGoals(activeUserId);
+
   useEffect(() => {
-    // Left intentional structure for API hooks
-  }, []);
+    if (!activeUserId) return;
+    
+    // Fetch trend data
+    mlApi.dashboard.getSpendingTrend(activeUserId, 30)
+      .then(data => {
+        if (data && Array.isArray(data)) {
+          setSpendingTrend(data);
+        }
+      })
+      .catch(err => console.error("Trend fetch failed:", err));
+
+    // Handle budget/goals from hooks (already reactive)
+    if (apiBudget) setBudget(apiBudget);
+    if (apiGoals) setGoals(apiGoals);
+  }, [activeUserId, apiBudget, apiGoals]);
 
 
   // Find Emergency Fund goal
   const emergencyFundGoal = goals.find(g => g.name.toLowerCase().includes('emergency') || g.priority === 'high');
 
-  // Calculate budget progress
-  const budgetAllocations = budget?.allocations || [];
-  const totalBudget = budget?.total_income || 50000; // Fallback or use income
+  // Calculate budget progress - Use real categories from spending if budget is empty
+  const hasBudgetAllocations = budget?.allocations && budget.allocations.length > 0;
+  const budgetAllocations = hasBudgetAllocations
+    ? budget.allocations
+    : Object.entries(dashboardData.category_breakdown).map(([category, data]: [string, any]) => ({
+      category,
+      spent: data.total,
+      allocated: (apiData?.user.income || 50000) / 4 // Simple heuristic: divide income into 4 slots
+    })).slice(0, 6);
+
+  const totalBudget = hasBudgetAllocations 
+    ? (budget?.total_income || 50000) 
+    : (apiData?.user.income || 50000); 
 
   // Refs for each section's scroll-zoom
   const financesSectionRef = useRef<HTMLDivElement>(null);
@@ -238,9 +265,9 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between h-full mm-card-main-content">
                     <div>
                       <Sparkles className="w-10 h-10 text-white mb-2" />
-                      <h3 className="text-lg font-bold text-white">Financial Score</h3>
+                      <h3 className="text-lg font-bold text-white">Trust Score</h3>
                     </div>
-                    <div className="text-5xl font-bold text-white">{dashboardData.financialScore}</div>
+                    <div className="text-5xl font-bold text-white">{Math.round(dashboardData.financialScore)}</div>
                   </div>
 
                   {/* Hidden details */}
@@ -274,7 +301,9 @@ export default function DashboardPage() {
                           renderText={(value) => <span>{value}</span>}
                         />
                       </div>
-                      <div className="text-3xl font-bold text-white">{dashboardData.savingsRate}%</div>
+                      <div className="text-3xl font-bold text-white">
+                        {typeof dashboardData.savingsRate === 'number' ? dashboardData.savingsRate.toFixed(1) : dashboardData.savingsRate}%
+                      </div>
                       <div className="text-sm text-white/80">Savings Rate</div>
                     </div>
                   </div>
@@ -379,7 +408,7 @@ export default function DashboardPage() {
                 transition={{ duration: 0.9, delay: 0.15, ease: MM_EASING }}
                 className="card-3d"
               >
-                <CashflowLineChart data={spendingTrend} />
+                <CashflowLineChart data={spendingTrend} monthlyIncome={apiData?.user.income || 50000} />
               </motion.div>
             </div>
 

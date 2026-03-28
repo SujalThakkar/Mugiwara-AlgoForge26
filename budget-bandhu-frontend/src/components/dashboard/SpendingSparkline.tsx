@@ -6,9 +6,10 @@ import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface SpendingSparklineProps {
     data: Array<{ date: string; amount: number }>;
+    forecastConfidence?: number;  // 0-1 float from LSTM model
 }
 
-export function SpendingSparkline({ data }: SpendingSparklineProps) {
+export function SpendingSparkline({ data, forecastConfidence }: SpendingSparklineProps) {
     if (!data || data.length === 0) {
         return (
             <div className="flex items-center justify-center h-[420px] bg-gray-100 rounded-3xl border border-gray-200">
@@ -16,9 +17,11 @@ export function SpendingSparkline({ data }: SpendingSparklineProps) {
             </div>
         );
     }
-    const firstValue = data[0]?.amount || 0;
-    const lastValue = data[data.length - 1]?.amount || 0;
-    const percentChange = ((lastValue - firstValue) / firstValue) * 100;
+    const firstValue = data[0]?.amount || 1;  // guard div-by-zero
+    const lastValue  = data[data.length - 1]?.amount || 0;
+    // Cap at ±999% to prevent spike artifacts (e.g. ₹100 → ₹99,999 = 99,899%)
+    const rawChange  = ((lastValue - firstValue) / firstValue) * 100;
+    const percentChange = Math.max(-999, Math.min(999, rawChange));
     const isPositive = percentChange >= 0;
 
     const total = data.reduce((sum, item) => sum + item.amount, 0);
@@ -62,15 +65,35 @@ export function SpendingSparkline({ data }: SpendingSparklineProps) {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="flex items-center gap-3 mb-2"
+                        className="flex items-center justify-between mb-2"
                     >
-                        <div className="w-10 h-10 rounded-xl bg-gray-900/10 flex items-center justify-center">
-                            <Activity className="w-5 h-5 text-gray-900" />
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gray-900/10 flex items-center justify-center">
+                                <Activity className="w-5 h-5 text-gray-900" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900">Spending Trend</h3>
+                                <p className="text-sm text-gray-700">Last 30 days analytics</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-900">Spending Trend</h3>
-                            <p className="text-sm text-gray-700">Last 30 days analytics</p>
-                        </div>
+                        {/* LSTM Badge — shown when forecast confidence is available */}
+                        {forecastConfidence != null && forecastConfidence > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.5, type: 'spring' }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-900/90 shadow-lg"
+                            >
+                                <motion.div
+                                    className="w-2 h-2 rounded-full bg-emerald-400"
+                                    animate={{ scale: [1, 1.4, 1], opacity: [1, 0.6, 1] }}
+                                    transition={{ repeat: Infinity, duration: 1.5 }}
+                                />
+                                <span className="text-[11px] font-black text-emerald-400 tracking-wider">
+                                    🤖 LSTM {Math.round(forecastConfidence * 100)}%
+                                </span>
+                            </motion.div>
+                        )}
                     </motion.div>
                 </div>
 

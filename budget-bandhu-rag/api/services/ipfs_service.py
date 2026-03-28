@@ -60,75 +60,134 @@ def _is_certificate(goal_type: str, target: float) -> bool:
     return target >= CERTIFICATE_THRESHOLD_INR
 
 
+# ── Lazy Load Base64 Logo ─────────────────────────────────────────────────────
+_LOGO_B64 = None
+
+def _get_logo_b64() -> str:
+    global _LOGO_B64
+    if _LOGO_B64 is None:
+        try:
+            logo_path = os.path.join(os.path.dirname(__file__), "..", "assets", "logo_b64.txt")
+            with open(logo_path, "r") as f:
+                _LOGO_B64 = f.read().strip()
+        except Exception as e:
+            logger.warning(f"[IPFS] Could not load logo base64: {e}")
+            _LOGO_B64 = ""
+    return _LOGO_B64
+
+
 # ── Image generation ──────────────────────────────────────────────────────────
 
-def _make_badge_image(
+def _make_badge_svg(
     goal_title: str,
     goal_type:  str,
     target:     float,
-    icon:       str = "🎯",
 ) -> bytes:
     """
-    Generate a circular badge-style PNG (400×400px).
-    Falls back to a plain colored square if PIL is not installed.
+    Generate a highly premium SVG badge.
+    Simulates a 3D Obsidian & Gold Medallion using precise vector gradients.
     """
-    try:
-        from PIL import Image, ImageDraw, ImageFont
+    amt_str = f"₹{int(target):,}" if "crypto" not in goal_type else f"{target} POL"
+    
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="100%" height="100%">
+  <defs>
+    <!-- Background Space/Glow -->
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4c1d95" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
 
-        size  = 400
-        img   = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-        draw  = ImageDraw.Draw(img)
+    <!-- Dark Obsidian Base -->
+    <linearGradient id="obsidian" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
 
-        # Outer circle background
-        draw.ellipse([0, 0, size, size], fill=BRAND_PURPLE)
-        # Inner ring
-        draw.ellipse([15, 15, size - 15, size - 15], outline=GOLD, width=6)
-        # Inner white circle
-        draw.ellipse([30, 30, size - 30, size - 30], fill=LIGHT_BG)
+    <!-- Metallic Gold Rim -->
+    <linearGradient id="gold-rim" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="20%" stop-color="#fef08a"/>
+      <stop offset="40%" stop-color="#d97706"/>
+      <stop offset="60%" stop-color="#fdf08a"/>
+      <stop offset="80%" stop-color="#78350f"/>
+      <stop offset="100%" stop-color="#fcd34d"/>
+    </linearGradient>
 
-        # Title text
-        title = goal_title[:20] + ("…" if len(goal_title) > 20 else "")
-        try:
-            font_lg = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 28)
-            font_sm = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 18)
-        except Exception:
-            font_lg = ImageFont.load_default()
-            font_sm = font_lg
+    <!-- Inner Reflection -->
+    <linearGradient id="reflection" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
 
-        # Center title
-        bbox = draw.textbbox((0, 0), title, font=font_lg)
-        tw   = bbox[2] - bbox[0]
-        draw.text(((size - tw) / 2, 170), title, font=font_lg, fill=BRAND_DARK)
+    <!-- Drop Shadows -->
+    <filter id="shadow-deep" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="15" stdDeviation="10" flood-color="#000000" flood-opacity="0.8"/>
+    </filter>
+    
+    <filter id="shadow-text" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#000000" flood-opacity="0.9"/>
+    </filter>
 
-        # "GOAL ACHIEVED" label
-        sub = "GOAL ACHIEVED"
-        bbox2 = draw.textbbox((0, 0), sub, font=font_sm)
-        tw2   = bbox2[2] - bbox2[0]
-        draw.text(((size - tw2) / 2, 215), sub, font=font_sm, fill=BRAND_PURPLE)
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&amp;family=Inter:wght@400;700;900&amp;display=swap');
+      .sub {{ font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; fill: #d1d5db; text-anchor: middle; letter-spacing: 6px; }}
+      .title {{ font-family: 'Cinzel', serif; font-weight: 900; font-size: 52px; fill: #ffffff; text-anchor: middle; }}
+      .amt {{ font-family: 'Inter', sans-serif; font-weight: 900; font-size: 64px; fill: url(#gold-rim); text-anchor: middle; letter-spacing: -1px; }}
+      .brand {{ font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; fill: #6366f1; text-anchor: middle; letter-spacing: 2px; opacity: 0.8; }}
+      .accent {{ font-size: 24px; fill: url(#gold-rim); text-anchor: middle; }}
+    </style>
+  </defs>
 
-        # Target amount
-        amt_str = f"₹{int(target):,}" if "crypto" not in goal_type else f"{target} POL"
-        bbox3   = draw.textbbox((0, 0), amt_str, font=font_sm)
-        tw3     = bbox3[2] - bbox3[0]
-        draw.text(((size - tw3) / 2, 246), amt_str, font=font_sm, fill=GOLD)
+  <!-- Ambient Glow -->
+  <rect width="600" height="600" fill="url(#glow)"/>
 
-        # BudgetBandhu branding
-        brand = "BudgetBandhu"
-        bbox4 = draw.textbbox((0, 0), brand, font=font_sm)
-        tw4   = bbox4[2] - bbox4[0]
-        draw.text(((size - tw4) / 2, 295), brand, font=font_sm, fill=BRAND_PURPLE)
+  <!-- Thick Outer Gold Rim / Base Coin -->
+  <circle cx="300" cy="300" r="260" fill="url(#gold-rim)" filter="url(#shadow-deep)"/>
+  
+  <!-- Outer Bevel indent (Dark) -->
+  <circle cx="300" cy="300" r="248" fill="#451a03"/>
+  
+  <!-- Inner Obsidian Plate -->
+  <circle cx="300" cy="300" r="244" fill="url(#obsidian)"/>
+  
+  <!-- Top Glass Reflection on Obsidian -->
+  <circle cx="300" cy="300" r="244" fill="url(#reflection)"/>
 
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
-        return buf.getvalue()
+  <!-- Intricate Tech / Magic Rings -->
+  <circle cx="300" cy="300" r="230" fill="none" stroke="url(#gold-rim)" stroke-width="1" stroke-dasharray="2 6" opacity="0.6"/>
+  <circle cx="300" cy="300" r="220" fill="none" stroke="#6366f1" stroke-width="2" opacity="0.4"/>
+  <circle cx="300" cy="300" r="200" fill="none" stroke="url(#gold-rim)" stroke-width="1" stroke-dasharray="15 5 2 5"/>
 
-    except ImportError:
-        # PIL not installed — return minimal valid PNG (1×1 purple pixel)
-        logger.warning("[IPFS] PIL not installed, using placeholder badge")
-        return _minimal_png(BRAND_PURPLE)
+  <!-- Logo (Embedded base64) -->
+  <image href="data:image/png;base64,{_get_logo_b64()}" x="250" y="70" width="100" height="100" />
+
+  <!-- Text Group -->
+  <g filter="url(#shadow-text)">
+    <text x="300" y="170" class="sub">GOAL ACHIEVED</text>
+    
+    <!-- Dynamically sized title -->
+    <text x="300" y="260" class="title" lengthAdjust="spacingAndGlyphs" textLength="{min(400, len(goal_title)*30)}">{goal_title.upper()}</text>
+    
+    <!-- Divider -->
+    <path d="M 160 310 L 440 310" stroke="url(#gold-rim)" stroke-width="2" opacity="0.5"/>
+    <path d="M 280 310 L 320 310" stroke="#ffffff" stroke-width="4"/>
+    
+    <text x="300" y="410" class="amt">{amt_str}</text>
+  </g>
+
+  <!-- Wrapping Text Path Brand (Requires a path def) -->
+  <defs>
+    <path id="curve" d="M 140 300 a 160 160 0 0 0 320 0" fill="transparent" />
+  </defs>
+  <text class="brand">
+    <textPath href="#curve" startOffset="50%" text-anchor="middle">BUDGETBANDHU SOULBOUND ASSET</textPath>
+  </text>
+</svg>"""
+    return svg.encode('utf-8')
 
 
-def _make_certificate_image(
+def _make_certificate_svg(
     goal_title:  str,
     goal_type:   str,
     target:      float,
@@ -136,101 +195,104 @@ def _make_certificate_image(
     user_wallet: Optional[str] = None,
 ) -> bytes:
     """
-    Generate a landscape certificate-style PNG (800×560px).
+    Generate an ultra-premium SVG certificate.
     """
-    try:
-        from PIL import Image, ImageDraw, ImageFont
+    amt_str = f"₹{int(target):,}" if "crypto" not in goal_type else f"{target:.4f} POL"
+    wallet_block = f'<text x="500" y="580" class="text-meta">WALLET: {user_wallet}</text>' if user_wallet else ""
 
-        W, H = 800, 560
-        img  = Image.new("RGB", (W, H), WHITE)
-        draw = ImageDraw.Draw(img)
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" width="100%" height="100%">
+  <defs>
+    <!-- Dark Luxury Background Gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#09090b" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
 
-        # Background
-        draw.rectangle([0, 0, W, H], fill=(245, 243, 255))   # purple-50
-        # Top banner
-        draw.rectangle([0, 0, W, 100], fill=BRAND_PURPLE)
-        # Gold border
-        draw.rectangle([12, 12, W - 12, H - 12], outline=GOLD, width=4)
-        draw.rectangle([18, 18, W - 18, H - 18], outline=GOLD, width=1)
+    <!-- Gold Foil Gradient -->
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="25%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#b45309" />
+      <stop offset="75%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#78350f" />
+    </linearGradient>
 
-        try:
-            f_title  = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 48)
-            f_header = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 22)
-            f_body   = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 18)
-            f_small  = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 14)
-        except Exception:
-            f_title = f_header = f_body = f_small = ImageFont.load_default()
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000" flood-opacity="0.8"/>
+    </filter>
 
-        # Header text
-        hdr = "🏆  Certificate of Achievement  🏆"
-        bb  = draw.textbbox((0, 0), hdr, font=f_body)
-        draw.text(((W - (bb[2] - bb[0])) / 2, 34), hdr, font=f_body, fill=WHITE)
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;800&amp;family=Inter:wght@400;700&amp;display=swap');
+      .header {{ font-family: 'Cinzel', serif; font-weight: 800; font-size: 38px; fill: url(#gold); text-anchor: middle; letter-spacing: 6px; }}
+      .sub {{ font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; fill: #818cf8; text-anchor: middle; letter-spacing: 4px; }}
+      .title {{ font-family: 'Cinzel', serif; font-weight: 800; font-size: 72px; fill: #ffffff; text-anchor: middle; }}
+      .target-lbl {{ font-family: 'Inter', sans-serif; font-weight: 700; font-size: 18px; fill: #6366f1; text-anchor: middle; letter-spacing: 2px; }}
+      .target-val {{ font-family: 'Cinzel', serif; font-weight: 800; font-size: 64px; fill: url(#gold); text-anchor: middle; }}
+      .text-meta {{ font-family: 'Inter', sans-serif; font-weight: 400; font-size: 14px; fill: #94a3b8; text-anchor: middle; }}
+      .footer {{ font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; fill: #4f46e5; text-anchor: middle; letter-spacing: 2px; }}
+    </style>
+  </defs>
 
-        # "CERTIFIES THAT"
-        ct = "THIS CERTIFIES THAT THE FOLLOWING GOAL HAS BEEN ACHIEVED"
-        bb2 = draw.textbbox((0, 0), ct, font=f_small)
-        draw.text(((W - (bb2[2] - bb2[0])) / 2, 130), ct, font=f_small, fill=BRAND_PURPLE)
+  <!-- Base Rectangle -->
+  <rect width="1000" height="700" fill="url(#bg)" />
+  
+  <!-- Outer Gold Border -->
+  <rect x="30" y="30" width="940" height="640" fill="none" stroke="url(#gold)" stroke-width="4" />
+  
+  <!-- Inner Delicate Border -->
+  <rect x="42" y="42" width="916" height="616" fill="none" stroke="#4c1d95" stroke-width="2" />
+  
+  <!-- Geometric accents -->
+  <path d="M 30 100 L 100 30" stroke="url(#gold)" stroke-width="2"/>
+  <path d="M 970 100 L 900 30" stroke="url(#gold)" stroke-width="2"/>
+  <path d="M 30 600 L 100 670" stroke="url(#gold)" stroke-width="2"/>
+  <path d="M 970 600 L 900 670" stroke="url(#gold)" stroke-width="2"/>
 
-        # Goal title (large)
-        title  = goal_title[:40] + ("…" if len(goal_title) > 40 else "")
-        bb3    = draw.textbbox((0, 0), title, font=f_title)
-        draw.text(((W - (bb3[2] - bb3[0])) / 2, 170), title, font=f_title, fill=BRAND_DARK)
+  <!-- Brand Logo -->
+  <image href="data:image/png;base64,{_get_logo_b64()}" x="450" y="20" width="100" height="100" />
 
-        # Horizontal divider
-        draw.line([(80, 255), (W - 80, 255)], fill=GOLD, width=2)
+  <!-- Content Group -->
+  <g filter="url(#shadow)">
+    <text x="500" y="140" class="header">CERTIFICATE OF DISCIPLINE</text>
+    
+    <text x="500" y="240" class="sub">AWARDED FOR THE SUCCESSFUL COMPLETION OF</text>
+    
+    <!-- Title with dynamic sizing logic based on length via SVG textLength (max width 800) -->
+    <text x="500" y="340" class="title" textLength="{min(800, len(goal_title)*40)}" lengthAdjust="spacingAndGlyphs">{goal_title.upper()}</text>
+    
+    <rect x="250" y="400" width="500" height="2" fill="url(#gold)" opacity="0.5"/>
+    
+    <text x="500" y="460" class="target-val">{amt_str}</text>
+  </g>
 
-        # Amount
-        amt = f"₹{int(target):,}" if "crypto" not in goal_type else f"{target:.4f} POL"
-        bb4 = draw.textbbox((0, 0), amt, font=f_header)
-        draw.text(((W - (bb4[2] - bb4[0])) / 2, 275), amt, font=f_header, fill=BRAND_PURPLE)
+  <!-- Metadata -->
+  <text x="500" y="550" class="text-meta">VERIFIED ON CHAIN: {completed_at}</text>
+  {wallet_block}
 
-        draw.text((80, 350), f"Date: {completed_at}", font=f_small, fill=(100, 100, 120))
+  <text x="500" y="650" class="footer">BUDGETBANDHU · IMMUTABLE SOULBOUND PROOF</text>
+</svg>"""
+    return svg.encode('utf-8')
 
-        if user_wallet:
-            wallet_short = f"{user_wallet[:10]}...{user_wallet[-6:]}"
-            draw.text((80, 375), f"Wallet: {wallet_short}", font=f_small, fill=(100, 100, 120))
-
-        # Soulbound note
-        note = "⛓  Soulbound Token (Non-Transferable) · Polygon Amoy"
-        bb5  = draw.textbbox((0, 0), note, font=f_small)
-        draw.text(((W - (bb5[2] - bb5[0])) / 2, 460), note, font=f_small, fill=BRAND_PURPLE)
-
-        # BudgetBandhu footer
-        brand = "BudgetBandhu · budgetbandhu.in"
-        bb6   = draw.textbbox((0, 0), brand, font=f_small)
-        draw.text(((W - (bb6[2] - bb6[0])) / 2, H - 40), brand, font=f_small, fill=(120, 120, 140))
-
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
-        return buf.getvalue()
-
-    except ImportError:
-        logger.warning("[IPFS] PIL not installed, using placeholder certificate")
-        return _minimal_png(BRAND_DARK)
-
-
-def _minimal_png(color: tuple) -> bytes:
-    """1×1 pixel PNG as fallback when PIL is unavailable."""
-    import struct, zlib
-    r, g, b = color
-    raw  = bytes([0, r, g, b])
-    comp = zlib.compress(raw)
-    def chunk(name, data):
-        c = struct.pack(">I", len(data)) + name + data
-        crc = zlib.crc32(name + data) & 0xFFFFFFFF
-        return c + struct.pack(">I", crc)
-    png  = b"\x89PNG\r\n\x1a\n"
-    png += chunk(b"IHDR", struct.pack(">IIBBBBB", 1, 1, 8, 2, 0, 0, 0))
-    png += chunk(b"IDAT", comp)
-    png += chunk(b"IEND", b"")
-    return png
 
 
 # ── Pinata uploads ────────────────────────────────────────────────────────────
 
-async def upload_image_to_ipfs(image_bytes: bytes, filename: str = "badge.png") -> str:
+async def upload_image_to_ipfs(
+    image_bytes: bytes, 
+    filename: str = "badge.svg", 
+    content_type: str = "image/svg+xml"
+) -> str:
     """
-    Upload a PNG image to Pinata and return ipfs://CID.
+    Upload an image to Pinata and return ipfs://CID.
+    Defaults to SVG handling.
     """
     if not PINATA_JWT and not (PINATA_API_KEY and PINATA_API_SECRET):
         raise RuntimeError("Pinata credentials not configured")
@@ -239,7 +301,7 @@ async def upload_image_to_ipfs(image_bytes: bytes, filename: str = "badge.png") 
         response = await client.post(
             PINATA_PIN_FILE_URL,
             headers=_get_auth_headers(),
-            files={"file": (filename, image_bytes, "image/png")},
+            files={"file": (filename, image_bytes, content_type)},
             data={
                 "pinataMetadata": json.dumps({"name": filename}),
                 "pinataOptions":  json.dumps({"cidVersion": 1}),
@@ -310,14 +372,14 @@ async def generate_and_upload_badge(
 
     # 1. Generate image bytes
     if is_cert:
-        img_bytes = _make_certificate_image(goal_title, goal_type, target, completed_at, user_wallet)
-        img_name  = f"certificate_{goal_title[:20].replace(' ', '_')}.png"
+        img_bytes = _make_certificate_svg(goal_title, goal_type, target, completed_at, user_wallet)
+        img_name  = f"certificate_{goal_title[:20].replace(' ', '_')}.svg"
     else:
-        img_bytes = _make_badge_image(goal_title, goal_type, target, icon)
-        img_name  = f"badge_{goal_title[:20].replace(' ', '_')}.png"
+        img_bytes = _make_badge_svg(goal_title, goal_type, target)
+        img_name  = f"badge_{goal_title[:20].replace(' ', '_')}.svg"
 
     # 2. Upload image
-    image_cid_uri = await upload_image_to_ipfs(img_bytes, img_name)
+    image_cid_uri = await upload_image_to_ipfs(img_bytes, img_name, content_type="image/svg+xml")
 
     # 3. Build metadata
     goal_type_display = {
