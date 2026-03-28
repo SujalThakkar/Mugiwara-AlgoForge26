@@ -41,8 +41,6 @@ def start_ngrok():
         )
         url = tunnel.public_url
         logger.info(f"[NGROK] RAG tunnel active: {url}")
-        with open("ngrok_url.txt", "w") as f:
-            f.write(f"Public URL: {url}\n")
     except Exception as e:
         logger.error(f"[NGROK] Failed to start RAG tunnel: {e}")
 

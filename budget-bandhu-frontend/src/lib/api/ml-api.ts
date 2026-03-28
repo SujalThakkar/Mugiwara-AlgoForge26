@@ -13,9 +13,13 @@ async function callApi<T>(endpoint: string, fallbackData: T, options?: RequestIn
             headers: shouldSetJsonHeader
                 ? {
                     'Content-Type': 'application/json',
+                    'ngrok-skip-browser-warning': '1',
                     ...options?.headers,
                 }
-                : options?.headers,
+                : {
+                    'ngrok-skip-browser-warning': '1',
+                    ...options?.headers,
+                },
         });
 
         if (!response.ok) {
@@ -27,6 +31,7 @@ async function callApi<T>(endpoint: string, fallbackData: T, options?: RequestIn
         return fallbackData;
     }
 }
+
 
 export interface User {
     id: string;
