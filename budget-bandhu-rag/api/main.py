@@ -1,209 +1,103 @@
-"""
-BudgetBandhu Unified ML API
-Mobile-First + Agent + ML Integration
-Full Feature Set (Ditto app.py features)
-
-Author: Aryan & Tanuj
-version: 4.2 (Unified + Core Integration)
-"""
-import dotenv
-import os
-import sys
-
-# Load environment variables FIRST
-dotenv.load_dotenv(override=True)
-
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-import time
-import json
-import logging
-import traceback
-import threading
+import logging, sys
 
-
-# Add parent directory to path to allow running as script
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Fix Windows encoding issue for emojis
-if sys.platform == 'win32':
-    import io
-    if hasattr(sys.stdout, 'reconfigure'):
-        sys.stdout.reconfigure(encoding='utf-8')
-    if hasattr(sys.stderr, 'reconfigure'):
-        sys.stderr.reconfigure(encoding='utf-8')
-    # Backup for older Python versions
-    elif isinstance(sys.stdout, io.TextIOWrapper):
-        sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
-        sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding='utf-8')
-
-# Modules
-from api.database import Database
-from api.routes import user, transactions, chat, forecast, insights, ocr, dashboard, budget, goals, gamification, whatsapp, telegram
-from intelligence.phi3_rag import Phi3RAG
-
-# Core Components
-from core.agent_controller import AgentController
-from memory.memory_manager import MemoryManager
-from memory.conversation_manager import ConversationManager
-from database.mongo_manager import MongoManager
-
-# Ngrok support
-try:
-    from pyngrok import ngrok
-    NGROK_AVAILABLE = True
-except ImportError:
-    NGROK_AVAILABLE = False
-
-ENABLE_NGROK = os.getenv("ENABLE_NGROK", "True").lower() == "true"
-NGROK_PORT = 8000
-
-# Logging Setup
-os.makedirs("logs", exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s | %(levelname)-8s | %(name)-20s | %(message)s',
-    handlers=[
-        logging.FileHandler(f"logs/api_{int(time.time())}.log", encoding='utf-8'),
-        logging.StreamHandler(sys.stdout)
-    ]
+    format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger("BudgetBandhu")
 
-class RequestLogger:
-    @staticmethod
-    def log_request(endpoint: str, method: str, body: dict):
-        logger.info(f"[REQ] | {method} {endpoint}")
+import os
+import threading
+try:
+    from pyngrok import ngrok
+    from dotenv import load_dotenv
+    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+    load_dotenv(env_path)
+except ImportError:
+    pass
 
-    @staticmethod
-    def log_error(endpoint: str, error: Exception):
-        logger.error(f"[ERR] | {endpoint} | {str(error)}")
+RAG_STATIC_DOMAIN = "babylike-overtimorously-stacey.ngrok-free.dev"
 
 def start_ngrok():
-    if not ENABLE_NGROK or not NGROK_AVAILABLE: return
     try:
-        ngrok.kill()
-        url = ngrok.connect(NGROK_PORT).public_url
-        logger.info(f"[NGROK] Public URL: {url}")
+        from pyngrok import conf as pyngrok_conf
+        token = os.getenv("LORDAKJ05_GMAIL_COM_AUTHTOKEN")
+        if not token:
+            logger.warning("[NGROK] LORDAKJ05_GMAIL_COM_AUTHTOKEN not set — skipping tunnel")
+            return
+        # Use a dedicated config so this agent never shares a session with the ML backend
+        rag_root = os.path.dirname(os.path.dirname(__file__))
+        config_path = os.path.join(rag_root, "ngrok_rag.yml")
+        pyngrok_config = pyngrok_conf.PyngrokConfig(
+            config_path=config_path,
+            auth_token=token,
+        )
+        tunnel = ngrok.connect(
+            addr=8000,
+            domain=RAG_STATIC_DOMAIN,
+            pyngrok_config=pyngrok_config,
+        )
+        url = tunnel.public_url
+        logger.info(f"[NGROK] RAG tunnel active: {url}")
         with open("ngrok_url.txt", "w") as f:
             f.write(f"Public URL: {url}\n")
     except Exception as e:
-        logger.error(f"Ngrok failed: {e}")
+        logger.error(f"[NGROK] Failed to start RAG tunnel: {e}")
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup
-    logger.info("[START] Starting BudgetBandhu Unified API...")
-    await Database.connect()
-    
-    # Initialize Core Agent Components
-    try:
-        logger.info("[INIT] Initializing Agent Core...")
-        
-        # 1. Mongo Bridge (Reuse connection)
-        # We manually bridge api.database.client to MongoManager 
-        # so core components use the same connection
-        mongo_mgr = MongoManager(os.getenv("MONGO_URL", ""), os.getenv("DATABASE_NAME", "budget_bandhu"))
-        mongo_mgr.client = Database.client
-        mongo_mgr.db = Database.get_db()
-        
-        # Manually initialize collections because we skipped .connect()
-        mongo_mgr.users = mongo_mgr.db.users
-        mongo_mgr.memories = mongo_mgr.db.memories
-        mongo_mgr.conversations = mongo_mgr.db.conversations
-        mongo_mgr.messages = mongo_mgr.db.messages
-        mongo_mgr.transactions = mongo_mgr.db.transactions
-        
-        logger.info("[INIT] Mongo Manager Bridged & Collections Init")
-        
-        # 2. Managers
-        mem_mgr = MemoryManager(mongo_mgr)
-        conv_mgr = ConversationManager(mongo_mgr)
-        
-        # 3. Intelligence
-        phi3 = Phi3RAG(base_model="budget-bandhu")
-        
-        # 4. ML Models (Transactions)
-        logger.info("[INIT] ML functionality is decoupled, but UserAnomalyDetector is kept for personalized anomalies")
-        from intelligence.user_anomaly_detector import UserAnomalyDetector
-        uad = None
-        try:
-            uad = UserAnomalyDetector(models_dir="models/user_anomaly")
-        except Exception as e:
-            logger.error(f"[INIT] [ERR] User Anomaly Detector Load Failed: {e}")
-        transactions.set_ml_models(uad)
-        
-        # 5. Controller
-        agent_ctrl = AgentController(
-            phi3_rag=phi3,
-            memory_manager=mem_mgr,
-            conversation_manager=conv_mgr,
-            categorizer=None
-        )
-        
-        chat.set_agent_controller(agent_ctrl)
-        whatsapp.set_agent_controller(agent_ctrl)
-        telegram.set_agent_controller(agent_ctrl)
-        logger.info("[INIT] [OK] Agent Controller & ML Ready")
-    except Exception as e:
-        logger.error(f"[INIT] [ERR] Agent Init Failed: {e}")
-        logger.error(traceback.format_exc())
-    
-    # Start Ngrok Thread
-    if ENABLE_NGROK:
-        threading.Thread(target=start_ngrok, daemon=True).start()
-
-    yield
-    
-    # Shutdown
-    await Database.disconnect()
-    logger.info("[STOP] API Shutdown")
-
-app = FastAPI(
-    title="BudgetBandhu Unified API",
-    version="4.2",
-    lifespan=lifespan
-)
+app = FastAPI(title="BudgetBandhu API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"], allow_methods=["*"],
+    allow_headers=["*"], allow_credentials=True
 )
 
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    start = time.time()
-    response = await call_next(request)
-    duration = time.time() - start
-    logger.info(f"[OUT] {request.method} {request.url.path} | {response.status_code} | {duration:.3f}s")
-    return response
+# ── Route registrations ──────────────────────────────────────
+from api.routes.chat         import router as chat_router
+from api.routes.transactions import router as transactions_router
+from api.routes.dashboard    import router as dashboard_router
+from api.routes.goals        import router as goals_router
+from api.routes.budget       import router as budget_router
+from api.routes.insights     import router as insights_router
+from api.routes.literacy     import router as literacy_router
 
-# Routes
-app.include_router(user.router)
-app.include_router(transactions.router)
-app.include_router(chat.router)
-app.include_router(forecast.router)
-app.include_router(insights.router)
-app.include_router(ocr.router)
-app.include_router(dashboard.router)
-app.include_router(budget.router)
-app.include_router(goals.router)
-app.include_router(gamification.router)
-app.include_router(whatsapp.router)
-app.include_router(telegram.router)
+app.include_router(chat_router)
+app.include_router(transactions_router)
+app.include_router(dashboard_router)
+app.include_router(goals_router)
+app.include_router(budget_router)
+app.include_router(insights_router)
+app.include_router(literacy_router)
 
-@app.get("/")
-def root():
-    return {"message": "BudgetBandhu Unified API v4.2", "status": "active"}
 
+# ── Health ───────────────────────────────────────────────────
 @app.get("/health")
-def health():
+async def health():
     return {"status": "healthy", "mode": "unified_mobile_core"}
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)
+
+@app.get("/api/v1/health/db")
+async def health_db():
+    try:
+        from database.mongo_manager import MongoManager
+        db = MongoManager()
+        await db.connect()
+        colls = await db.db.list_collection_names()
+        await db.close()
+        return {"mongodb": "connected", "collections": colls}
+    except Exception as e:
+        return {"mongodb": "error", "detail": str(e)}
+
+
+# ── Startup: pre-warm AgentController ───────────────────────
+@app.on_event("startup")
+async def startup():
+    logger.info("[MAIN] Pre-warming AgentController...")
+    # Start ngrok in background
+    threading.Thread(target=start_ngrok, daemon=True).start()
+    from api.routes.chat import get_controller
+    get_controller()
+    logger.info("[MAIN] \u2705 Ready")

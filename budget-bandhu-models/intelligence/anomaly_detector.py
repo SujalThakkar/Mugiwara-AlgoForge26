@@ -460,9 +460,8 @@ class AnomalyDetector:
     def _check_velocity(self, txn, history: list) -> int:
         """
         Count debit transactions in the same 60-minute window.
-
-        FIX #3 — This method is only called when _has_time_column() is True,
-        so the guard below is a defensive fallback only.
+        Uses explicit transaction date and time to avoid treating same-day batch uploads
+        as high velocity.
         """
         txn_dt = _parse_dt(txn)
         if txn_dt is None:
@@ -472,12 +471,42 @@ class AnomalyDetector:
         txn_time = str(_get(txn, "time", "")).strip()
         if not txn_time or txn_time in {"00:00:00", "00:00"}:
             return 0
+            
+        # Parse full transaction datetime (date + time)
+        from datetime import datetime
+        try:
+            time_obj = datetime.strptime(txn_time, "%H:%M:%S").time()
+        except ValueError:
+            try:
+                time_obj = datetime.strptime(txn_time, "%H:%M").time()
+            except ValueError:
+                return 0
+                
+        full_txn_dt = datetime.combine(txn_dt.date(), time_obj)
 
         count = 0
         for h in history[-50:]:
+            h_id = _get(h, "transaction_id", "")
+            if h_id == _get(txn, "transaction_id", ""):
+                continue
+                
             if _is_credit(h):
                 continue  # only count debits toward velocity
+                
             h_dt = _parse_dt(h)
-            if h_dt and abs((txn_dt - h_dt).total_seconds()) <= 3_600:
-                count += 1
+            h_time = str(_get(h, "time", "")).strip()
+            if h_dt and h_time and h_time not in {"00:00:00", "00:00"}:
+                try:
+                    h_time_obj = datetime.strptime(h_time, "%H:%M:%S").time()
+                except ValueError:
+                    try:
+                        h_time_obj = datetime.strptime(h_time, "%H:%M").time()
+                    except ValueError:
+                        continue
+                        
+                full_h_dt = datetime.combine(h_dt.date(), h_time_obj)
+                
+                # Check if it was within 3600 seconds (1 hour) of the ACTUAL transaction date/time
+                if abs((full_txn_dt - full_h_dt).total_seconds()) <= 3_600:
+                    count += 1
         return count

@@ -1,4 +1,4 @@
-FROM E:\PICT Techfiesta\BudgetBandhu\budget-bandhu-ml\models\budget-bandhu-q4km.gguf
+FROM "E:\PICT Techfiesta\BudgetBandhu\budget-bandhu-rag\models\budget-bandhu-q4km.gguf"
 
 PARAMETER temperature 0.7
 PARAMETER top_p 0.9

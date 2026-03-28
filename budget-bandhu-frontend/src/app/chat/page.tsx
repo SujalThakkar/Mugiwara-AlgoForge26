@@ -12,6 +12,8 @@ import { useUserStore } from '@/lib/store/useUserStore';
 import { mlApi } from '@/lib/api/ml-api';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Quick Action Items
 const quickActions = [
@@ -175,11 +177,9 @@ export default function ChatPage() {
                                         : 'bg-slate-800 text-gray-100 rounded-tl-none border border-slate-700'
                                         }`}
                                 >
-                                    <div dangerouslySetInnerHTML={{
-                                        __html: message.content
-                                            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-emerald-300">$1</strong>')
-                                            .replace(/\n/g, '<br/>')
-                                    }} />
+                                    <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:mb-2 prose-ul:my-1 prose-li:my-0 text-current prose-strong:text-emerald-300">
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+                                    </div>
 
                                     <div className="flex items-center justify-end mt-2 gap-2 opacity-60">
                                         <span className="text-[10px]">

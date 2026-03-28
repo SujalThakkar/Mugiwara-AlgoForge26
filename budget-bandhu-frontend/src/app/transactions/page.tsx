@@ -9,7 +9,6 @@ import { AddTransactionModal } from "@/components/transactions/AddTransactionMod
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
 import { useUserStore } from "@/lib/store/useUserStore";
 import { useTransactions } from "@/lib/hooks/useMLApi";
-import { mockData } from "@/lib/api/mock-data";
 import { Search, Plus, Mic, Download, Camera, Upload, AlertTriangle, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
@@ -48,11 +47,7 @@ export default function TransactionsPage() {
         refetch,
     } = useTransactions(activeUserId);
 
-    // Use API data if available. Only use mock data if using DEMO ID and no API data found.
-    const shouldUseRealData = activeUserId !== DEMO_USER_ID || apiTransactions.length > 0;
-
-    const transactions = shouldUseRealData
-        ? apiTransactions.map(t => ({
+    const transactions = apiTransactions.map(t => ({
             id: t.id,
             date: t.date,
             merchant: t.description,
@@ -63,9 +58,10 @@ export default function TransactionsPage() {
             notes: t.notes || '',
             isAnomaly: t.is_anomaly,
             anomalySeverity: t.anomaly_severity,
+            anomalyReason: t.anomaly_reason,
+            anomalyScore: t.anomaly_score,
             categoryConfidence: t.category_confidence
-        }))
-        : mockData.transactions;
+        }));
 
     const filteredTransactions = transactions.filter(txn =>
         txn.merchant.toLowerCase().includes(searchTerm.toLowerCase()) ||

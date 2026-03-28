@@ -3,11 +3,8 @@
 import { Bell, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useConfigStore } from "@/lib/store/useConfigStore";
 
 export function Header() {
-    const { isMockMode } = useConfigStore();
-
     return (
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6">
             {/* Search Bar */}
@@ -22,15 +19,7 @@ export function Header() {
                 </div>
             </div>
 
-            {/* Right Actions */}
             <div className="flex items-center gap-3">
-                {/* Mock Mode Indicator (subtle) */}
-                {isMockMode && (
-                    <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-lavender-50 rounded-lg">
-                        <div className="w-2 h-2 bg-lavender-500 rounded-full animate-pulse" />
-                        <span className="text-xs font-medium text-lavender-700">Demo Mode</span>
-                    </div>
-                )}
 
                 {/* Notifications */}
                 <Button variant="ghost" size="icon" className="relative">

@@ -14,6 +14,47 @@ log        = logging.getLogger("budgetbandhu")
 START_TIME = time.time()
 
 
+import os
+import threading
+try:
+    from pyngrok import ngrok
+    from dotenv import load_dotenv
+    # Load ML's own .env first (if present), then fall back to RAG .env for shared secrets
+    ml_env = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+    rag_env = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "budget-bandhu-rag", ".env")
+    load_dotenv(rag_env)   # load shared secrets (both ngrok tokens)
+    load_dotenv(ml_env, override=True)   # ML-specific overrides win
+except ImportError:
+    pass
+
+ML_STATIC_DOMAIN = "unoperated-merideth-sparklike.ngrok-free.dev"
+
+def start_ngrok():
+    try:
+        from pyngrok import conf as pyngrok_conf
+        token = os.getenv("ARYAN_LOMTE_SOMAIYA_EDU_AUTHTOKEN")
+        if not token:
+            log.warning("[NGROK] ARYAN_LOMTE_SOMAIYA_EDU_AUTHTOKEN not set — skipping tunnel")
+            return
+        # Use a dedicated config so this agent never shares a session with the RAG backend
+        ml_root = os.path.dirname(os.path.dirname(__file__))
+        config_path = os.path.join(ml_root, "ngrok_ml.yml")
+        pyngrok_config = pyngrok_conf.PyngrokConfig(
+            config_path=config_path,
+            auth_token=token,
+        )
+        tunnel = ngrok.connect(
+            addr=8001,
+            domain=ML_STATIC_DOMAIN,
+            pyngrok_config=pyngrok_config,
+        )
+        url = tunnel.public_url
+        log.info(f"[NGROK] ML tunnel active: {url}")
+        with open("ngrok_url.txt", "w") as f:
+            f.write(f"Public URL: {url}\n")
+    except Exception as e:
+        log.error(f"[NGROK] Failed to start ML tunnel: {e}")
+
 # ── Lifespan — warm up all models on startup ──────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,6 +68,9 @@ async def lifespan(app: FastAPI):
     log.info(f"  All healthy: {health['all_healthy']}")
     log.info(f"  Active    : {health.get('models_active', [])}")
     log.info("=" * 60)
+    
+    threading.Thread(target=start_ngrok, daemon=True).start()
+    
     yield
     log.info("ML Microservice shutting down.")
 
@@ -103,11 +147,11 @@ async def root():
         "docs":     "/docs",
         "health":   "/health",
         "endpoints": [
-            "POST /api/ml/process-csv",
-            "POST /api/ml/categorize",
-            "POST /api/ml/anomaly/detect",
-            "POST /api/ml/forecast",
-            "POST /api/ml/budget/optimize",
-            "GET  /api/ml/health",
+            "POST /ml/analyze",
+            "POST /ml/categorize",
+            "POST /ml/anomalies",
+            "POST /ml/forecast",
+            "POST /ml/budget/optimize",
+            "GET  /ml/health",
         ]
     }

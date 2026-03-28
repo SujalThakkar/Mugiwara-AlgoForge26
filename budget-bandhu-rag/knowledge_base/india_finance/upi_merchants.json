@@ -1,0 +1,67 @@
+{
+  "document_id": "upi_merchants_v3",
+  "source": "india_finance",
+  "category": "digital_payments",
+  "chunks": [
+    {
+      "id": "upi_apps",
+      "text": "Popular UPI Apps in India: PhonePe — 47% market share, backed by Walmart. Google Pay (GPay) — 35% market share, no transaction fee. Paytm — wallet + UPI, IPO listed. BHIM UPI — NPCI's official app, works on all bank accounts. Amazon Pay — UPI + wallet. WhatsApp Pay — integrated in WhatsApp, up to ₹1L/day. Daily transaction limit: ₹1 lakh standard, ₹2 lakh for verified accounts, ₹5 lakh for merchant/verified. No charges for peer-to-peer.",
+      "tags": [
+        "PhonePe",
+        "GPay",
+        "Paytm",
+        "BHIM",
+        "UPI",
+        "digital payment",
+        "transaction limit"
+      ]
+    },
+    {
+      "id": "upi_categories",
+      "text": "Common UPI Payment Categories and Merchants: Food & Dining — Swiggy, Zomato, Dominos, KFC. Transport — Ola, Uber, Rapido, Metro QR, RedBus, IRCTC. Groceries — BigBasket, Blinkit, Zepto, DMart. Entertainment — BookMyShow, PVR, Zee5, Hotstar. Shopping — Amazon, Flipkart, Myntra, Nykaa. Recharge — Jio, Airtel, Vi, BSNL. Fuel — IOCL, BPCL, HPCL petrol pumps. Medical — Apollo, 1mg, Netmeds. Finance — Zerodha, Groww, SBI mutual funds.",
+      "tags": [
+        "Swiggy",
+        "Zomato",
+        "Ola",
+        "Uber",
+        "BigBasket",
+        "Blinkit",
+        "Zepto",
+        "Amazon",
+        "Flipkart",
+        "Myntra",
+        "Zerodha",
+        "Groww",
+        "categories"
+      ]
+    },
+    {
+      "id": "digital_wallet",
+      "text": "Digital Wallets & Prepaid Cards in India: Paytm Wallet — KYC required for > ₹10,000 balance. Amazon Pay — linked to Amazon account, cashback on purchases. PhonePe Wallet — for merchants. Prepaid cards: Niyo (forex), Fi Money (zero forex markup abroad), Jupiter (savings account + debit). Full KYC wallets: up to ₹1L balance. Load limits: ₹50,000/month. Use for: quick transactions, online shopping where UPI not accepted, expense tracking.",
+      "tags": [
+        "Paytm",
+        "Amazon Pay",
+        "digital wallet",
+        "KYC",
+        "prepaid",
+        "Niyo",
+        "Fi Money",
+        "Jupiter"
+      ]
+    },
+    {
+      "id": "upi_fraud_safety",
+      "text": "UPI Fraud Prevention: Never share UPI PIN or OTP — no bank/payment app asks for it. Collect request scam — fraudster sends collect request, you pay instead of receiving. QR code scam — scanning unknown QR codes causes payment outflow, not inflow. Customer care fraud — fake customer care numbers on Google. Steps if defrauded: report to bank within 3 days for zero liability, file complaint on NPCI portal, cybercrime.gov.in, or call 1930 (Cyber Helpline). RBI mandate: report within 3 working days.",
+      "tags": [
+        "UPI fraud",
+        "scam",
+        "OTP",
+        "QR code",
+        "collect request",
+        "1930",
+        "cybercrime",
+        "safety"
+      ]
+    }
+  ]
+}

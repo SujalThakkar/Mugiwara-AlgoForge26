@@ -4,12 +4,12 @@ from datetime import date
 
 
 class Transaction(BaseModel):
-    transaction_id: str
-    date: str
+    transaction_id: Optional[str] = "txn_0"
+    date: Optional[str] = ""
     description: str
     amount: float
-    transaction_type: str  # Debit | Credit
-    balance: float
+    transaction_type: Optional[str] = "Debit"  # Debit | Credit
+    balance: Optional[float] = 0.0
     category: Optional[str] = None
 
 class CategoryResult(BaseModel):
@@ -97,8 +97,21 @@ class CategorizeRequest(BaseModel):
 
 class AnomalyRequest(BaseModel):
     transactions: list[Transaction]
-    history: list[Transaction]
+    history: Optional[list[Transaction]] = []
 
 class ForecastRequest(BaseModel):
     daily_history: list[DailySpend]
     days_ahead: int = 7
+
+
+class TransactionForecastRequest(BaseModel):
+    """Accepts raw transactions and converts to daily spend internally."""
+    user_id: str = "anonymous"
+    transactions: list[dict] = []
+    income: float = 50000
+
+
+class GoalEtaRequest(BaseModel):
+    """Request for per-goal ETA calculation."""
+    goal: dict  # {target_amount, current_amount, target_date}
+    transactions: list[dict] = []  # last 60 days of transactions

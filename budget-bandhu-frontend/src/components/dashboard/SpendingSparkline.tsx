@@ -9,6 +9,13 @@ interface SpendingSparklineProps {
 }
 
 export function SpendingSparkline({ data }: SpendingSparklineProps) {
+    if (!data || data.length === 0) {
+        return (
+            <div className="flex items-center justify-center h-[420px] bg-gray-100 rounded-3xl border border-gray-200">
+                <p className="text-gray-500 font-medium">Accumulating spending data...</p>
+            </div>
+        );
+    }
     const firstValue = data[0]?.amount || 0;
     const lastValue = data[data.length - 1]?.amount || 0;
     const percentChange = ((lastValue - firstValue) / firstValue) * 100;

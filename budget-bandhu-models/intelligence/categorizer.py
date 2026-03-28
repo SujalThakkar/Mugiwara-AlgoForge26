@@ -12,8 +12,9 @@ RULE_KEYWORDS = {
                           "biryani","dunzo","blinkit food","fassos","box8",
                           "haldiram","behrouz","eatfit","subway"],
     "Transport":         ["uber","ola","irctc","rapido","metro","bus","train",
-                          "cab","taxi","petrol","fuel","redbus","yulu","vogo",
-                          "indrive","meru","blusmart","dmrc","bmtc","best bus"],
+                          "cab","taxi","petrol","fuel","hpcl","bpcl","indianoil",
+                          "redbus","yulu","vogo","indrive","meru","blusmart",
+                          "dmrc","bmtc","best bus"],
     "Shopping":          ["amazon","flipkart","myntra","meesho","nykaa","ajio",
                           "snapdeal","croma","reliance digital","decathlon",
                           "tata cliq","shopclues","h&m","zara","lifestyle"],
@@ -34,10 +35,13 @@ RULE_KEYWORDS = {
                           "treebo","fabhotel","akasaair"],
     "Groceries":         ["bigbasket","dmart","jiomart","zepto","blinkit",
                           "grocery","sabzi","kirana","milk","vegetables",
-                          "spencer","reliance fresh","milkbasket","zepto"],
+                          "spencer","reliance fresh","milkbasket","dunzo"],
     "Transfers & ATM":   ["upi/","neft","atm","imps","rtgs","transfer",
                           "send money","withdrawal","wallet load","rent",
                           "phonepe","gpay","paytm"],
+    "Investments":       ["zerodha","groww","upstox","angel one","angelone",
+                          "5paisa","kuvera","smallcase","indmoney","et money",
+                          "trading"],
 }
 
 
@@ -122,31 +126,40 @@ class TransactionCategorizer:
     # ── Public API ────────────────────────────────────────────────────
     def categorize(self, description: str) -> CategoryResult:
         """
-        Categorise a single description.
-
-        Args:
-            description: raw UPI description string
-        Returns:
-            CategoryResult
+        Categorise a single description using Hybrid approach (Rules -> ML).
         """
+        res = self._rule_categorize(description)
+        # If rules found a confident match, return it
+        if res.confidence > 0.30:
+            return res
+            
+        # Otherwise fallback to ML if loaded
         if self._loaded:
             return self._ml_categorize([description])[0]
-        return self._rule_categorize(description)
+            
+        return res
 
     def categorize_batch(self, descriptions: list[str]) -> list[CategoryResult]:
         """
-        Categorise a batch efficiently (GPU-batched encoding).
-
-        Args:
-            descriptions: list of raw UPI strings
-        Returns:
-            list[CategoryResult]
+        Categorise a batch efficiently using Hybrid approach (Rules -> batched ML for misses).
         """
         if not descriptions:
             return []
+            
+        results = [self._rule_categorize(d) for d in descriptions]
+        
         if self._loaded:
-            return self._ml_categorize(descriptions)
-        return [self._rule_categorize(d) for d in descriptions]
+            # Gather indices where rules failed to find a match (low confidence defaults)
+            to_ml_idx = [i for i, r in enumerate(results) if r.confidence <= 0.30]
+            
+            if to_ml_idx:
+                ml_descs = [descriptions[i] for i in to_ml_idx]
+                ml_results = self._ml_categorize(ml_descs)
+                # Drop in ML results for failed rules
+                for ml_i, orig_i in enumerate(to_ml_idx):
+                    results[orig_i] = ml_results[ml_i]
+                    
+        return results
 
     # ── ML path ──────────────────────────────────────────────────────
     def _ml_categorize(self, descriptions: list[str]) -> list[CategoryResult]:

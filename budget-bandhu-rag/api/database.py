@@ -9,9 +9,10 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Optional
 import os
 
-# MongoDB Configuration
-MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
-DATABASE_NAME = os.getenv("DATABASE_NAME", "budget_bandhu")
+from dotenv import load_dotenv
+load_dotenv()
+MONGO_URL = os.environ.get("MONGODB_ATLAS_URI")
+DATABASE_NAME = os.environ.get("MONGODB_DATABASE", "budget_bandhu")
 
 
 class Database:
@@ -22,8 +23,9 @@ class Database:
     @classmethod
     async def connect(cls):
         """Connect to MongoDB"""
+        import certifi
         print(f"[DATABASE] Connecting to MongoDB at {MONGO_URL}...")
-        cls.client = AsyncIOMotorClient(MONGO_URL)
+        cls.client = AsyncIOMotorClient(MONGO_URL, tlsCAFile=certifi.where())
         
         # Verify connection
         try:

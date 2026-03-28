@@ -1,789 +1,622 @@
 """
-Agent Controller - The Sovereign Authority (Enhanced with Conversation Support)
-Controls the entire agentic lifecycle with multi-turn conversation tracking.
-
-Features:
-- 9-step agentic workflow
-- Multi-turn conversation history
-- Session management
-- Memory retrieval (episodic + semantic)
-- Validation gating
-- Conservative learning
-- Full conversation context
-
-Author: Aryan Lomte
-Date: Jan 16, 2026
-Version: 2.0.0
+core/agent_controller.py — Single source of truth for all chat logic.
 """
-from typing import Dict, Optional, List
+import logging, re, asyncio
+from typing import Dict, Any
 from datetime import datetime
-import uuid
 
-from memory.memory_manager import MemoryManager
-from memory.conversation_manager import ConversationManager
-from intelligence.phi3_rag import Phi3RAG
-from core.gating import GatingSystem
-import re
-from api.database import Database
+logger = logging.getLogger("BudgetBandhu")
+
+# ── Canonical imports ────────────────────────────────────────
+from intelligence.phi3_rag           import Phi3RAG
+from intelligence.ml_client          import MLClient
+from memory.conversation_manager     import ConversationManager
+from memory.episodic_memory          import EpisodicMemoryStore
+from memory.semantic_memory          import SemanticMemoryStore
+from memory.working_memory           import WorkingMemoryStore
+from memory.procedural_memory        import ProceduralMemoryStore
+from memory.trajectory_memory        import TrajectoryMemoryStore
+from memory.cognitive_memory_manager import CognitiveMemoryManager
+from memory.knowledge_graph          import KnowledgeGraphStore
+from database.mongo_manager          import MongoManager
+from core.gating                     import GatingSystem
+from rag.query_router                import QueryRouter
+from rag.hybrid_retriever            import HybridRetriever
+from rag.crag_evaluator              import CRAGEvaluator
+from rag.reranker                    import HeuristicReranker
+from rag.self_rag                    import SelfRAGEvaluator
+from models.schemas                  import QueryIntent
 
 
 class AgentController:
-    """
-    Enhanced agent controller with conversation history support.
-    
-    The controller decides:
-    - When to speak
-    - When to warn vs advise
-    - When learning is permitted
-    - What enters memory
-    - How conversation history affects context
-    
-    The LLM never makes these decisions.
-    """
-    
-    def __init__(
-        self,
-        phi3_rag: Phi3RAG,
-        memory_manager: MemoryManager,
-        conversation_manager: ConversationManager,
-        gating_system: Optional[GatingSystem] = None,
-        categorizer = None
-    ):
-        """
-        Initialize agent controller with all required managers.
-        
-        Args:
-            phi3_rag: Phi-3.5 RAG intelligence component
-            memory_manager: Memory operations manager (episodic + semantic)
-            conversation_manager: Conversation history manager
-            gating_system: Validation gates (optional, uses default if None)
-            categorizer: Transaction categorization engine (optional)
-        """
-        self.phi3 = phi3_rag
-        self.memory = memory_manager
-        self.conversation = conversation_manager
-        self.gating = gating_system or GatingSystem()
-        self.categorizer = categorizer
-        
-        # Statistics tracking
-        self.stats = {
-            'total_turns': 0,
-            'successful_turns': 0,
-            'failed_gates': 0,
-            'memories_used': 0
-        }
-        
-        print("[AGENT] Agent Controller initialized with conversation support")
-    
-    async def execute_turn(
-        self,
-        user_id: str,
-        query: str,
-        session_id: Optional[str] = None
-    ) -> Dict:
-        """
-        Execute one conversation turn with full agentic workflow.
-        
-        The immutable 9-step lifecycle:
-        
-        STEP 1: Input normalization
-        STEP 2: Session management (create/resume)
-        STEP 3: Memory retrieval (episodic + semantic)
-        STEP 4: Conversation history retrieval (multi-turn context)
-        STEP 5: Context reconstruction (memory + history)
-        STEP 6: Model reasoning (Phi-3.5 proposes)
-        STEP 7: Controller gating (validation)
-        STEP 8: Response delivery + storage
-        STEP 9: Observation & learning evaluation
-        
-        Args:
-            user_id: User identifier
-            query: User's question/command
-            session_id: Optional conversation session ID (creates new if None)
-        
-        Returns:
-            {
-                'response': str,              # Final response to user
-                'session_id': str,            # Session identifier
-                'confidence': float,          # Model confidence (0-1)
-                'memory_used': {              # Memory context used
-                    'episodic_count': int,
-                    'semantic_count': int
-                },
-                'conversation_turns': int,    # Number of turns in session
-                'gates_passed': bool,         # Validation result
-                'metadata': {                 # Additional metadata
-                    'latency_seconds': float,
-                    'model': str,
-                    'timestamp': str
-                }
-            }
-        """
-        self.stats['total_turns'] += 1
-        print(f"\n[AGENT] ===== NEW TURN for user {user_id} =====")
-        
-        # ================================================================
-        # STEP 1: Input normalization
-        # ================================================================
-        normalized_query = self._normalize_input(query)
-        print(f"[AGENT] Step 1: Normalized query: {normalized_query}")
-        
-        # Check Intent (Transaction Override)
-        intent_result = await self._check_intent_and_execute(user_id, normalized_query)
-        if intent_result:
-             print(f"[AGENT] Intent Tool Executed: {intent_result}")
-             # We assume session management handles this or we just skip standard flow
-             # Ideally trigger session logic too?
-             if not session_id:
-                 session_id = await self.conversation.create_session(user_id)
-                 
-             await self.conversation.add_message(session_id, 'user', query)
-             await self.conversation.add_message(session_id, 'assistant', intent_result)
-             
-             return {
-                 'response': intent_result,
-                 'session_id': session_id,
-                 'confidence': 1.0,
-                 'gates_passed': True,
-                 'metadata': {'model': 'rule_based_intent'},
-                 'conversation_turns': 1,
-                 'memory_used': {'total_memories': 0}
-             }
-        
-        # ================================================================
-        # STEP 2: Session management
-        # ================================================================
-        # ================================================================
-        # STEP 2: Session management
-        # ================================================================
-        # Treat 'default' or empty string as no session
-        if not session_id or session_id == 'default':
-            # Try to recover last active session for this user first
-            existing_sessions = await self.conversation.get_user_sessions(str(user_id))
-            if existing_sessions:
-                session_id = existing_sessions[0]
-                print(f"[AGENT] Step 2: Resumed last active session {session_id}")
-            else:
-                session_id = await self.conversation.create_session(str(user_id))
-                print(f"[AGENT] Step 2: Created new session {session_id}")
-        else:
-            print(f"[AGENT] Step 2: Continuing session {session_id}")
-        
-        # Store user message in conversation history
-        await self.conversation.add_message(session_id, 'user', query)
-        
-        # ================================================================
-        # STEP 3: Memory retrieval
-        # ================================================================
-        memory_context = await self.memory.get_user_memories(user_id)
-        episodic_count = len(memory_context.get('episodic', []))
-        semantic_count = len(memory_context.get('semantic', []))
-        total_memories = episodic_count + semantic_count
-        
-        self.stats['memories_used'] += total_memories
-        
-        print(f"[AGENT] Step 3: Retrieved {episodic_count} episodic + {semantic_count} semantic = {total_memories} memories")
-        
-        # ================================================================
-        # STEP 4: Conversation history retrieval
-        # ================================================================
-        conversation_history = await self.conversation.build_context_from_history(
-            session_id,
-            max_messages=6  # Last 3 turns (3 user + 3 assistant messages)
-        )
-        print(f"[AGENT] Step 4: Retrieved {len(conversation_history)} messages from conversation history")
-        
-        # ================================================================
-        # STEP 5: Context reconstruction
-        # ================================================================
-        reconstructed_context = self._reconstruct_context(
-            normalized_query,
-            memory_context,
-            conversation_history
-        )
-        print(f"[AGENT] Step 5: Context reconstructed for LLM")
-        
-        # ================================================================
-        # STEP 6: Model reasoning (Phi-3.5 proposes)
-        # ================================================================
-        proposed_response = self.phi3.process({
-            'query': normalized_query,
-            'context': reconstructed_context,
-            'max_length': 400,
-            'temperature': 0.7
-        })
-        print(f"[AGENT] Step 6: Phi-3.5 proposed response")
-        
-        # ================================================================
-        # STEP 7: Controller gating
-        # ================================================================
-        gate_result = self.gating.validate(
-            response=proposed_response['result'],
-            memory_context=memory_context,
-            query=normalized_query
-        )
-        
-        passed_gates = gate_result['passed']
-        print(f"[AGENT] Step 7: Gates {'PASSED ✅' if passed_gates else 'FAILED ❌'}")
-        
-        if not passed_gates:
-            self.stats['failed_gates'] += 1
-            print(f"[AGENT] Failed gates: {gate_result['failed_gates']}")
-            final_response = gate_result['modified_response']
-        else:
-            self.stats['successful_turns'] += 1
-            final_response = proposed_response['result']
-        
-        # ================================================================
-        # STEP 8: Response delivery + storage
-        # ================================================================
-        response_obj = {
-            'response': final_response,
-            'session_id': session_id,
-            'confidence': proposed_response['confidence'],
-            'memory_used': {
-                'episodic_count': episodic_count,
-                'semantic_count': semantic_count,
-                'total_memories': total_memories
-            },
-            'conversation_turns': len(conversation_history) // 2,  # Pairs of messages
-            'gates_passed': passed_gates,
-            'failed_gates': gate_result.get('failed_gates', []) if not passed_gates else [],
-            'metadata': {
-                'latency_seconds': proposed_response.get('metadata', {}).get('latency_seconds'),
-                'model': proposed_response.get('metadata', {}).get('model', 'budget-bandhu'),
-                'timestamp': datetime.now().isoformat(),
-                'tokens_generated': proposed_response.get('metadata', {}).get('tokens_generated')
-            }
-        }
-        
-        # Store assistant message in conversation history
-        await self.conversation.add_message(
-            session_id,
-            'assistant',
-            final_response,
-            confidence=proposed_response['confidence'],
-            metadata=response_obj['metadata']
-        )
-        
-        print(f"[AGENT] Step 8: Response delivered and stored")
-        
-        # ================================================================
-        # STEP 9: Observation & learning evaluation
-        # ================================================================
-        observation = self._observe_interaction(user_id, query, response_obj)
-        await self._evaluate_learning(user_id, observation, memory_context)
-        print(f"[AGENT] Step 9: Observation & learning complete")
-        
-        print(f"[AGENT] ===== TURN COMPLETE =====\n")
-        return response_obj
-        
-        print(f"[AGENT] ===== TURN COMPLETE =====\n")
-        return response_obj
-    
-    def _normalize_input(self, query: str) -> str:
-        """
-        Clean and normalize user input.
-        
-        Operations:
-        - Remove extra whitespace
-        - Strip leading/trailing spaces
-        - Basic sanitization
-        
-        Args:
-            query: Raw user input
-        
-        Returns:
-            Normalized query string
-        """
-        # Remove extra whitespace
-        normalized = " ".join(query.split())
-        
-        # Strip and return
-        return normalized.strip()
-    
-    def _reconstruct_context(
-        self,
-        query: str,
-        memory_context: Dict,
-        conversation_history: List[Dict]
-    ) -> Dict:
-        """
-        Enhanced context reconstruction with conversation history.
-        
-        Combines multiple context sources:
-        1. User query (current input)
-        2. Episodic memory (events/transactions from DB)
-        3. Semantic memory (user profile/facts from DB)
-        4. Conversation history (last N turns from current session)
-        
-        This is the RAG reconstruction step that builds the full context
-        for the LLM to generate a response.
-        
-        Args:
-            query: Normalized user query
-            memory_context: Dict with 'episodic' and 'semantic' lists
-            conversation_history: List of previous messages in session
-        
-        Returns:
-            Reconstructed context dict for RAG prompt building
-        """
-        return {
-            'query': query,
-            'episodic': memory_context.get('episodic', []),
-            'semantic': memory_context.get('semantic', []),
-            'conversation_history': conversation_history
-        }
-    
-    def _observe_interaction(
-        self,
-        user_id: int,
-        query: str,
-        response: Dict
-    ) -> Dict:
-        """
-        Log interaction for potential learning.
-        
-        Creates observation object that tracks:
-        - User query and system response
-        - Confidence and gate results
-        - Timestamp and user ID
-        - Friction detection placeholder
-        
-        Args:
-            user_id: User identifier
-            query: User's query
-            response: System response object
-        
-        Returns:
-            Observation object for learning evaluation
-        """
-        return {
-            'user_id': user_id,
-            'query': query,
-            'response': response,
-            'timestamp': datetime.now().isoformat(),
-            'friction_detected': False,  # Updated via user feedback API
-            'gates_passed': response['gates_passed']
-        }
-    
-    async def _evaluate_learning(
-        self,
-        user_id: str,
-        observation: Dict,
-        memory_context: Dict
-    ):
-        """
-        Learning evaluation - CONSERVATIVE and DELAYED.
-        
-        Only store episodic memory if:
-        1. Explicit friction detected (user correction, ignored advice)
-        2. Repetition confirmed (same query multiple times)
-        3. Pattern identified (behavioral insights)
-        
-        NO INSTANT LEARNING - requires validation.
-        
-        Args:
-            user_id: User identifier
-            observation: Interaction observation object
-            memory_context: Current memory context
-        """
-        # Check for friction signals
-        if observation.get('friction_detected'):
-            # Store episodic memory for corrections
-            await self.memory.store_episodic_memory(
-                user_id,
-                event_summary=f"User correction on query: {observation['query'][:50]}",
-                trigger_type='correction',
-                metadata={
-                    'friction': True,
-                    'original_response': observation['response']['response'][:100]
-                }
+
+    def __init__(self):
+        logger.info("[AGENT] Initializing...")
+
+        self.rag  = Phi3RAG()
+        self.ml   = MLClient()
+        self.db   = MongoManager()
+
+        # RAG pipeline must init embed_fn first
+        _atlas = self.db.get_motor_db()
+        _embed = self.rag.embed_fn
+
+        # Memory stores
+        self.conversation = ConversationManager(_atlas)
+        self.episodic     = EpisodicMemoryStore(_atlas, _embed)
+        self.semantic     = SemanticMemoryStore(_atlas, _embed)
+        self.working      = WorkingMemoryStore("working_memory.db")
+        self.procedural   = ProceduralMemoryStore(_atlas)
+        self.trajectory   = TrajectoryMemoryStore(_atlas)
+        self.cognitive    = CognitiveMemoryManager("cognitive.db", _atlas, _embed)
+        self.knowledge    = KnowledgeGraphStore(_atlas)
+
+        self.gating       = GatingSystem()
+
+        self.query_router = QueryRouter(embedding_fn=_embed)
+        self.retriever    = HybridRetriever(atlas_db=_atlas, embedding_fn=_embed)
+        self.crag         = CRAGEvaluator(embedding_fn=_embed)
+        self.reranker     = HeuristicReranker()
+        self.self_rag     = SelfRAGEvaluator()
+
+        logger.info("[AGENT] \u2705 Ready \u2014 all memory + RAG pipeline loaded")
+
+
+    # ────────────────────────────────────────────────────────────
+    # PUBLIC ENTRY POINT
+    # ────────────────────────────────────────────────────────────
+    async def execute_turn(self, user_id: str, query: str,
+                           session_id: str = "default",
+                           context: Dict = {}) -> Dict[str, Any]:
+
+        logger.info(f"[AGENT] ===== NEW TURN for user {user_id} =====")
+
+        if not query or not query.strip():
+            return self._safe_response(
+                "I'm Bandhu, your financial assistant. "
+                "I can help with budgets, expenses, savings, and investments. "
+                "Could you rephrase your question?",
+                session_id, gates_passed=False
             )
-            print(f"[AGENT] Learning: Stored episodic memory due to friction")
-        
-        # --- ENABLE ACTIVE LEARNING ---
-        
-        query_lower = observation['query'].lower()
-        
-        # 1. Semantic Extraction: Salary / Income
-        if "salary" in query_lower or "income" in query_lower:
-            match = re.search(r"(salary|income)\s+(?:is|of)?\s+(\d+(?:k|000)?)", query_lower)
-            if match:
-                value = match.group(2)
-                await self.memory.store_semantic_memory(
-                    user_id,
-                    attribute_type="income",
-                    value=value,
-                    confidence=0.9
-                )
-                print(f"[AGENT] Learning: Stored semantic memory (Income: {value})")
 
-        # 2. Episodic Extraction: Significant Purchases (> 10k)
-        # We already store transactions in DB, but let's store "Major Events" in memory
-        match = re.search(r"(spent|bought|paid|kharch)\s+(?:a\s+)?(.+?)\s+(?:on|for)\s+(.+)", query_lower)
-        if match:
-             amount_str = match.group(2).strip()
-             item = match.group(3).strip()
-             amount = self._parse_indian_amount(amount_str)
-             
-             if amount and amount > 10000: # Only significant events > 10k
-                 await self.memory.store_episodic_memory(
-                     user_id,
-                     event_summary=f"Major Purchase: {item.title()} for ₹{amount}",
-                     trigger_type='large_expense',
-                     metadata={'amount': amount, 'item': item}
-                 )
-                 print(f"[AGENT] Learning: Stored episodic memory (Major Expense)")
+        q = query.strip()
+        logger.info(f"[AGENT] Step 1: Normalized query: {q}")
 
-        # Check for gate failures (potential learning opportunity)
-        if not observation.get('gates_passed'):
-            print(f"[AGENT] Learning: Gate failure recorded for future analysis")
-    
-    def get_session_summary(self, session_id: str) -> Dict:
-        """
-        Get summary of conversation session.
-        
-        Useful for:
-        - Analytics and debugging
-        - Session review
-        - User history display
-        
-        Args:
-            session_id: Conversation session identifier
-        
-        Returns:
-            {
-                'session_id': str,
-                'total_messages': int,
-                'total_turns': int,
-                'started_at': str (ISO timestamp),
-                'last_activity': str (ISO timestamp),
-                'messages': List[Dict]
-            }
-        """
-        history = self.conversation.get_conversation_history(session_id)
-        
-        return {
-            'session_id': session_id,
-            'total_messages': len(history),
-            'total_turns': len(history) // 2,
-            'started_at': history[0]['timestamp'] if history else None,
-            'last_activity': history[-1]['timestamp'] if history else None,
-            'messages': history
-        }
-    
-    def end_session(self, session_id: str):
-        """
-        Mark a conversation session as ended.
-        
-        Args:
-            session_id: Session to end
-        """
-        self.conversation.end_session(session_id)
-        print(f"[AGENT] Session {session_id} ended")
-    
-    def get_stats(self) -> Dict:
-        """
-        Get agent performance statistics.
-        
-        Returns:
-            {
-                'total_turns': int,
-                'successful_turns': int,
-                'failed_gates': int,
-                'success_rate': float,
-                'memories_used': int,
-                'avg_memories_per_turn': float
-            }
-        """
-        total = self.stats['total_turns']
-        
-        return {
-            'total_turns': total,
-            'successful_turns': self.stats['successful_turns'],
-            'failed_gates': self.stats['failed_gates'],
-            'success_rate': self.stats['successful_turns'] / max(total, 1),
-            'memories_used': self.stats['memories_used'],
-        }
-
-    def _parse_indian_amount(self, amount_str: str) -> Optional[float]:
-        """
-        Parse Indian number formats like:
-        - "5000", "50.5" (numeric)
-        - "50k", "50K" (thousands)
-        - "1 lakh", "a lakh", "1.5 lakh", "one lakh" (lakhs)
-        - "2 crore", "2.5 crores" (crores)
-        """
-        amount_str = amount_str.lower().strip()
-        
-        # Direct number
+        # Step 2: Conversation save (non-blocking)
+        turns = 0
         try:
-            return float(amount_str)
-        except ValueError:
-            pass
-        
-        # Multiplier patterns
-        multipliers = {
-            'k': 1000,
-            'thousand': 1000,
-            'lakh': 100000,
-            'lakhs': 100000,
-            'lac': 100000,
-            'crore': 10000000,
-            'crores': 10000000,
-            'cr': 10000000,
+            await self.conversation.add_message(session_id, 'user', q)
+            turns = await self.conversation.get_turn_count(session_id)
+            logger.info(f"[AGENT] Step 2: Continuing session {session_id}")
+        except Exception as e:
+            logger.warning(f"[AGENT] Conversation save skipped: {e}")
+
+            # Use the new lightweight check_query method
+            gate = self.gating.check_query(q)
+            if not gate.get("passed", True):
+                return self._safe_response(
+                    gate.get("message", "I can only help with financial topics."),
+                    session_id, gates_passed=False
+                )
+        except Exception as e:
+            logger.warning(f"[AGENT] Gating skipped: {e}")
+            # Non-blocking — continue even if gating fails
+
+        # Step 4: Fetch UNIFIED memory context (parallel, non-blocking)
+        intent_map = {
+            "transaction":  QueryIntent.SIMPLE_LOOKUP,
+            "question":     QueryIntent.FULL_ADVISORY,
+            "goal_setting": QueryIntent.GOAL_PLANNING,
+            "goal_query":   QueryIntent.GOAL_PLANNING,
         }
-        
-        # Word to number mapping
-        word_to_num = {
-            'a': 1, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-            'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
-            'half': 0.5
+        intent_enum = intent_map.get(self._classify_intent(q), QueryIntent.FULL_ADVISORY)
+
+        try:
+            unified_ctx = await self.cognitive.get_unified_context(
+                user_id=user_id, query=q,
+                query_intent=intent_enum,
+                session_id=session_id
+            )
+            
+            # Map back to internal variables for the rest of the turn logic
+            episodic     = unified_ctx.episodic
+            semantic     = unified_ctx.semantic
+            working      = {item.content_type: item.content_json for item in unified_ctx.working}
+            procedural   = [unified_ctx.procedural] if unified_ctx.procedural else []
+            trajectory   = unified_ctx.trajectory.__dict__ if unified_ctx.trajectory else {}
+            cognitive    = unified_ctx.__dict__
+            graph        = unified_ctx.graph_paths
+            conv_history = await self.conversation.get_history(session_id, limit=6)
+        except Exception as e:
+            logger.warning(f"[AGENT] Unified context fetch failed: {e}")
+            episodic, semantic, working, procedural, trajectory, cognitive, graph, conv_history = [], [], {}, [], {}, {}, [], []
+
+        context_bundle = {
+            "episodic":     episodic,
+            "semantic":     semantic,
+            "working":      working,
+            "procedural":   procedural,
+            "trajectory":   trajectory,
+            "cognitive":    cognitive,
+            "graph":        graph,
+            "conversation": conv_history,
+            "session_id":   session_id
         }
-        
-        # Try patterns like "50k", "100K"
-        match = re.match(r'^(\d+(?:\.\d+)?)\s*(k|thousand|lakh|lakhs|lac|crore|crores|cr)s?$', amount_str)
-        if match:
-            num = float(match.group(1))
-            unit = match.group(2)
-            return num * multipliers.get(unit, 1)
-        
-        # Try patterns like "a lakh", "one lakh", "1 lakh", "1.5 lakh"
-        match = re.match(r'^(a|one|two|three|four|five|six|seven|eight|nine|ten|\d+(?:\.\d+)?)\s*(lakh|lakhs|lac|crore|crores|cr|k|thousand)s?$', amount_str)
-        if match:
-            num_part = match.group(1)
-            unit = match.group(2)
-            
-            if num_part in word_to_num:
-                num = word_to_num[num_part]
-            else:
-                try:
-                    num = float(num_part)
-                except ValueError:
-                    return None
-            
-            return num * multipliers.get(unit, 1)
-        
-        return None
+        memory_used = {
+            "episodic_count":   len(episodic),
+            "semantic_count":   len(semantic),
+            "procedural_count": len(procedural),
+            "graph_facts":      len(graph),
+            "total_memories":   len(episodic) + len(semantic) + len(procedural) + len(graph)
+        }
 
-    async def _check_intent_and_execute(self, user_id: str, query: str) -> Optional[str]:
-        """
-        Rule-based intent detection for critical actions like Adding Transactions.
-        Routes through full ML pipeline for proper categorization and anomaly detection.
-        """
-        # Enhanced Transaction Pattern: "spent 5000 on swiggy" or "spent a lakh on gpu"
-        # Now supports: numeric, "50k", "a lakh", "2 crore", etc.
-        # Also supports Hinglish: "kharch kiye", "bhare", "diye", "liya"
-        match = re.search(r"(spent|paid|bought|kharch|bhare|diye|liya)\s+(?:kiye)?\s*(.+?)\s+(?:on|for|at|par|pe)?\s+(.+)", query.lower())
-        if match:
-             try:
-                 # Group 2 is amount or merchant depending on order
-                 part1 = match.group(2).strip()
-                 part2 = match.group(3).strip()
-                 
-                 # Check which part is the amount
-                 amount = self._parse_indian_amount(part1)
-                 merchant = part2
-                 
-                 # Swap if amount is in the second part (e.g. "swiggy par 500 kharch")
-                 if amount is None:
-                    amount = self._parse_indian_amount(part2)
-                    merchant = part1
-                 
-                 if amount is None or amount <= 0:
-                     return None  # Could not parse amount
+        # Step 5: Intent
+        intent = self._classify_intent(q)
+        logger.info(f"[AGENT] Step 5: Intent = {intent}")
 
-                 
-                 if not merchant: return None # Strict check
-                 
-                 db = Database.get_db()
-                 if Database.client is None: return None
+        # Step 5b: Full RAG pipeline → inject chunks
+        rag_chunks = await self._fetch_rag_chunks(q, user_id, intent)
+        context_bundle["_rag_chunks"] = rag_chunks
 
-                 # Import the ML pipeline from transactions route
-                 from api.routes.transactions import process_through_ml_pipeline, update_budget_spent
-                 
-                 # Prepare transaction for ML pipeline
-                 txn_dict = {
-                     "date": datetime.now().isoformat(),
-                     "amount": amount,
-                     "description": merchant.title(),
-                     "type": "debit"
-                 }
-                 
-                 # Get user history for better anomaly detection
-                 user_history = await db["transactions"].find(
-                     {"user_id": user_id},
-                     {"amount": 1, "category": 1, "date": 1, "description": 1}
-                 ).sort("date", -1).limit(100).to_list(length=100)
-                 
-                 # Run through FULL ML pipeline (Categorization + Anomaly Detection)
-                 enriched, cat_stats, anomaly_stats = await process_through_ml_pipeline(
-                     [txn_dict], 
-                     user_id=user_id, 
-                     user_history=user_history
-                 )
-                 enriched_txn = enriched[0]
-                 
-                 # Build final document with all ML enrichments
-                 doc = {
-                     "user_id": user_id,
-                     "amount": amount,
-                     "description": merchant.title(),
-                     "category": enriched_txn.get("category", "Other"),
-                     "category_confidence": enriched_txn.get("category_confidence", enriched_txn.get("confidence", 0.0)),
-                     "categorization_method": enriched_txn.get("method", "ml"),
-                     "type": "debit",
-                     "source": "chat",
-                     "date": datetime.now(),
-                     "is_anomaly": enriched_txn.get("is_anomaly", False),
-                     "anomaly_score": enriched_txn.get("anomaly_score", 0.0),
-                     "anomaly_severity": enriched_txn.get("severity", "normal"),
-                     "created_at": datetime.utcnow()
-                 }
-                 
-                 await db["transactions"].insert_one(doc)
-                 
-                 # Update budget spent
-                 await update_budget_spent(db, user_id, doc["category"], amount)
-                 
-                 # Build detailed response with ML pipeline info
-                 category = doc["category"]
-                 confidence = doc["category_confidence"]
-                 method = doc["categorization_method"]
-                 anomaly_score = doc["anomaly_score"]
-                 severity = doc["anomaly_severity"]
-                 
-                 # Format amount in Indian style
-                 if amount >= 10000000:  # 1 Crore+
-                     amount_str = f"₹{amount/10000000:.2f} Crore"
-                 elif amount >= 100000:  # 1 Lakh+
-                     amount_str = f"₹{amount/100000:.2f} Lakh"
-                 elif amount >= 1000:
-                     amount_str = f"₹{amount/1000:.1f}K"
-                 else:
-                     amount_str = f"₹{amount:.0f}"
-                 
-                 # Build response with ML pipeline details
-                 response_lines = [
-                     f"✅ **Transaction Recorded**",
-                     f"",
-                     f"📝 **Details:**",
-                     f"• Amount: {amount_str} (₹{amount:,.0f})",
-                     f"• Item: {merchant.title()}",
-                     f"• Category: {category}",
-                     f"",
-                     f"🤖 **ML Pipeline Results:**",
-                     f"• Categorization: {method.upper()} method",
-                     f"• Confidence: {confidence*100:.1f}%",
-                     f"• Anomaly Score: {anomaly_score:.2f}",
-                     f"• Severity: {severity.capitalize()}",
-                 ]
-                 
-                 # Add anomaly warning if detected
-                 if doc["is_anomaly"]:
-                     response_lines.extend([
-                         f"",
-                         f"⚠️ **ANOMALY DETECTED!**",
-                         f"This transaction appears unusual compared to your spending patterns.",
-                     ])
-                 
-                 # Add budget impact info
-                 budget = await db["budgets"].find_one({"user_id": user_id})
-                 if budget:
-                     for alloc in budget.get("allocations", []):
-                         if alloc.get("category") == category:
-                             spent = alloc.get("spent", 0) + amount
-                             limit = alloc.get("amount", 0)
-                             if limit > 0:
-                                 pct = (spent / limit) * 100
-                                 response_lines.extend([
-                                     f"",
-                                     f"💰 **Budget Impact ({category}):**",
-                                     f"• Spent: ₹{spent:,.0f} / ₹{limit:,.0f}",
-                                     f"• Usage: {pct:.1f}%",
-                                 ])
-                                 if pct >= 100:
-                                     response_lines.append(f"• ⛔ Budget EXCEEDED!")
-                                 elif pct >= 80:
-                                     response_lines.append(f"• ⚠️ Approaching limit!")
-                             break
-                 
-                 return "\n".join(response_lines)
-             except Exception as e:
-                 print(f"[INTENT] Error: {e}")
-                 import traceback
-                 traceback.print_exc()
-                 return None
-        return None
+        # Step 6: Intent routing
+        if intent == "transaction":
+            response_data = await self._handle_transaction(q, user_id, context_bundle)
+        elif intent in ("goal_setting", "goal_query"):
+            response_data = await self._handle_goal(q, user_id, context_bundle, intent)
+        else:
+            response_data = self._handle_rag_query(q, context_bundle)
 
+        # Step 6b: SelfRAG quality gate (question intents only)
+        if intent == "question" and response_data.get("response"):
+            response_data["response"] = await self._verify_response(
+                q, intent, "\n".join(rag_chunks), response_data["response"]
+            )
 
-# ============================================================
-# Backward Compatibility Wrapper
-# ============================================================
+        # Step 7: Write to ALL memory (parallel, non-blocking)
+        response_text = response_data.get("response", "")
+        
+        async def safe_run(coro):
+            try: await coro
+            except Exception as e: logger.warning(f"[AGENT] Memory write skipped: {e}")
 
-class SimpleAgentController:
-    """
-    Simplified version for quick testing without conversation tracking.
-    
-    Use AgentController (above) for production with full features.
-    This is a lightweight wrapper for testing individual components.
-    """
-    
-    def __init__(
-        self,
-        phi3_rag: Phi3RAG,
-        memory_manager: MemoryManager
-    ):
-        """
-        Initialize simple agent (no conversation tracking).
-        
-        Args:
-            phi3_rag: Phi-3.5 RAG component
-            memory_manager: Memory operations manager
-        """
-        self.phi3 = phi3_rag
-        self.memory = memory_manager
-        
-        print("[AGENT] Simple Agent Controller initialized (no conversation tracking)")
-    
-    def execute_turn(self, user_id: int, query: str) -> Dict:
-        """
-        Simple execution without session tracking.
-        
-        Args:
-            user_id: User identifier
-            query: User query
-        
-        Returns:
-            {
-                'response': str,
-                'confidence': float,
-                'metadata': Dict
-            }
-        """
-        # Get memory context
-        memory_context = self.memory.get_user_memories(user_id)
-        
-        # Generate response
-        result = self.phi3.generate(
-            query=query,
-            context=memory_context,
-            max_length=400,
-            temperature=0.7
+        await asyncio.gather(
+            safe_run(self.episodic.store_episode(user_id, intent, q, response_text, session_id)),
+            safe_run(self._update_semantic_memory(user_id, q, intent, response_text)),
+            safe_run(self.working.add(session_id, user_id, "turn_context", {
+                 "last_query": q, "last_intent": intent,
+                 "timestamp": datetime.now().isoformat()})),
+            safe_run(self._update_procedural_memory(user_id, q, intent, response_data)),
+            safe_run(self._update_knowledge_graph(user_id, q, intent)),
+            safe_run(self.cognitive.write_episodic(user_id, intent, q, response_text, session_id)),
+            safe_run(self.conversation.add_message(session_id, 'assistant', response_text))
         )
-        
+
         return {
-            'response': result['result'],
-            'confidence': result['confidence'],
-            'metadata': result['metadata']
+            "response":           response_text,
+            "confidence":         response_data.get("confidence", 0.85),
+            "memory_used":        memory_used,
+            "gates_passed":       True,
+            "conversation_turns": turns,
+            "intent":             intent
         }
 
 
-# ============================================================
-# Testing
-# ============================================================
+    # ────────────────────────────────────────────────────────────
+    # INTENT CLASSIFIER
+    # ────────────────────────────────────────────────────────────
+    def _classify_intent(self, query: str) -> str:
+        q = query.lower()
+        TXN = [
+            r"i (spent|paid|bought|purchased|ordered|transferred)",
+            r"spent [\d\.,]+ (on|at|for)",
+            r"paid [\d\.,]+",
+            r"\u20b9[\d\.,]+ (on|at|for)",
+            r"[\d\.,]+ (rupees?|rs\.?|inr) (on|at|for)",
+            r"(lakh|crore|k) (on|at|for)",
+        ]
+        for p in TXN:
+            if re.search(p, q): return "transaction"
 
-if __name__ == "__main__":
-    # ... remaining testing code ...
-    pass
+        GOAL_SET = [
+            r"saving for", r"my goal is", r"i want to save",
+            r"planning to (buy|save)", r"europe trip", r"target.*lakh"
+        ]
+        for p in GOAL_SET:
+            if re.search(p, q): return "goal_setting"
+
+        GOAL_Q = [
+            r"progress.*goal", r"how.*saving", r"on track",
+            r"when will i", r"achieve.*goal", r"travel goal"
+        ]
+        for p in GOAL_Q:
+            if re.search(p, q): return "goal_query"
+
+        return "question"
+
+
+    # ────────────────────────────────────────────────────────────
+    # RAG PIPELINE
+    # ────────────────────────────────────────────────────────────
+    async def _fetch_rag_chunks(self, query: str,
+                                 user_id: str, intent: str) -> list:
+        try:
+            route = await self.query_router.route(query, user_id)
+            logger.info(f"[AGENT] Route: {route.intent.value} "
+                        f"tiers={route.tiers_to_query} "
+                        f"conf={route.confidence:.2f}")
+            if route.db_direct:
+                return []
+
+            raw = await self.retriever.retrieve(
+                query=query, user_id=user_id,
+                tiers=route.tiers_to_query, top_k=12
+            )
+            if not raw:
+                return []
+
+            import numpy as np
+            q_emb = None
+            if self.rag.embed_fn:
+                try:
+                    loop = asyncio.get_event_loop()
+                    vec  = await loop.run_in_executor(None, self.rag.embed_fn, query)
+                    if vec:
+                        q_emb = np.array(vec, dtype=np.float32)
+                except Exception:
+                    pass
+
+            graded   = await self.crag.evaluate_chunks(query, raw, q_emb)
+            kept     = [c for c in graded if c.decision != "DISCARD"]
+            if not kept:
+                web = await self.crag.fetch_web_fallback(route.intent.value)
+                return [web] if web else []
+
+            reranked   = self.reranker.rerank(query, kept)
+            injectable = self.crag.get_injectable_content(reranked)
+            chunks     = [c for c in injectable.split("\n") if c.strip()]
+
+            logger.info(
+                f"[AGENT] RAG: {len(chunks)} chunks "
+                f"(KEEP={sum(1 for c in graded if c.decision=='KEEP')} "
+                f"TRIM={sum(1 for c in graded if c.decision=='TRIM')} "
+                f"DISCARD={sum(1 for c in graded if c.decision=='DISCARD')})"
+            )
+            return chunks
+        except Exception as e:
+            logger.warning(f"[AGENT] RAG pipeline skipped: {e}")
+            return []
+
+
+    async def _verify_response(self, query: str, intent: str,
+                                context: str, response: str) -> str:
+        try:
+            from models.schemas import QueryIntent as QI
+            intent_map = {
+                "transaction":  QI.SIMPLE_LOOKUP,
+                "question":     QI.FULL_ADVISORY,
+                "goal_setting": QI.GOAL_PLANNING,
+                "goal_query":   QI.GOAL_PLANNING,
+            }
+            verdict = await self.self_rag.evaluate_response(
+                query              = query,
+                query_intent       = intent_map.get(intent, QI.FULL_ADVISORY),
+                context_injected   = context,
+                generated_response = response,
+                graded_chunks      = []
+            )
+
+            if verdict.passed:
+                logger.info("[AGENT] SelfRAG ✅ passed")
+                return response
+
+            # ── Hard block for hallucinated legal/tax sections ────────────────
+            if "NO_HALLUCINATION" in verdict.failed_criteria:
+                logger.warning("[AGENT] SelfRAG 🚨 HALLUCINATION detected — replacing response")
+                return self._safe_financial_response(query, context)
+
+            # Other failures (GROUNDED, USEFUL) — soft pass with disclaimer
+            logger.warning(f"[AGENT] SelfRAG ⚠️  soft fail: {verdict.failed_criteria}")
+            return response + (
+                "\n\n⚠️ *Note: Please verify specific figures at "
+                "[incometax.gov.in](https://incometax.gov.in)*"
+            )
+
+        except Exception as e:
+            logger.warning(f"[AGENT] SelfRAG skipped: {e}")
+            return response
+
+    def _safe_financial_response(self, query: str, context: str) -> str:
+        """
+        Fallback when hallucination is detected.
+        Never fabricates section numbers — always redirects to official sources.
+        """
+        q = query.lower()
+
+        # Tax / section query fallback
+        if any(w in q for w in ["tax", "section", "income tax", "itr", "tds", "gst"]):
+            return (
+                "For accurate tax information specific to your situation, "
+                "please refer to the official sources:\n\n"
+                "📋 **Income Tax Act sections:** [incometax.gov.in](https://incometax.gov.in)\n"
+                "📋 **GST rules:** [gst.gov.in](https://gst.gov.in)\n\n"
+                "I can help with general concepts like tax slabs, 80C deductions, "
+                "or HRA exemptions — but for specific legal sections and penalties, "
+                "always verify with a CA or the official portal."
+            )
+
+        # Black money / illegal query fallback
+        if any(w in q for w in ["black money", "convert", "white money", "unaccounted", "illegal"]):
+            return (
+                "Converting unaccounted income into declared income must be done "
+                "legally through proper ITR filing.\n\n"
+                "⚠️ Any method involving misrepresentation is illegal under "
+                "the Income Tax Act.\n\n"
+                "✅ **Legal path:** Declare all income in your ITR. "
+                "Consult a Chartered Accountant for specific guidance.\n\n"
+                "*For exact penalty sections, verify at [incometax.gov.in](https://incometax.gov.in)*"
+            )
+
+        # Generic safe fallback
+        return (
+            "I want to give you accurate information, but I'm not confident "
+            "enough in the specific details to answer this safely. "
+            "Please verify at [incometax.gov.in](https://incometax.gov.in) "
+            "or consult a qualified financial advisor."
+        )
+
+
+
+    # ────────────────────────────────────────────────────────────
+    # TRANSACTION HANDLER
+    # ────────────────────────────────────────────────────────────
+    async def _handle_transaction(self, query: str,
+                                   user_id: str, context: Dict) -> Dict:
+        extracted = self._extract_transaction(query)
+        amount    = extracted.get("amount", 0)
+        merchant  = extracted.get("description", "Unknown")
+
+        if amount <= 0:
+            return {"response":
+                "I couldn't detect a valid amount. "
+                "Try: 'I spent \u20b9500 on Swiggy'", "confidence": 0.6}
+
+        # Categorize
+        category, conf = "Other", 0.0
+        try:
+            r = await self.ml.post("/ml/categorize",
+                                   {"descriptions": [merchant]})
+            items = r if isinstance(r, list) else r.get("results", [])
+            if items:
+                category = items[0].get("category", "Other")
+                conf     = float(items[0].get("confidence", 0.0))
+        except Exception as e:
+            logger.warning(f"[AGENT] Categorize skipped: {e}")
+
+        # Anomaly detect
+        is_anomaly, score, severity, reason = False, 0.0, "LOW", ""
+        try:
+            r = await self.ml.post("/ml/anomalies", {
+                "transactions": [{
+                    "transaction_id": "temp",
+                    "date": datetime.now().isoformat()[:10],
+                    "description": merchant, "amount": amount,
+                    "transaction_type": "Debit",
+                    "balance": 0, "category": category
+                }], "history": []
+            })
+            anoms = r if isinstance(r, list) else r.get("anomalies", [])
+            if anoms:
+                a          = anoms[0]
+                is_anomaly = a.get("is_anomaly", False)
+                score      = float(a.get("anomaly_score", 0.0))
+                severity   = a.get("severity", "LOW")
+                reason     = a.get("reason", "")
+        except Exception as e:
+            logger.warning(f"[AGENT] Anomaly skipped: {e}")
+
+        # Save to MongoDB
+        try:
+            await self.db.transactions.insert_one({
+                "user_id": user_id, "description": merchant,
+                "amount": amount, "category": category,
+                "category_confidence": conf,
+                "categorization_method": "ml" if conf > 0 else "rule",
+                "type": "Debit", "source": "chat",
+                "date": datetime.now().isoformat()[:10],
+                "is_anomaly": is_anomaly, "anomaly_score": score,
+                "anomaly_severity": severity,
+                "created_at": datetime.now().isoformat()
+            })
+        except Exception as e:
+            logger.warning(f"[AGENT] Save skipped: {e}")
+
+        # Format amount
+        if amount >= 10_000_000:
+            amt = f"\u20b9{amount/10_000_000:.2f} Crore (\u20b9{amount:,.0f})"
+        elif amount >= 100_000:
+            amt = f"\u20b9{amount/100_000:.2f} Lakh (\u20b9{amount:,.0f})"
+        else:
+            amt = f"\u20b9{amount:,.0f}"
+
+        anomaly_block = ""
+        if is_anomaly and severity in ("HIGH", "MEDIUM"):
+            anomaly_block = f"\n\n\u26a0\ufe0f **Anomaly!** Severity: {severity}\n{reason}"
+
+        return {
+            "response": (
+                f"\u2705 **Transaction Recorded**\n\n"
+                f"\U0001f4dd **Details:**\n"
+                f"\u2022 Amount: {amt}\n"
+                f"\u2022 Item: {merchant}\n"
+                f"\u2022 Category: {category}\n\n"
+                f"\U0001f916 **ML Results:**\n"
+                f"\u2022 Confidence: {conf*100:.1f}%\n"
+                f"\u2022 Anomaly Score: {score:.2f}\n"
+                f"\u2022 Severity: {severity}"
+                f"{anomaly_block}"
+            ),
+            "confidence": 0.95,
+            "amount": amount, "description": merchant, "category": category
+        }
+
+
+    def _extract_transaction(self, query: str) -> Dict:
+        q = query.lower()
+        amount = 0.0
+        for pattern, multiplier in [
+            (r'([\d\.]+)\s*crore',   10_000_000),
+            (r'([\d\.]+)\s*lakh',    100_000),
+            (r'([\d\.]+)\s*k\b',     1_000),
+            (r'([\d,]+(?:\.\d+)?)',  1),
+        ]:
+            m = re.search(pattern, q)
+            if m:
+                amount = float(m.group(1).replace(',', '')) * multiplier
+                break
+
+        merchant = "Unknown Purchase"
+        MERCHANTS = [
+            "swiggy","zomato","uber","ola","amazon","flipkart","netflix",
+            "jio","airtel","bigbasket","zepto","blinkit","apollo","1mg",
+            "zerodha","groww","makemytrip","irctc","petrol","fuel",
+            "electricity","metro","rapido","dominos","kfc","myntra",
+            "nykaa","unacademy","byjus","paytm","phonepe","gpay","oyo"
+        ]
+        for kw in MERCHANTS:
+            if kw in q:
+                merchant = kw.capitalize()
+                break
+        m = re.search(
+            r'(?:on|at|for|from)\s+([A-Za-z][A-Za-z\s]{1,25}?)'
+            r'(?:\s+today|\s+yesterday|$|\.)',
+            query, re.IGNORECASE
+        )
+        if m:
+            c = m.group(1).strip()
+            if len(c) > 2 and c.lower() not in ('a','an','the','my'):
+                merchant = c
+
+        return {"amount": amount, "description": merchant}
+
+
+    # ────────────────────────────────────────────────────────────
+    # GOAL HANDLER
+    # ────────────────────────────────────────────────────────────
+    async def _handle_goal(self, query: str, user_id: str,
+                            context: Dict, intent: str) -> Dict:
+        if intent == "goal_setting":
+            try:
+                await self.episodic.store_episode(
+                    user_id, "goal_setting",
+                    query, f"User set goal: {query[:100]}",
+                    session_id=context.get("session_id")
+                )
+            except Exception:
+                pass
+
+        result = self.rag.generate(query=query, context=context)
+        response = result.get("result", "")
+        if not response or len(response) < 20:
+            if intent == "goal_setting":
+                response = (
+                    "Great! I've noted your goal. "
+                    "Set it up in the Goals section to track progress automatically."
+                )
+            else:
+                ep_goals = [
+                    m.get("event_summary", "") for m in context.get("episodic", [])
+                    if any(w in m.get("event_summary", "").lower()
+                           for w in ["goal","saving","europe","trip","lakh"])
+                ]
+                response = (
+                    f"Based on your goals: {'; '.join(ep_goals[:2])}. "
+                    "Check the Goals tab for AI-verified ETAs."
+                    if ep_goals else
+                    "Check the Goals section for your progress and ETAs."
+                )
+        return {"response": response, "confidence": 0.85}
+
+
+    # ────────────────────────────────────────────────────────────
+    # RAG QUERY HANDLER
+    # ────────────────────────────────────────────────────────────
+    def _handle_rag_query(self, query: str, context: Dict) -> Dict:
+        result = self.rag.generate(
+            query=query, context=context,
+            max_length=600, temperature=0.3
+        )
+        return {"response": result.get("result", ""), "confidence": 0.85}
+
+
+    # ────────────────────────────────────────────────────────────
+    # MEMORY WRITE HELPERS
+    # ────────────────────────────────────────────────────────────
+    async def _update_semantic_memory(self, user_id, query, intent, response):
+        q = query.lower()
+        facts = []
+        m = re.search(r'(salary|earn|income).*?([\d,]+)', q)
+        if m:
+            facts.append(("monthly_income", f"\u20b9{m.group(2).replace(',','')}", "income"))
+        if any(w in q for w in ["saving for","goal is","want to buy"]):
+            facts.append(("active_goal", query[:100], "goal"))
+        for city in ["mumbai","delhi","bangalore","pune","hyderabad","chennai"]:
+            if city in q:
+                facts.append(("city", city.capitalize(), "location"))
+        for inst in ["ppf","elss","sip","fd","gold","nps"]:
+            if inst in q:
+                facts.append(("investment_interest", inst.upper(), "investment"))
+        for attr, value, source in facts:
+            try:
+                await self.semantic.upsert_fact(user_id, "USER_PROFILE", attr, value, 0.75)
+            except Exception:
+                pass
+
+    async def _update_procedural_memory(self, user_id, query, intent, data):
+        if intent != "transaction":
+            return
+        amount   = data.get("amount", 0)
+        category = data.get("category", "Other")
+        merchant = data.get("description", "")
+        if amount > 0:
+            try:
+                await self.procedural.record_pattern(
+                    user_id=user_id,
+                    pattern=f"Spent \u20b9{amount:,.0f} on {merchant} ({category})",
+                    category=category, amount=amount,
+                    metadata={"merchant": merchant,
+                              "timestamp": datetime.now().isoformat()}
+                )
+            except Exception:
+                pass
+
+    async def _update_knowledge_graph(self, user_id, query, intent):
+        q = query.lower()
+        LINKS = {
+            "zerodha": [("is_a","Investment Platform"),("enables","Stock Trading")],
+            "ppf":     [("is_a","Tax Saving"),("section","80C")],
+            "elss":    [("is_a","Mutual Fund"),("section","80C"),("lock_in","3yr")],
+            "swiggy":  [("is_a","Food Delivery"),("category","Food & Dining")],
+            "sip":     [("is_a","Investment Method"),("for","Mutual Funds")],
+        }
+        for entity, links in LINKS.items():
+            if entity in q:
+                for rel, target in links:
+                    try:
+                        await self.knowledge.add_fact(
+                            user_id=user_id, subject=entity,
+                            relation=rel, obj=target, source="conversation"
+                        )
+                    except Exception:
+                        pass
+
+
+    # ────────────────────────────────────────────────────────────
+    # HELPERS
+    # ────────────────────────────────────────────────────────────
+    def _safe_response(self, msg, session_id, gates_passed=True):
+        return {
+            "response": msg, "confidence": 0.85,
+            "memory_used": {"episodic_count":0,"semantic_count":0,"total_memories":0},
+            "gates_passed": gates_passed,
+            "conversation_turns": 0, "intent": "blocked"
+        }

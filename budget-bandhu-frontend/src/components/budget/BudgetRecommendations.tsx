@@ -57,7 +57,7 @@ export function BudgetRecommendations({
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
 
-    const getChangeIcon = (change: 'increase' | 'decrease' | 'maintain') => {
+    const getChangeIcon = (change?: 'increase' | 'decrease' | 'maintain') => {
         switch (change) {
             case 'increase': return <TrendingUp className="w-4 h-4 text-red-500" />;
             case 'decrease': return <TrendingDown className="w-4 h-4 text-green-500" />;
@@ -65,7 +65,7 @@ export function BudgetRecommendations({
         }
     };
 
-    const getChangeColor = (change: 'increase' | 'decrease' | 'maintain') => {
+    const getChangeColor = (change?: 'increase' | 'decrease' | 'maintain') => {
         switch (change) {
             case 'increase': return 'bg-red-50 border-red-200';
             case 'decrease': return 'bg-green-50 border-green-200';
@@ -151,14 +151,14 @@ export function BudgetRecommendations({
                                         {getChangeIcon(rec.change)}
                                         <span className="font-semibold text-gray-800">{rec.category}</span>
                                     </div>
-                                    <p className="text-sm text-gray-600 mb-2">{rec.reason}</p>
+                                    <p className="text-sm text-gray-600 mb-2">{rec.reasoning}</p>
                                     <div className="flex items-center gap-4 text-sm">
                                         <span className="text-gray-500">
-                                            Current: <span className="font-medium">{formatCurrency(rec.current_allocation)}</span>
+                                            Current: <span className="font-medium">{formatCurrency(rec.current_spend)}</span>
                                         </span>
                                         <span className="text-gray-400">→</span>
                                         <span className={rec.change === 'decrease' ? 'text-green-600' : 'text-red-600'}>
-                                            Suggested: <span className="font-bold">{formatCurrency(rec.recommended)}</span>
+                                            Suggested: <span className="font-bold">{formatCurrency(rec.suggested_budget)}</span>
                                         </span>
                                     </div>
                                 </div>

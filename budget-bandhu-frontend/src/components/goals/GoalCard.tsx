@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle, Plus } from "lucide-react";
+import { CheckCircle, Plus, Sparkles } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 interface GoalCardProps {
@@ -19,6 +19,11 @@ interface GoalCardProps {
             reached: boolean;
             date: string | null;
         }>;
+        eta_days?: number | null;
+        on_track?: boolean;
+        projected_completion_date?: string | null;
+        shortfall_risk?: string | null;
+        ai_verified?: boolean;
     };
     onAddMoney?: (goalId: string, amount: number) => void;
 }
@@ -62,7 +67,14 @@ export function GoalCard({ goal, onAddMoney }: GoalCardProps) {
                         {goal.icon}
                     </div>
                     <div className="flex-1 mt-1">
-                        <h3 className="text-xl lg:text-2xl font-bold text-white tracking-tight group-hover:text-emerald-400 transition-colors">{goal.name}</h3>
+                        <h3 className="text-xl lg:text-2xl font-bold text-white tracking-tight group-hover:text-emerald-400 transition-colors flex items-center gap-2">
+                            {goal.name}
+                            {goal.ai_verified && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                    <Sparkles className="w-3 h-3" /> AI
+                                </span>
+                            )}
+                        </h3>
                         <p className="text-sm text-gray-300 font-medium">
                             Target: {new Date(goal.deadline).toLocaleDateString('en-IN', {
                                 month: 'short',
@@ -100,12 +112,23 @@ export function GoalCard({ goal, onAddMoney }: GoalCardProps) {
                     <div className="text-3xl font-black text-white tracking-tight">
                         {formatCurrency(goal.current)}
                     </div>
-                    <div className="text-sm text-gray-300 mt-1">
-                        of {formatCurrency(goal.target)}
-                        <span className="mx-2 text-gray-500">•</span>
-                        <span className="text-emerald-400 font-medium">
-                            {formatCurrency(goal.target - goal.current)} remaining
-                        </span>
+                    <div className="text-sm text-gray-300 mt-2 flex items-center justify-between">
+                        <div>
+                            of {formatCurrency(goal.target)}
+                            <span className="mx-2 text-gray-500">•</span>
+                            <span className="text-emerald-400 font-medium">
+                                {formatCurrency(goal.target - goal.current)} remaining
+                            </span>
+                        </div>
+                        {goal.shortfall_risk && !isComplete && (
+                            <div className={`text-xs font-bold px-2 py-1 rounded-md ${
+                                goal.shortfall_risk === 'HIGH' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                                goal.shortfall_risk === 'MEDIUM' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
+                                'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            }`}>
+                                Risk: {goal.shortfall_risk}
+                            </div>
+                        )}
                     </div>
                 </div>
 

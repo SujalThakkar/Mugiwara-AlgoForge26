@@ -1,0 +1,72 @@
+{
+  "document_id": "insurance_india_v3",
+  "source": "india_finance",
+  "category": "insurance",
+  "chunks": [
+    {
+      "id": "term_insurance",
+      "text": "Term Life Insurance: Pure protection — no maturity benefit, highest cover at lowest cost. ₹1 Crore cover for 30-year non-smoker: ~₹7,000-10,000/year. Thumb rule: cover = 10-15x annual income. Best claim settlement ratios: LIC 98.62%, HDFC Life 99.39%, Max Life 99.51%, ICICI Pru 98.49%. Buy online — 20-30% cheaper than offline. Pay annually, not monthly. Add riders: accidental death (2-3x), critical illness, disability. Avoid ULIPs for pure protection.",
+      "tags": [
+        "term insurance",
+        "₹1 crore",
+        "claim settlement",
+        "LIC",
+        "HDFC Life",
+        "annual premium",
+        "rider"
+      ]
+    },
+    {
+      "id": "health_insurance",
+      "text": "Health Insurance India: Minimum recommended cover: ₹5 Lakh (₹10L for metro cities). Types: Individual, Floater (family). Top plans 2024: Star Health, Niva Bupa (earlier Max Bupa), Care Health, HDFC Ergo Optima Secure. Features to check: room rent capping (avoid), co-payment (avoid), pre-existing waiting period (prefer 1-2 year), restore benefit (must), no-claim bonus (30-50%). Buy at young age — lower premiums, no pre-existing loading. 80D deduction up to ₹25,000.",
+      "tags": [
+        "health insurance",
+        "₹5 lakh",
+        "Star Health",
+        "Niva Bupa",
+        "room rent",
+        "co-payment",
+        "80D"
+      ]
+    },
+    {
+      "id": "vehicle_insurance",
+      "text": "Vehicle Insurance India: Third-party mandatory by law (Motor Vehicles Act). Third-party rates (IRDAI fixed): two-wheeler < 75cc — ₹538/year. Car < 1000cc — ₹2,094/year. Comprehensive: covers own damage + third-party. IDV (Insured Declared Value) = market value of vehicle. NCB (No Claim Bonus): 20% first year, up to 50% after 5 claim-free years — transfers across insurers. Zero Depreciation add-on recommended for new vehicles. Online comparison: PolicyBazaar, InsuranceDekho.",
+      "tags": [
+        "vehicle insurance",
+        "third party",
+        "IDV",
+        "NCB",
+        "zero depreciation",
+        "two wheeler",
+        "car"
+      ]
+    },
+    {
+      "id": "ulip_warning",
+      "text": "ULIP Warning: Unit Linked Insurance Plans combine insurance and investment — worst of both worlds for most investors. High charges: premium allocation (2-5%), fund management (1.35%), policy admin, mortality charges. Lock-in 5 years. Returns typically 6-8% (worse than pure MF). Surrender before 5 years — huge penalties. Better alternative: Buy term insurance (10% of ULIP premium) + invest rest in mutual funds. Exception: use ULIP only for tax-free maturity after 10 years if premium < ₹2.5L.",
+      "tags": [
+        "ULIP",
+        "charges",
+        "lock-in",
+        "surrender",
+        "term insurance",
+        "mutual fund",
+        "avoid"
+      ]
+    },
+    {
+      "id": "critical_illness",
+      "text": "Critical Illness Insurance: Lump-sum payout on diagnosis of specified illnesses — cancer, heart attack, stroke, kidney failure, organ transplant. Payout regardless of hospitalisation. Use for: income replacement during treatment, EMI coverage, lifestyle changes. Cover: minimum ₹25-50 lakh. Add as rider on term plan (cheaper) or standalone. Waiting period: 90 days from policy start. Survival period: must survive 30 days post diagnosis for claim. IRDA regulates. Separate from health insurance.",
+      "tags": [
+        "critical illness",
+        "cancer",
+        "heart attack",
+        "lump sum",
+        "rider",
+        "standalone",
+        "income replacement"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,189 @@
+{
+  "document_id": "income_tax_act_complete",
+  "source": "india_finance",
+  "category": "legal_taxation",
+  "chunks": [
+    {
+      "id": "ita_chapter1_basic",
+      "text": "Income Tax Act 1961 — Basic Framework: Section 1 (Short title, extent, commencement). Section 2 (Definitions): 2(7) Assessee, 2(9) Assessment Year, 2(24) Income, 2(31) Person, 2(45) Total Income. Section 3 (Previous Year). Section 4 (Charge of income tax — levy on total income of previous year). Section 5 (Scope of total income for residents vs non-residents). Section 6 (Residence in India — 182 days rule for individuals). Section 7 (Income deemed to accrue in India).",
+      "tags": [
+        "ITA",
+        "Section 2",
+        "Section 4",
+        "Section 5",
+        "Section 6",
+        "residence",
+        "182 days",
+        "assessment year"
+      ]
+    },
+    {
+      "id": "ita_heads_income",
+      "text": "Five Heads of Income under ITA: Section 14 (Heads of income). Section 15-17 (Salaries — perquisites, allowances, standard deduction ₹75,000). Section 22-27 (House Property — annual value, municipal tax, 30% standard deduction, Section 24 interest). Section 28-44 (Profits and Gains from Business/Profession — PGBP). Section 45-55A (Capital Gains — short term vs long term). Section 56-59 (Income from Other Sources — interest, dividend, lottery, gifts). Set-off rules: Section 70 (within same head), Section 71 (inter-head), Section 72 (carry forward — 8 years for business losses).",
+      "tags": [
+        "heads of income",
+        "Section 14",
+        "Section 15",
+        "salary",
+        "house property",
+        "capital gains",
+        "PGBP",
+        "other sources",
+        "set off",
+        "72"
+      ]
+    },
+    {
+      "id": "ita_capital_gains_detailed",
+      "text": "Capital Gains — Key Sections: Section 45 (Chargeability of capital gains). Section 47 (Transactions not regarded as transfer — gift, inheritance, HUF partition). Section 48 (Mode of computation — cost of acquisition, improvement, transfer expenses). Section 49 (Cost with reference to previous owner). Section 50C (Stamp duty value as full value of consideration for land/building). Section 50CA (Fair market value for unquoted shares). Section 54 (Exemption on sale of residential house — buy/construct within 2/3 years). Section 54B (Agricultural land). Section 54EC (Investment in NHAI/REC bonds within 6 months, max ₹50L). Section 54F (Sale of any asset, invest full proceeds in house). Section 111A (STCG — equity 20%). Section 112 (LTCG — other assets 20% with indexation). Section 112A (LTCG — equity 12.5% above ₹1.25L).",
+      "tags": [
+        "capital gains",
+        "Section 45",
+        "Section 47",
+        "Section 50C",
+        "Section 54",
+        "Section 54EC",
+        "Section 111A",
+        "Section 112A",
+        "LTCG",
+        "STCG",
+        "12.5%",
+        "20%"
+      ]
+    },
+    {
+      "id": "ita_deductions_complete",
+      "text": "Chapter VI-A Deductions — Complete List: 80C (₹1.5L — PPF/ELSS/NSC/LIC/EPF/tuition). 80CCC (pension fund ₹1.5L within 80C limit). 80CCD(1) NPS within ₹1.5L. 80CCD(1B) NPS additional ₹50,000. 80CCD(2) employer NPS no cap. 80D (health insurance ₹25K/₹50K). 80DD (disability dependent ₹75K/₹1.25L). 80DDB (specified diseases ₹40K/₹1L for senior). 80E (education loan interest, no limit, 8 years). 80EE (first home loan interest ₹50K, loan ≤ ₹35L). 80EEA (affordable housing ₹1.5L, stamp duty ≤ ₹45L). 80G (donations 50%/100%). 80GG (house rent no HRA, least of: rent-10% income, ₹5000/month, 25% income). 80GGC (political party donations). 80IA/80IB (infrastructure/industrial undertakings). 80IAC (startup 3-year holiday). 80JJA (employment generation). 80P (cooperative societies). 80QQB (royalty authors ₹3L). 80RRB (royalty patents ₹3L). 80TTA (savings interest ₹10K). 80TTB (senior citizen interest ₹50K). 80U (self disability ₹75K/₹1.25L).",
+      "tags": [
+        "80C",
+        "80D",
+        "80DD",
+        "80DDB",
+        "80E",
+        "80EEA",
+        "80G",
+        "80GG",
+        "80IAC",
+        "80TTA",
+        "80TTB",
+        "80U",
+        "deductions",
+        "Chapter VIA"
+      ]
+    },
+    {
+      "id": "ita_tds_complete",
+      "text": "TDS Provisions — Complete Sections: 192 (TDS on salary — as per slab). 193 (Interest on securities — 10%). 194 (Dividends — 10% if >₹5,000). 194A (Interest other than securities — 10%, threshold ₹40K/₹50K seniors). 194B (Lottery/crossword — 30% if >₹10,000). 194C (Contractors — 1%/2%, threshold ₹30K per contract or ₹1L annual). 194D (Insurance commission — 5%). 194DA (Life insurance maturity — 5% on profit portion if >₹1L). 194H (Commission/brokerage — 5%, threshold ₹15K). 194I (Rent — 10% plant/machinery; 10% land/building, threshold ₹2.4L/year). 194IA (Property sale — 1% if ≥₹50L). 194IB (Rent by individual — 5% if >₹50K/month). 194J (Professional/technical fees — 10%, threshold ₹30K). 194K (MF income — 10% for resident). 194LBC (securitisation trust — 25%/30%). 194N (cash withdrawal — 2% if >₹1Cr, 5% if no ITR for 3 years >₹20L). 194Q (purchase of goods — 0.1% if >₹50L). 194S (VDA/crypto — 1% if >₹10,000 or ₹50,000 specified persons). 195 (Payments to non-residents — DTAA rates apply). 196D (FII income).",
+      "tags": [
+        "TDS",
+        "192",
+        "193",
+        "194",
+        "194A",
+        "194C",
+        "194H",
+        "194I",
+        "194IA",
+        "194J",
+        "194N",
+        "194Q",
+        "194S",
+        "195",
+        "non-resident"
+      ]
+    },
+    {
+      "id": "ita_penalties_prosecution",
+      "text": "Penalty & Prosecution Sections: 270A (under-reporting: 50% of tax on under-reported income; misreporting: 200%). 271AAC (undisclosed income: 60% tax + 25% surcharge = effective 83%). 271AAD (false entry in books — equal to false entry amount). 271B (failure to get accounts audited — 0.5% of turnover or ₹1.5L, whichever lower). 271C (failure to deduct TDS — equal to TDS amount). 271H (failure to file TDS returns — ₹10K to ₹1L). 272A (failure to answer AO — ₹10K per default). 274/275 (procedure for penalty). 276B (failure to deposit TDS — rigorous imprisonment 3 months to 7 years + fine). 276C (wilful attempt to evade tax — 6 months to 7 years + fine). 276CC (failure to file return — 3 months to 2 years; if tax >₹25L: 6 months to 7 years). 276D (failure to produce accounts — fine). 277 (false statement in verification — 6 months to 7 years). 277A (falsification of books — 3 months to 2 years). 278 (abetment of false return — 3 months to 2 years; if tax >₹25L: 6 months to 7 years). 278A (second/subsequent offence — doubled imprisonment). 278B (offences by companies — company + managing director liable). 278C (offences by HUF — members liable). 278D (DOES NOT EXIST in Income Tax Act — commonly confused with PMLA Section 3 or Central Excise provisions).",
+      "tags": [
+        "270A",
+        "271AAC",
+        "271B",
+        "271C",
+        "276B",
+        "276C",
+        "277",
+        "278",
+        "278A",
+        "278B",
+        "278C",
+        "278D",
+        "penalty",
+        "prosecution",
+        "imprisonment",
+        "evasion"
+      ]
+    },
+    {
+      "id": "ita_assessment_procedure",
+      "text": "Assessment Procedure — Key Sections: 139 (Return of income — due dates: July 31 individual, Oct 31 audit, Nov 30 TP). 139(4) (Belated return — December 31). 139(5) (Revised return — December 31). 139(8A) (Updated return ITR-U — within 2 years, 25%-50% additional tax). 142 (Inquiry before assessment — notice for return/information). 143(1) (Intimation — summary processing with adjustments). 143(2) (Scrutiny notice — within 3 months of return filing deadline). 143(3) (Scrutiny assessment). 144 (Best judgment assessment — if return not filed). 147/148 (Reassessment — escaped income, 3 years if <₹50L; 10 years if >₹50L). 153 (Time limits for assessment — 9 months from end of AY). 154 (Rectification of mistake — 4 years). 156 (Notice of demand). 220-221 (Interest and penalty on defaulting assessee — 1% per month u/s 220(2)).",
+      "tags": [
+        "139",
+        "142",
+        "143",
+        "144",
+        "147",
+        "148",
+        "153",
+        "154",
+        "ITR-U",
+        "139(8A)",
+        "scrutiny",
+        "reassessment",
+        "belated return"
+      ]
+    },
+    {
+      "id": "ita_international_tax",
+      "text": "International Taxation Sections: 5A (Apportionment between spouses). 9 (Income deemed to accrue in India — business connection, property, salary in India). 90 (DTAA agreements — India has 90+ treaties). 90A (Adoption of agreement by Central Government). 91 (Relief for non-treaty countries — lower of Indian tax or foreign tax). 92 (Transfer pricing — ALP arm's length price). 92C (Most appropriate method for TP). 115A (Tax on dividends/royalties/FTS for non-residents — 20%/10%). 115AD (FII income). 115E (Non-resident Indians — investment income 20%, LTCG 10%). 115O (DDT abolished from 2020 — dividends taxable in hands of shareholder). DTAA benefits: India-USA (max 15% dividend, 10-15% royalty), India-UK, India-Mauritius (capital gains in residence country).",
+      "tags": [
+        "international tax",
+        "DTAA",
+        "Section 9",
+        "Section 90",
+        "transfer pricing",
+        "92",
+        "non-resident",
+        "115A",
+        "FII",
+        "Mauritius"
+      ]
+    },
+    {
+      "id": "ita_black_money_act",
+      "text": "Black Money (Undisclosed Foreign Income and Assets) and Imposition of Tax Act 2015: Section 3 (Charge of tax — 30% on undisclosed foreign income/assets). Section 10 (Penalty — 90% of undisclosed amount, i.e., 3x the tax). Section 42-43 (Prosecution — 3 to 10 years rigorous imprisonment for wilful evasion). Not part of Income Tax Act 1961 — standalone legislation. PMLA Section 3 (money laundering offence — knowingly involved in proceeds of crime). PMLA Section 4 (punishment — 3 to 7 years, extendable to 10 years for NDPS). Benami Transactions Prohibition Act 1988/2016: Section 3 (prohibition of benami transactions). Section 53 (rigorous imprisonment 1 to 7 years + fine up to 25% of market value). Prevention of Money Laundering: FATF compliant, ED enforces, reporting entity must file STR.",
+      "tags": [
+        "black money act 2015",
+        "PMLA",
+        "benami",
+        "Section 3",
+        "Section 4",
+        "Section 10",
+        "money laundering",
+        "ED",
+        "FATF",
+        "foreign assets",
+        "undisclosed"
+      ]
+    },
+    {
+      "id": "ita_search_survey",
+      "text": "Search, Seizure and Survey Sections: 131 (Power to call for information). 132 (Search and seizure — IT raid, warrant required). 132A (Power to requisition books from other agency). 132B (Application of seized assets). 133 (Power to call information from any person/institution). 133A (Survey — tax officer can visit business premises). 133B (Collection of information). 133C (Processing of information). Income found in search: taxed as undisclosed income, 60% flat tax + 25% surcharge (effective 83%) under Section 68/69/69A/69B/69C. Section 68 (Unexplained cash credit). Section 69 (Unexplained investments). Section 69A (Unexplained money, jewellery, valuables). Section 69B (Amount of investments not fully disclosed). Section 69C (Unexplained expenditure).",
+      "tags": [
+        "132",
+        "133A",
+        "search seizure",
+        "survey",
+        "Section 68",
+        "Section 69",
+        "69A",
+        "69B",
+        "69C",
+        "unexplained",
+        "cash credit",
+        "83%",
+        "IT raid"
+      ]
+    }
+  ]
+}

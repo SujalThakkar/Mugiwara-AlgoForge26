@@ -45,6 +45,26 @@ class GatingSystem:
     def __init__(self):
         pass
     
+    def check_query(self, query: str) -> Dict:
+        """
+        Lightweight pre-generation check: Is query within financial domain?
+        Returns: {
+            'passed': bool,
+            'message': str (if failed)
+        }
+        """
+        if self._check_scope(query):
+            return {'passed': True}
+        
+        return {
+            'passed': False,
+            'message': (
+                "I'm Bandhu, your financial assistant. "
+                "I can only help with budgets, expenses, savings, and investments. "
+                "Could you rephrase your question?"
+            )
+        }
+    
     def validate(self, response: str, memory_context: Dict, query: str) -> Dict:
         """
         Run all gates.

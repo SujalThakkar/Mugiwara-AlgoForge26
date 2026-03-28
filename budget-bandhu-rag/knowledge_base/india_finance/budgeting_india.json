@@ -1,0 +1,125 @@
+{
+  "document_id": "budgeting_india_v3",
+  "source": "india_finance",
+  "category": "budgeting",
+  "chunks": [
+    {
+      "id": "50_30_20_rule",
+      "text": "50-30-20 Budgeting Rule adapted for India: 50% Needs — rent, groceries, utilities, EMIs, insurance premiums, commute. 30% Wants — dining out, OTT subscriptions, shopping, travel, entertainment. 20% Savings & Investments — SIP, PPF, emergency fund, FD, NPS. For Mumbai/Bengaluru/Delhi where rent is high, adjust to 60-20-20. Key: pay yourself first — auto-transfer savings on salary day.",
+      "tags": [
+        "50-30-20",
+        "budgeting",
+        "rule",
+        "savings",
+        "needs",
+        "wants",
+        "salary"
+      ]
+    },
+    {
+      "id": "emergency_fund",
+      "text": "Emergency Fund: Target: 6 months of monthly expenses (3 months minimum). Where to keep: Liquid Mutual Fund (better than savings account, instant redemption T+1), or high-interest savings account (IDFC, Kotak 7%). Single income household: 9-12 months. If EMIs are high: keep more buffer. Do NOT invest emergency fund in stocks or ELSS. Replenish immediately after use.",
+      "tags": [
+        "emergency fund",
+        "6 months",
+        "liquid fund",
+        "savings",
+        "job loss",
+        "medical"
+      ]
+    },
+    {
+      "id": "salary_allocation_india",
+      "text": "Recommended Salary Allocation (India, ₹50,000-₹1,00,000/month): Rent: max 30% of take-home. Groceries: ₹5,000-10,000. Transport: ₹2,000-5,000. Utilities (electricity, phone, internet): ₹2,000-4,000. SIP/investments: minimum 20%. Entertainment/dining: 10-15%. Clothes/shopping: 5%. Emergency fund build-up: 5%. Review budget every 3 months. Track with apps: ET Money, Walnut, Money Manager.",
+      "tags": [
+        "salary allocation",
+        "₹50000",
+        "₹1 lakh",
+        "rent",
+        "groceries",
+        "SIP",
+        "budget India"
+      ]
+    },
+    {
+      "id": "debt_management",
+      "text": "Debt Management in India: Avalanche method — pay highest interest debt first (personal loan 18%, credit card 36%). Snowball — pay smallest balance first for motivation. Never pay only credit card minimum — the interest trap. EMI-to-income ratio should not exceed 40-50%. Debt consolidation loan: single lower-rate loan to clear multiple high-rate debts. CIBIL improvement: on-time payment is #1 factor (35% weightage).",
+      "tags": [
+        "debt",
+        "EMI",
+        "avalanche",
+        "snowball",
+        "credit card",
+        "consolidation",
+        "CIBIL"
+      ]
+    },
+    {
+      "id": "india_cost_of_living",
+      "text": "India City Cost of Living (approx monthly 2024): Mumbai 1BHK rent: ₹20,000-50,000. Bengaluru: ₹15,000-35,000. Delhi NCR: ₹12,000-30,000. Pune: ₹12,000-25,000. Hyderabad: ₹12,000-28,000. Groceries family of 4: ₹8,000-15,000. Utilities+internet: ₹3,000-5,000. School fees: ₹5,000-25,000/month. Petrol (full tank): ₹4,000-5,000. Dining out per person: ₹300-800 (mid-range).",
+      "tags": [
+        "cost of living",
+        "Mumbai",
+        "Bengaluru",
+        "Delhi",
+        "Pune",
+        "rent",
+        "groceries",
+        "2024"
+      ]
+    },
+    {
+      "id": "retirement_planning",
+      "text": "Retirement Planning India: Target corpus: 25-30x annual expenses (4% withdrawal rule). At ₹1L/month expenses: need ₹3-3.6 Crore corpus. Inflation adjustment: 6-7% India inflation — double expenses every 10-12 years. Best instruments: NPS (low cost, tax benefit), EPF, ELSS, balanced advantage funds. Start at 25 not 45 — difference is 10x corpus. Rule of 72: at 8% return, money doubles every 9 years. Post-retirement: shift to debt/hybrid for stability.",
+      "tags": [
+        "retirement",
+        "corpus",
+        "4% rule",
+        "NPS",
+        "EPF",
+        "inflation",
+        "25x",
+        "planning"
+      ]
+    },
+    {
+      "id": "financial_goals_framework",
+      "text": "Financial Goals Framework: Short-term (< 3 years): FD, RD, liquid funds, short-term debt funds. Medium-term (3-5 years): ELSS, balanced hybrid funds, NSC. Long-term (5+ years): equity mutual funds, stocks, PPF, NPS, real estate. SMART goals: Specific (₹10L for car), Measurable (SIP calculator), Achievable (check income), Relevant (priority), Time-bound (3 years). Review and rebalance portfolio every 6 months.",
+      "tags": [
+        "financial goals",
+        "short term",
+        "long term",
+        "FD",
+        "equity",
+        "SMART",
+        "rebalance"
+      ]
+    },
+    {
+      "id": "swiggy_zomato_spending",
+      "text": "Food Delivery Spending in India: Average Swiggy/Zomato order: ₹350-500. Ordering 3x/week: ₹5,400-6,500/month. Annual: ₹65,000-78,000. Opportunity cost: ₹6,000/month invested in SIP at 12% for 10 years = ₹14 lakhs. Tips to reduce: meal prep Sunday, cook 4 days/week, use Swiggy One/Zomato Gold subscription (₹149-299/month, saves 20-40%). Target food delivery budget: max ₹2,000-3,000/month.",
+      "tags": [
+        "Swiggy",
+        "Zomato",
+        "food delivery",
+        "spending",
+        "₹350",
+        "monthly",
+        "opportunity cost"
+      ]
+    },
+    {
+      "id": "ott_subscriptions",
+      "text": "OTT Subscription Costs India 2024: Netflix — ₹149/month (mobile), ₹499 (HD), ₹649 (4K). Amazon Prime — ₹1,499/year (₹125/month). Disney+ Hotstar — ₹149/month (Super), ₹299 (Premium). Sony LIV — ₹299/month. ZEE5 — ₹99/month. Spotify — ₹119/month. YouTube Premium — ₹139/month. All combined: ₹1,500-2,000/month. Tip: share plans with family, rotate subscriptions monthly to cut cost to ₹300-400.",
+      "tags": [
+        "Netflix",
+        "Amazon Prime",
+        "Hotstar",
+        "OTT",
+        "subscription",
+        "entertainment",
+        "₹149"
+      ]
+    }
+  ]
+}

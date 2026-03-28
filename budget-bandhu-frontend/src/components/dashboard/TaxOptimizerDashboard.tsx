@@ -17,7 +17,15 @@ interface TaxInvestment {
 }
 
 export function TaxOptimizerDashboard() {
-    const maxLimit80C = mockData.tax.maxLimit80C;
+    const maxLimit80C = mockData.tax?.maxLimit80C || 150000;
+    
+    if (!mockData.tax || !mockData.tax.investments) {
+        return (
+            <div className="flex items-center justify-center p-6 h-[300px] bg-white/70 rounded-2xl border border-white/50">
+                <p className="text-gray-500 font-medium">Accumulating tax data...</p>
+            </div>
+        );
+    }
 
     const getInvestStyle = (category: string) => {
         switch (category) {

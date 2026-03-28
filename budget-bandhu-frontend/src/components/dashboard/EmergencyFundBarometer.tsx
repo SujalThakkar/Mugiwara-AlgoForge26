@@ -2,18 +2,24 @@
 
 import { motion } from 'framer-motion';
 import { Shield, TrendingUp, AlertTriangle, CheckCircle, DollarSign, Calendar } from 'lucide-react';
-import { mockData } from '@/lib/api/mock-data';
 
 interface EmergencyFundBarometerProps {
     goal?: any;
 }
 
 export function EmergencyFundBarometer({ goal }: EmergencyFundBarometerProps) {
-    const emergencyGoal = goal || mockData.goals.find(g => g.name === 'Emergency Fund') || mockData.goals[0];
-    const currentAmount = emergencyGoal.current;
-    const targetAmount = emergencyGoal.target;
-    const monthlyExpenses = mockData.dashboardSummary.monthSpent; // Ideally pass this too, but mock is fine for now
-    const monthsCovered = currentAmount / monthlyExpenses;
+    const emergencyGoal = goal;
+    if (!emergencyGoal) {
+        return (
+            <div className="flex items-center justify-center h-full min-h-[300px] bg-gray-100/10 rounded-3xl border border-white/5">
+                <p className="text-indigo-200 font-medium">Accumulating goal data...</p>
+            </div>
+        );
+    }
+    const currentAmount = emergencyGoal.current || 0;
+    const targetAmount = emergencyGoal.target || 1;
+    const monthlyExpenses = emergencyGoal.monthly_expenses || 30000; // sensible default
+    const monthsCovered = monthlyExpenses > 0 ? currentAmount / monthlyExpenses : 0;
     const percentage = (currentAmount / targetAmount) * 100;
     const recommendedMonths = 6;
 

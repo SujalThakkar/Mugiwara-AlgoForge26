@@ -11,6 +11,10 @@ interface Transaction {
     category: string;
     type: 'debit' | 'credit';
     isAnomaly: boolean;
+    anomalySeverity?: 'HIGH' | 'MEDIUM' | 'LOW' | 'NORMAL';
+    anomalyType?: string;
+    anomalyReason?: string;
+    anomalyScore?: number;
 }
 
 interface TransactionCardProps {
@@ -29,10 +33,27 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
                         <div className="flex items-center gap-2">
                             <h4 className="font-semibold text-gray-900">{transaction.merchant}</h4>
                             {transaction.isAnomaly && (
-                                <AlertCircle className="w-4 h-4 text-coral-500" />
+                                <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold ${
+                                    transaction.anomalySeverity === 'HIGH' ? 'bg-red-100 text-red-700' :
+                                    transaction.anomalySeverity === 'MEDIUM' ? 'bg-orange-100 text-orange-700' :
+                                    'bg-yellow-100 text-yellow-700'
+                                }`}>
+                                    <AlertCircle className="w-3 h-3" />
+                                    ⚠ {transaction.anomalySeverity || 'ANOMALY'}
+                                </div>
                             )}
                         </div>
                         <CategoryBadge category={transaction.category} />
+                        {transaction.isAnomaly && (transaction.anomalyReason || transaction.anomalyType) && (
+                            <div className="mt-1 flex flex-col gap-0.5">
+                                {transaction.anomalyType && (
+                                    <span className="text-[10px] font-bold text-red-700 uppercase tracking-widest">{transaction.anomalyType}</span>
+                                )}
+                                {transaction.anomalyReason && (
+                                    <p className="text-xs text-red-600 italic leading-snug">{transaction.anomalyReason}</p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="text-right">

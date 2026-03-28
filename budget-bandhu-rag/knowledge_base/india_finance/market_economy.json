@@ -1,0 +1,64 @@
+{
+  "document_id": "market_economy_india",
+  "source": "india_finance",
+  "category": "markets",
+  "chunks": [
+    {
+      "id": "sensex_nifty",
+      "text": "Indian Stock Market Indices: SENSEX — BSE index of 30 large-cap stocks. NIFTY 50 — NSE index of 50 large-cap stocks. NIFTY Next 50 — next 50 large caps. NIFTY Midcap 150, Smallcap 250. Sectoral: NIFTY Bank, IT, Pharma, FMCG, Auto. Market cap classification: Large cap > ₹20,000 Cr, Mid cap ₹5,000-20,000 Cr, Small cap < ₹5,000 Cr. Trading hours: 9:15 AM to 3:30 PM, Monday-Friday. Pre-open session: 9:00-9:15 AM.",
+      "tags": [
+        "SENSEX",
+        "NIFTY",
+        "BSE",
+        "NSE",
+        "large cap",
+        "mid cap",
+        "trading hours",
+        "index"
+      ]
+    },
+    {
+      "id": "inflation_india",
+      "text": "Inflation in India: CPI (Consumer Price Index) — RBI target 4% (±2% band). WPI (Wholesale Price Index) — tracks wholesale prices. CPI components: Food & beverages 45.86%, Housing 10.07%, Fuel 6.84%, Miscellaneous 28.32%. Historical average: 5-7% per year. Effect on investments: FD rate must beat inflation for real returns. Real return = nominal return - inflation. RBI adjusts repo rate to control inflation. High inflation → RBI raises rates → loans costlier.",
+      "tags": [
+        "CPI",
+        "WPI",
+        "inflation",
+        "4%",
+        "RBI target",
+        "real return",
+        "FD",
+        "repo rate"
+      ]
+    },
+    {
+      "id": "sebi_regulations",
+      "text": "SEBI (Securities & Exchange Board of India) Key Rules: Mutual fund expense ratio cap: 1.05% (direct), 1.80% (regular) for equity. No entry load. Exit load: max 1% (first year). KYC mandatory for investing. Insider trading prohibited — SEBI LODR regulations. Mutual fund SIP minimum: ₹100 (AMFI mandate from 2024). Nominee mandatory for demat accounts. ASBA (Application Supported by Blocked Amount) for IPO applications — no advance payment.",
+      "tags": [
+        "SEBI",
+        "expense ratio",
+        "exit load",
+        "KYC",
+        "insider trading",
+        "IPO",
+        "ASBA",
+        "mutual fund"
+      ]
+    },
+    {
+      "id": "budget_2024_highlights",
+      "text": "Union Budget 2024-25 Key Finance Highlights: LTCG tax increased: 10% to 12.5% (equity, >1 year). STCG increased: 15% to 20% (equity, <1 year). LTCG exemption limit: ₹1,25,000 (up from ₹1,00,000). STT on F&O increased. Capital gains indexation benefit removed for real estate (flat 12.5% without indexation). Standard deduction increased ₹50,000 to ₹75,000 (new regime). NPS employer deduction: 10% to 14% of salary. Angel tax abolished for all investors.",
+      "tags": [
+        "budget 2024",
+        "LTCG",
+        "STCG",
+        "12.5%",
+        "20%",
+        "standard deduction",
+        "75000",
+        "angel tax",
+        "NPS"
+      ]
+    }
+  ]
+}

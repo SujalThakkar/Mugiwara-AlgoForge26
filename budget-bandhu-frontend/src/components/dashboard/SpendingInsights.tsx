@@ -15,6 +15,10 @@ interface Insight {
 
 interface SpendingInsightsProps {
     insights?: any[];
+    weeklySummary?: {
+        save_potential: number;
+        message: string;
+    };
 }
 
 export function SpendingInsights(props: SpendingInsightsProps) {
@@ -33,7 +37,7 @@ export function SpendingInsights(props: SpendingInsightsProps) {
         }
     };
 
-    const { insights: apiInsights } = props;
+    const { insights: apiInsights, weeklySummary } = props;
 
     // Map API insights to UI format or use mock if empty
     const displayInsights: Insight[] = (apiInsights && apiInsights.length > 0) ? apiInsights.map((i: any, index: number) => {
@@ -156,12 +160,12 @@ export function SpendingInsights(props: SpendingInsightsProps) {
                     <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                         <Lightbulb className="w-5 h-5 text-white" />
                     </div>
-                    <div>
+                    <>
                         <p className="text-sm text-white font-semibold">Weekly Summary</p>
                         <p className="text-xs text-white/80">
-                            Save up to <span className="font-bold text-white">₹5,300/month</span>! 💰
+                            {weeklySummary?.message || <>Save up to <span className="font-bold text-white">₹5,300/month</span>! 💰</>}
                         </p>
-                    </div>
+                    </>
                 </div>
             </motion.div>
         </motion.div>

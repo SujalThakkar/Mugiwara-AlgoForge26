@@ -15,6 +15,10 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { useUserStore } from '@/lib/store/useUserStore';
+import { mlApi } from '@/lib/api/ml-api';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface AILearningModalProps {
     topic: {
@@ -43,22 +47,40 @@ export function AILearningModal({ topic, isOpen, onClose }: AILearningModalProps
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    const { userId } = useUserStore();
+    const activeUserId = userId || "demo_user";
+
     useEffect(() => {
         if (isOpen) {
-            // Initial AI greeting with personalized lesson
-            const greeting: Message = {
-                id: '1',
-                role: 'ai',
-                content: `Hi! I'm your AI learning assistant powered by Phi3. Let's learn about **${topic.title}** together!\n\nBased on your transaction history, I noticed:\n• You spend ₹15,000/month on average\n• Your largest expense category is Food (₹5,500)\n• You've saved ₹12,000 in the last 3 months\n\nLet me create a personalized lesson for you on ${topic.title} using YOUR data!`,
-                suggestions: [
-                    'Show me a budgeting strategy',
-                    'How can I save more?',
-                    'Calculate my savings potential',
-                ],
+            const fetchLesson = async () => {
+                setIsLoading(true);
+                try {
+                    const sessionId = `lesson_${Date.now()}`;
+                    const res = await mlApi.literacy.getLesson(activeUserId, topic.title, 'beginner', sessionId);
+                    const lessonText = `**${res.lesson.title}**\n\n${res.lesson.content}\n\n**Example specific to you:**\n> ${res.lesson.personalized_example}\n\n**Key Takeaways:**\n${res.lesson.key_points.map((kp: string) => `• ${kp}`).join('\n')}\n\nLet me know if you have any questions or want to see a quiz!`;
+                    
+                    const greeting: Message = {
+                        id: '1',
+                        role: 'ai',
+                        content: lessonText,
+                        suggestions: [
+                            'Generate a quiz',
+                            'Show an example',
+                            'Tell me more',
+                        ],
+                    };
+                    setMessages([greeting]);
+                } catch (e) {
+                    setMessages([{ id: '1', role: 'ai', content: 'Could not load lesson right now.' }]);
+                } finally {
+                    setIsLoading(false);
+                }
             };
-            setMessages([greeting]);
+            fetchLesson();
+        } else {
+            setMessages([]);
         }
-    }, [isOpen, topic]);
+    }, [isOpen, topic, activeUserId]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -74,57 +96,28 @@ export function AILearningModal({ topic, isOpen, onClose }: AILearningModalProps
         };
 
         setMessages((prev) => [...prev, userMessage]);
+        const currentInput = inputValue;
         setInputValue('');
         setIsLoading(true);
 
-        // Simulate AI response (replace with actual Phi3 API call)
-        setTimeout(() => {
-            const aiResponse = generateAIResponse(inputValue, topic.id);
+        try {
+            const sessionId = `lesson_${Date.now()}`;
+            const chatResponse = await mlApi.chat.send(activeUserId, currentInput, sessionId);
+            const aiResponse: Message = {
+                id: Date.now().toString(),
+                role: 'ai',
+                content: chatResponse.response,
+            };
             setMessages((prev) => [...prev, aiResponse]);
+        } catch (error) {
+            setMessages((prev) => [...prev, {
+                id: Date.now().toString(),
+                role: 'ai',
+                content: "Sorry, I couldn't reach the AI server right now."
+            }]);
+        } finally {
             setIsLoading(false);
-        }, 1500);
-    };
-
-    const generateAIResponse = (userInput: string, topicId: string): Message => {
-        const lowerInput = userInput.toLowerCase();
-
-        // Intent detection for calculator routing
-        if (lowerInput.includes('invest') || lowerInput.includes('sip')) {
-            return {
-                id: Date.now().toString(),
-                role: 'ai',
-                content: `Great question! Based on your current savings of ₹12,000, I recommend starting a SIP.\n\nWith ₹5,000/month SIP at 12% annual return:\n• After 5 years: ₹4.1 lakhs\n• After 10 years: ₹11.6 lakhs\n• After 20 years: ₹49.5 lakhs\n\nWould you like to try our SIP Calculator with your numbers?`,
-                calculatorLink: { name: 'SIP Calculator', href: '/literacy/calculators/sip?amount=5000', amount: 5000 },
-                suggestions: ['How do I start SIP?', 'What are mutual funds?', 'Show tax benefits'],
-            };
         }
-
-        if (lowerInput.includes('budget') || lowerInput.includes('save')) {
-            return {
-                id: Date.now().toString(),
-                role: 'ai',
-                content: `Perfect! Let's create a budget based on YOUR spending:\n\n**Your Current Spending:**\n• Food: ₹5,500 (37%)\n• Transport: ₹3,000 (20%)\n• Entertainment: ₹2,500 (17%)\n• Others: ₹4,000 (26%)\n\n**My Suggestion (50-30-20 Rule):**\n• Needs: ₹7,500 (50%)\n• Wants: ₹4,500 (30%)\n• Savings: ₹3,000 (20%)\n\nYou could save ₹3,000 more by reducing entertainment to ₹1,500!`,
-                suggestions: ['How to track budget?', 'Create savings goal', 'Show spending trends'],
-            };
-        }
-
-        if (lowerInput.includes('tax')) {
-            return {
-                id: Date.now().toString(),
-                role: 'ai',
-                content: `Let me explain tax-saving based on your income!\n\nIf your annual income is ₹6 lakhs:\n• Basic exemption: ₹2.5L (no tax)\n• 5% slab: ₹2.5L-₹5L = ₹12,500 tax\n• 20% slab: ₹5L-₹6L = ₹20,000 tax\n\n**Total Tax: ₹32,500**\n\nYou can save tax by investing in:\n• ELSS Mutual Funds (₹1.5L limit)\n• PPF (₹1.5L limit)\n• NPS (₹50K additional)\n\nWant to calculate your exact tax?`,
-                calculatorLink: { name: 'Tax Calculator', href: '/literacy/calculators/tax' },
-                suggestions: ['What is 80C?', 'Best tax-saving funds', 'Calculate my tax'],
-            };
-        }
-
-        // Default response
-        return {
-            id: Date.now().toString(),
-            role: 'ai',
-            content: `That's a great question about ${topic.title}!\n\nBased on your financial profile, here's what I recommend:\n\n1. **Start Small:** Begin with what you can afford\n2. **Be Consistent:** Small regular steps beat large irregular ones\n3. **Track Progress:** Use our dashboard to monitor\n\nLet me know if you want specific calculations or examples!`,
-            suggestions: ['Show me examples', 'Calculate for me', 'Next topic'],
-        };
     };
 
     const handleSuggestionClick = (suggestion: string) => {
@@ -194,12 +187,8 @@ export function AILearningModal({ topic, isOpen, onClose }: AILearningModalProps
                                         <span className="text-xs font-semibold text-emerald-600">AI Assistant</span>
                                     </div>
                                 )}
-                                <div className="prose prose-sm max-w-none">
-                                    {message.content.split('\n').map((line, idx) => (
-                                        <p key={idx} className={message.role === 'user' ? 'text-white' : 'text-gray-800'}>
-                                            {line}
-                                        </p>
-                                    ))}
+                                <div className={`prose prose-sm max-w-none prose-p:leading-relaxed prose-p:mb-2 prose-ul:my-1 prose-li:my-0 ${message.role === 'user' ? 'text-white prose-strong:text-emerald-100' : 'text-gray-800 prose-strong:text-emerald-600'}`}>
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
                                 </div>
 
                                 {/* Calculator Link */}

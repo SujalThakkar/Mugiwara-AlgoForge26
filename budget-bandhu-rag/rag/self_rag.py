@@ -137,7 +137,36 @@ class SelfRAGEvaluator:
         certain_future      = re.compile(r'\bwill definitely\b|\bguaranteed\b|\bcertain\b')
         if future_date_pattern.search(generated_response) and certain_future.search(generated_response):
             hallucination_score = max(hallucination_score, 0.6)
-            failed.append("NO_HALLUCINATION")
+
+        # ── Check: fabricated Indian legal / tax section numbers ──────────────
+        _VERIFIED_TAX_SECTIONS = {
+            # Income Tax Act — commonly cited, verified real sections
+            "80c", "80d", "80e", "80g", "80gg", "80tta", "80ttb", "87a",
+            "10", "10a", "10b", "24", "24b", "44ad", "44ada", "44ae",
+            "139", "139a", "143", "147", "148", "194", "194a", "194c",
+            "194h", "194i", "194j", "195", "206c",
+            # Penalty / prosecution sections
+            "271", "271a", "271aac", "271aad", "272", "272a",
+            "276", "276b", "276c", "276cc", "276ccc",
+            "277", "278", "278a", "278b", "278c", "278e",
+            # GST Act
+            "9", "10", "15", "16", "17", "18",
+            # FEMA
+            "13",
+        }
+        _SECTION_RE = re.compile(
+            r'section\s+(\d{1,3}[A-Za-z]{0,4}(?:\(\d+\))?)',
+            re.IGNORECASE
+        )
+        for m in _SECTION_RE.finditer(generated_response):
+            sec_raw   = m.group(1)
+            sec_clean = re.sub(r'[^0-9a-z]', '', sec_raw.lower())
+            # Flag if NOT in whitelist AND NOT present verbatim in context
+            if (sec_clean not in _VERIFIED_TAX_SECTIONS
+                    and sec_raw.lower() not in context_injected.lower()):
+                hallucination_score = max(hallucination_score, 0.8)
+                logger.warning(f"[SELF-RAG] 🚨 Unverified section cited: Section {sec_raw}")
+                break
 
         if hallucination_score >= 0.5:
             failed.append("NO_HALLUCINATION")

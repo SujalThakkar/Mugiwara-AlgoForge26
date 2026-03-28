@@ -37,6 +37,9 @@ export interface Goal {
     // ML Forecast Data
     eta_days?: number | null;
     on_track?: boolean;
+    projected_completion_date?: string | null;
+    shortfall_risk?: string | null;
+    ai_verified?: boolean;
 }
 
 export default function GoalsPage() {
@@ -70,7 +73,10 @@ export default function GoalsPage() {
                 color: g.color,
                 milestones: g.milestones || [],
                 eta_days: g.eta_days,
-                on_track: g.on_track
+                on_track: g.on_track,
+                projected_completion_date: g.projected_completion_date,
+                shortfall_risk: g.shortfall_risk,
+                ai_verified: g.ai_verified
             })));
         }
     }, [apiGoals]);
@@ -206,7 +212,7 @@ export default function GoalsPage() {
         }
 
         // 3. ML Forecast: On Track
-        if (goal.on_track === true) {
+        if (goal.on_track === true && goal.ai_verified) {
             return {
                 title: "On Track (AI Verified)",
                 message: `You are projected to hit this goal in ${goal.eta_days} days. Keep it up!`,

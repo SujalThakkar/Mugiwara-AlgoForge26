@@ -21,12 +21,29 @@ from api.models.transaction import (
     TransactionCreate, TransactionBulkUpload, Transaction, 
     TransactionResponse, TransactionStats
 )
+from pydantic import BaseModel
+from typing import Any
 
 # ML Imports
 from intelligence.ml_client import categorize, detect_anomalies
 from intelligence.user_anomaly_detector import UserAnomalyDetector
 
 router = APIRouter(prefix="/api/v1/transactions", tags=["Transactions"])
+
+class TransactionCreateRequest(BaseModel):
+    """Flexible transaction body — accepts user_id inline and transaction_type alias."""
+    user_id: str = "+91-9876543210"
+    description: str
+    amount: float
+    transaction_type: Optional[str] = "Debit"  # Debit / Credit (case-insensitive)
+    type: Optional[str] = None                  # alternative field name
+    date: Optional[str] = None
+    category: Optional[str] = None
+    notes: Optional[str] = None
+
+    def resolved_type(self) -> str:
+        raw = (self.type or self.transaction_type or "Debit").lower()
+        return "debit" if raw == "debit" else "credit"
 
 # ML instances
 user_anomaly_detector: Optional[UserAnomalyDetector] = None
@@ -50,13 +67,27 @@ async def process_through_ml_pipeline(transactions: List[dict], user_id: str = N
     try:
         descriptions = [t.get("description", "") for t in transactions]
         cat_result = await categorize(descriptions)
+        
+        ml_results = cat_result.get("results", [])
         categorized = []
         for i, t in enumerate(transactions):
             t_copy = t.copy()
-            t_copy["category"] = cat_result["categories"][i]
-            t_copy["confidence"] = 0.95
+            # Handle results as list of dicts or list of strings
+            if i < len(ml_results):
+                res = ml_results[i]
+                if isinstance(res, dict):
+                    t_copy["category"] = res.get("category", "Uncategorized")
+                    t_copy["confidence"] = res.get("confidence", 0.95)
+                else:
+                    t_copy["category"] = str(res)
+                    t_copy["confidence"] = 0.95
+            else:
+                t_copy["category"] = "Uncategorized"
+                t_copy["confidence"] = 0.0
+            
             t_copy["method"] = "llm"
             categorized.append(t_copy)
+            
         cat_stats = cat_result.get("stats", {})
     except Exception as e:
         logger.warning(f"⚠️ Categorizer failed - using Uncategorized: {e}")
@@ -71,7 +102,7 @@ async def process_through_ml_pipeline(transactions: List[dict], user_id: str = N
     try:
         # We run the basic remote isolation forest first
         anomaly_result = await detect_anomalies(categorized)
-        enriched = anomaly_result.get("result", categorized)
+        enriched = anomaly_result.get("anomalies", categorized)
         anomaly_stats = anomaly_result.get("stats", {})
         
         # Overlay user anomaly detector if history is passed
@@ -103,58 +134,67 @@ async def update_budget_spent(db, user_id: str, category: str, amount: float):
 
 @router.post("", response_model=dict)
 async def add_transaction(
-    user_id: str, 
-    transaction: TransactionCreate, 
+    request: TransactionCreateRequest,
     db=Depends(get_database)
 ):
-    """Add a single transaction (ML Processed)"""
+    """Add a single transaction (ML Processed) — accepts user_id in body."""
     if db is None:
         raise HTTPException(status_code=500, detail="Database connection failed")
     try:
-        # Prepare for ML pipeline
+        user_id = request.user_id
+        txn_type = request.resolved_type()
+        txn_date = request.date or datetime.utcnow().strftime("%Y-%m-%d")
+
         txn_dict = {
-            "date": str(transaction.date),
-            "amount": transaction.amount,
-            "description": transaction.description,
-            "type": transaction.type
+            "date": txn_date,
+            "amount": request.amount,
+            "description": request.description,
+            "type": txn_type
         }
-        
-        # Run pipeline
+
+        # Run ML pipeline
         enriched, _, _ = await process_through_ml_pipeline([txn_dict], user_id=user_id)
         enriched_txn = enriched[0]
-        
-        # Mongo Document
-        final_category = transaction.category if transaction.category else enriched_txn["category"]
-        final_method = "manual" if transaction.category else enriched_txn.get("method", "manual")
-        final_confidence = 1.0 if transaction.category else (enriched_txn.get("category_confidence") or enriched_txn.get("confidence", 0.0))
+
+        final_category = request.category if request.category else enriched_txn.get("category", "Other")
+        final_method   = "manual" if request.category else enriched_txn.get("method", "ml")
+        final_confidence = 1.0 if request.category else enriched_txn.get("confidence", 0.0)
+
+        is_anomaly     = enriched_txn.get("is_anomaly", False)
+        anomaly_score  = enriched_txn.get("anomaly_score", 0.0)
+        anomaly_sev    = enriched_txn.get("severity") or enriched_txn.get("anomaly_severity")
+        anomaly_reason = enriched_txn.get("reason") or enriched_txn.get("anomaly_reason")
 
         doc = {
             "user_id": user_id,
-            "date": transaction.date,
-            "amount": transaction.amount,
-            "description": transaction.description,
-            "type": transaction.type,
-            "notes": transaction.notes,
-            # Enriched
+            "date": txn_date,
+            "amount": request.amount,
+            "description": request.description,
+            "type": txn_type,
+            "notes": request.notes,
             "category": final_category,
             "category_confidence": final_confidence,
             "categorization_method": final_method,
-            "is_anomaly": enriched_txn["is_anomaly"],
-            "anomaly_score": enriched_txn["anomaly_score"],
-            "anomaly_severity": enriched_txn["severity"],
+            "is_anomaly": is_anomaly,
+            "anomaly_score": anomaly_score,
+            "anomaly_severity": anomaly_sev,
+            "anomaly_reason": anomaly_reason,
+            "anomaly_flagged_at": datetime.utcnow() if is_anomaly else None,
             "created_at": datetime.utcnow()
         }
-        
+
         result = await db["transactions"].insert_one(doc)
-        
-        if transaction.type == 'debit':
-            await update_budget_spent(db, user_id, final_category, transaction.amount)
-        
+
+        if txn_type == "debit":
+            await update_budget_spent(db, user_id, final_category, request.amount)
+
         return {
             "message": "Transaction added",
             "transaction_id": str(result.inserted_id),
             "category": final_category,
-            "is_anomaly": enriched_txn["is_anomaly"]
+            "is_anomaly": is_anomaly,
+            "anomaly_score": anomaly_score,
+            "anomaly_severity": anomaly_sev,
         }
     except Exception as e:
         import traceback
@@ -191,15 +231,23 @@ async def add_transactions_bulk(
     
     for i, enriched_txn in enumerate(enriched):
         original = data.transactions[i]
+        is_anomaly     = enriched_txn.get("is_anomaly", False)
+        anomaly_score  = enriched_txn.get("anomaly_score", 0.0)
+        anomaly_sev    = enriched_txn.get("severity") or enriched_txn.get("anomaly_severity")
+        anomaly_type   = enriched_txn.get("anomaly_type") or enriched_txn.get("type")
+        anomaly_reason = enriched_txn.get("reason") or enriched_txn.get("anomaly_reason")
         doc = {
             "user_id": data.user_id,
             **original.dict(),
             "category": enriched_txn["category"],
-            "category_confidence": enriched_txn["confidence"],
-            "categorization_method": enriched_txn["method"],
-            "is_anomaly": enriched_txn["is_anomaly"],
-            "anomaly_score": enriched_txn["anomaly_score"],
-            "anomaly_severity": enriched_txn["severity"],
+            "category_confidence": enriched_txn.get("confidence", 0.0),
+            "categorization_method": enriched_txn.get("method", "ml"),
+            "is_anomaly": is_anomaly,
+            "anomaly_score": anomaly_score,
+            "anomaly_severity": anomaly_sev,
+            "anomaly_type": anomaly_type,
+            "anomaly_reason": anomaly_reason,
+            "anomaly_flagged_at": datetime.utcnow() if is_anomaly else None,
             "created_at": datetime.utcnow()
         }
         docs.append(doc)
@@ -228,39 +276,51 @@ async def upload_csv(
     db=Depends(get_database)
 ):
     """Upload transactions via CSV"""
-    # 1. Read file
-    content = await file.read()
-    df = pd.read_csv(io.BytesIO(content))
-    
-    # 2. Map columns (Case insensitive)
-    # Expected: date, amount, description, [type, category]
-    df.columns = [c.lower() for c in df.columns]
-    
-    # 3. Validation
-    required = ["date", "amount", "description"]
-    missing = [c for c in required if c not in df.columns]
-    if missing:
-        raise HTTPException(status_code=400, detail=f"Missing columns: {missing}")
+    try:
+        # 1. Read file
+        content = await file.read()
+        df = pd.read_csv(io.BytesIO(content))
         
-    # 4. Convert to list of dicts
-    transactions = []
-    for _, row in df.iterrows():
-        transactions.append({
-            "date": str(row["date"]),
-            "amount": float(row["amount"]),
-            "description": str(row["description"]),
-            "type": row.get("type", "debit"),
-            "category": row.get("category", None)
-        })
+        # 2. Map columns (Case insensitive)
+        df.columns = [c.lower().strip() for c in df.columns]
         
-    # 5. Reuse bulk logic
-    from api.models.transaction import TransactionBulkUpload, TransactionCreate
-    data = TransactionBulkUpload(
-        user_id=user_id,
-        transactions=[TransactionCreate(**t) for t in transactions]
-    )
-    
-    return await add_transactions_bulk(data, db=db)
+        # 3. Validation
+        required = ["date", "amount", "description"]
+        missing = [c for c in required if c not in df.columns]
+        if missing:
+            raise HTTPException(status_code=400, detail=f"Missing columns: {missing}")
+            
+        # 4. Convert to list of dicts (pandas-safe access, no .get())
+        transactions = []
+        for _, row in df.iterrows():
+            txn_type = str(row["type"]).strip().lower() if "type" in df.columns else "debit"
+            cat = row["category"] if "category" in df.columns and pd.notna(row["category"]) else None
+            transactions.append({
+                "date": str(row["date"]),
+                "amount": float(row["amount"]),
+                "description": str(row["description"]),
+                "type": txn_type if txn_type in ("debit", "credit") else "debit",
+                "category": cat if cat and str(cat).lower() not in ("nan", "none", "") else None
+            })
+            
+        # 5. Reuse bulk logic
+        from api.models.transaction import TransactionBulkUpload, TransactionCreate
+        data = TransactionBulkUpload(
+            user_id=user_id,
+            transactions=[TransactionCreate(**t) for t in transactions]
+        )
+        
+        result = await add_transactions_bulk(data, db=db)
+        result["transactions_parsed"] = len(transactions)
+        result["inserted_count"] = len(transactions)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[CSV Upload] Error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 
@@ -276,8 +336,10 @@ async def get_transactions(
     query = {"user_id": user_id}
     if category: query["category"] = category
     if anomalies_only: query["is_anomaly"] = True
-    
-    cursor = db["transactions"].find(query).sort("date", -1).limit(limit)
+
+    sort_field = "anomaly_score" if anomalies_only else "date"
+    sort_dir   = -1  # always descending
+    cursor = db["transactions"].find(query).sort(sort_field, sort_dir).limit(limit)
     txns = await cursor.to_list(length=limit)
     
     # Fix ID

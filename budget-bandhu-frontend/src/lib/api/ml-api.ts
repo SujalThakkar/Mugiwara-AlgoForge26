@@ -1,16 +1,9 @@
 import { mockData } from './mock-data';
 import { ChatMessage } from '../types/chat';
-import { useConfigStore } from '../store/useConfigStore';
 
 const ML_API_BASE = process.env.NEXT_PUBLIC_ML_API_URL || 'http://localhost:8000';
 
 async function callApi<T>(endpoint: string, fallbackData: T, options?: RequestInit): Promise<T> {
-    const { isMockMode } = useConfigStore.getState();
-
-    if (isMockMode) {
-        return fallbackData;
-    }
-
     try {
         const body = options?.body;
         const shouldSetJsonHeader = !(typeof FormData !== 'undefined' && body instanceof FormData);
@@ -75,7 +68,10 @@ export interface Transaction {
     category: string;
     category_confidence: number;
     is_anomaly: boolean;
-    anomaly_severity: 'normal' | 'low' | 'medium' | 'high';
+    anomaly_score?: number;
+    anomaly_severity: 'HIGH' | 'MEDIUM' | 'LOW' | 'NORMAL';
+    anomaly_type?: string;
+    anomaly_reason?: string;
     notes?: string;
     created_at: string;
 }
@@ -124,10 +120,16 @@ export interface DashboardData {
         rate: number;
     };
     insights: Insight[];
+    weekly_summary?: {
+        save_potential: number;
+        message: string;
+    };
     forecast: {
-        horizon: string;
+        predicted_spending: number;
         predicted_savings: number;
         confidence: number;
+        forecast_7d?: Array<{date: string; predicted_amount: number}>;
+        monthly_summary?: { projected_total: number; vs_last_month: number; top_category: string };
     } | null;
     budget_summary: {
         total_allocated: number;
@@ -157,12 +159,13 @@ export interface Budget {
 
 export interface BudgetRecommendation {
     category: string;
-    current_allocation: number;
-    actual_spent: number;
-    recommended: number;
-    multiplier: number;
-    change: 'increase' | 'decrease' | 'maintain';
-    reason: string;
+    current_spend: number;
+    suggested_budget: number;
+    savings_potential: number;
+    multiplier?: number;
+    change?: 'increase' | 'decrease' | 'maintain';
+    reasoning: string;
+    confidence?: number;
 }
 
 export interface Goal {
@@ -179,6 +182,9 @@ export interface Goal {
     remaining: number;
     on_track: boolean;
     eta_days: number | null;
+    projected_completion_date?: string | null;
+    shortfall_risk?: string | null;
+    ai_verified?: boolean;
     milestones: Array<{ amount: number; reached: boolean; date: string | null }>;
 }
 
@@ -236,7 +242,8 @@ function getMockTransactions(userId: string): Transaction[] {
         category: transaction.category,
         category_confidence: 1,
         is_anomaly: transaction.isAnomaly,
-        anomaly_severity: transaction.isAnomaly ? 'high' : 'normal',
+        anomaly_severity: transaction.isAnomaly ? 'HIGH' : 'NORMAL',
+        anomaly_type: transaction.isAnomaly ? 'Unusual Spending' : undefined,
         notes: transaction.notes,
         created_at: transaction.date,
     }));
@@ -276,9 +283,11 @@ function getMockDashboardData(userId: string): DashboardData {
             icon: insight.icon,
         })),
         forecast: {
-            horizon: '30 days',
+            predicted_spending: 32000,
             predicted_savings: mockData.savingsForecast['30day'].predicted,
             confidence: mockData.savingsForecast['30day'].confidence,
+            forecast_7d: [{ date: '2026-03-29', predicted_amount: 4200 }],
+            monthly_summary: { projected_total: 45000, vs_last_month: 5.2, top_category: 'Shopping' }
         },
         budget_summary: {
             total_allocated: mockData.budget.allocations.reduce((sum, item) => sum + item.allocated, 0),
@@ -500,12 +509,12 @@ export const mlApi = {
                     recommendations: [
                         {
                             category: 'Shopping',
-                            current_allocation: 5000,
-                            actual_spent: 5420,
-                            recommended: 4200,
+                            current_spend: 5420,
+                            suggested_budget: 4200,
+                            savings_potential: 1220,
                             multiplier: 0.84,
                             change: 'decrease' as const,
-                            reason: 'Recent shopping spend is above target and can be trimmed safely.',
+                            reasoning: 'Recent shopping spend is above target and can be trimmed safely.',
                         },
                     ],
                     total_savings_potential: 800,
@@ -556,6 +565,9 @@ export const mlApi = {
                     remaining: goal.target - goal.current,
                     on_track: goal.priority !== 'high' || goal.current / goal.target > 0.35,
                     eta_days: goal.priority === 'high' ? 95 : 140,
+                    projected_completion_date: '2026-07-01',
+                    shortfall_risk: 'LOW',
+                    ai_verified: true,
                     milestones: goal.milestones,
                 }))
             );
@@ -738,6 +750,34 @@ export const mlApi = {
             { code: 'pa', name: 'Punjabi' },
             { code: 'en', name: 'English' },
         ],
+    },
+
+    literacy: {
+        getLesson: async (userId: string, topic: string, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'beginner', sessionId: string) => {
+            return callApi(
+                '/api/v1/literacy/lesson',
+                {
+                    lesson: {
+                        title: `${topic} Lesson`,
+                        content: `This is a fallback lesson on ${topic}. Please connect to backend to get your personalized Phi-3 lesson.`,
+                        key_points: ['Understand the basics', 'Apply to your life', 'Track your progress'],
+                        personalized_example: "Based on data, you are doing well.",
+                        estimated_minutes: 5,
+                    },
+                    quiz: {
+                        questions: []
+                    }
+                },
+                { method: 'POST', body: JSON.stringify({ user_id: userId, topic, difficulty, session_id: sessionId }) }
+            );
+        },
+        saveQuizResult: async (userId: string, sessionId: string, score: number, total: number) => {
+            return callApi(
+                '/api/v1/literacy/quiz-result',
+                { status: 'ok' },
+                { method: 'POST', body: JSON.stringify({ user_id: userId, session_id: sessionId, score, total }) }
+            );
+        }
     },
 
     ocr: {

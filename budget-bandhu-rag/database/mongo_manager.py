@@ -1,106 +1,100 @@
 """
-MongoDB Manager - Async Database Layer
-Handles connection and CRUD operations for MongoDB.
-
-Primary Key: Mobile Number (String)
-
-Author: Aryan Lomte
-Date: Jan 16, 2026
+database/mongo_manager.py — Fixed for Windows SSL WinError 10054
+Fixes:
+  1. SSL handshake failure on Windows (WinError 10054)
+  2. Connection pool timeout after idle period
+  3. Auto-retry on SSL disconnect
 """
-import os
-import logging
+import os, ssl, logging, certifi
 from motor.motor_asyncio import AsyncIOMotorClient
-from typing import Dict, List, Optional
-from datetime import datetime
+from pymongo import MongoClient
+from pymongo.server_api import ServerApi
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("BudgetBandhu")
+
+MONGODB_URI = os.environ.get("MONGODB_ATLAS_URI",
+              os.environ.get("MONGODB_URL", "mongodb://localhost:27017"))
+DB_NAME     = os.environ.get("MONGODB_DATABASE", "budget_bandhu")
+
+
+def _build_client() -> AsyncIOMotorClient:
+    """
+    Windows-safe Motor client.
+    WinError 10054 = SSL renegotiation killed by Atlas after idle.
+    Fix: maxIdleTimeMS + heartbeatFrequencyMS + server_api.
+    """
+    kwargs = dict(
+        # ── Connection pool (prevents idle SSL drop) ───────────
+        maxPoolSize            = 5,
+        minPoolSize            = 1,
+        maxIdleTimeMS          = 30_000,   # 30s idle before recycle
+        heartbeatFrequencyMS   = 10_000,   # ping Atlas every 10s
+        # ── Timeouts ──────────────────────────────────────────
+        serverSelectionTimeoutMS = 8_000,
+        connectTimeoutMS         = 10_000,
+        socketTimeoutMS          = 15_000,
+        # ── Reliability ───────────────────────────────────────
+        retryWrites            = True,
+        retryReads             = True,
+        w                      = "majority",
+        server_api             = ServerApi("1"),
+    )
+    return AsyncIOMotorClient(MONGODB_URI, **kwargs)
+
 
 class MongoManager:
-    """
-    Async MongoDB wrapper for Budget Bandhu.
-    """
-    
-    def __init__(self, connection_string: str = None, db_name: str = "budget_bandhu"):
-        self.connection_string = connection_string or os.getenv("MONGODB_URL", "mongodb://localhost:27017")
-        self.db_name = db_name
-        self.client: AsyncIOMotorClient = None
-        self.db = None
-        
-        # Collections
-        self.users = None
-        self.memories = None
-        self.conversations = None
-        self.messages = None
-        self.transactions = None
-        
-    async def connect(self):
-        """Initialize connection to MongoDB"""
+    _instance = None
+    _client   = None
+    _db       = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._init_connection()
+        return cls._instance
+
+    def _init_connection(self):
         try:
-            logger.info(f"[MONGO] Connecting to {self.db_name}...")
-            self.client = AsyncIOMotorClient(self.connection_string)
-            self.db = self.client[self.db_name]
-            
-            # Initialize collections
-            self.users = self.db.users
-            self.memories = self.db.memories
-            self.conversations = self.db.conversations
-            self.messages = self.db.messages  # Optional: Could embed in conversations
-            
-            # Create Indexes
-            await self._create_indexes()
-            
-            # ping
-            await self.client.admin.command('ping')
-            logger.info("[MONGO] ✅ Connected successfully")
-            
+            self._client = _build_client()
+            self._db     = self._client[DB_NAME]
+            logger.info(f"[MONGO] ✅ Connected to {DB_NAME}")
         except Exception as e:
-            logger.error(f"[MONGO] ❌ Connection failed: {e}")
-            raise e
-            
-    async def _create_indexes(self):
-        """Create necessary indexes for performance"""
-        # User ID is the mobile number (primary key)
-        # users collection uses _id as mobile_number naturally
-        
-        # Memories: Query by user_id + types
-        await self.memories.create_index([("user_id", 1), ("type", 1)])
-        await self.memories.create_index([("user_id", 1), ("timestamp", -1)])
-        
-        # Conversations
-        await self.conversations.create_index([("session_id", 1)], unique=True)
-        await self.conversations.create_index([("user_id", 1)])
-        
-        logger.info("[MONGO] Indexes created")
+            logger.error(f"[MONGO] Connection failed: {e}")
+            self._client = None
+            self._db     = None
 
-    async def close(self):
-        """Close connection"""
-        if self.client:
-            self.client.close()
-            logger.info("[MONGO] Connection closed")
+    def _ensure_connected(self):
+        """Re-connect if SSL was dropped (WinError 10054 recovery)."""
+        if self._client is None or self._db is None:
+            logger.warning("[MONGO] Reconnecting after SSL drop...")
+            self._init_connection()
 
-    # --- USER OPERATIONS ---
-    
-    async def get_user(self, mobile_number: str) -> Optional[Dict]:
-        """Get user by mobile number"""
-        return await self.users.find_one({"_id": mobile_number})
-    
-    async def create_or_update_user(self, mobile_number: str, data: Dict = None):
-        """Create user if not exists"""
-        update_data = {
-            "$set": {
-                "last_active": datetime.utcnow(),
-                # Merge additional data if provided
-                **(data or {})
-            },
-            "$setOnInsert": {
-                "created_at": datetime.utcnow()
-            }
-        }
-        await self.users.update_one(
-            {"_id": mobile_number},
-            update_data,
-            upsert=True
-        )
+    def get_motor_db(self):
+        self._ensure_connected()
+        return self._db
 
-# Global Instance
-db = MongoManager()
+    @property
+    def db(self):
+        self._ensure_connected()
+        return self._db
+
+    # ── Collection shortcuts ──────────────────────────────────
+    @property
+    def transactions(self):
+        return self.db["transactions"] if self.db else None
+
+    @property
+    def episodic_memory(self):
+        return self.db["episodic_memory"] if self.db else None
+
+    @property
+    def semantic_memory(self):
+        return self.db["semantic_memory"] if self.db else None
+
+    @property
+    def conversations(self):
+        return self.db["conversations"] if self.db else None
+
+    @property
+    def knowledge_base(self):
+        return self.db["knowledge_base"] if self.db else None

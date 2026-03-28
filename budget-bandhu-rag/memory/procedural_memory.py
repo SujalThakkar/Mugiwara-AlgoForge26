@@ -14,7 +14,7 @@ Default strategies (seeded for new users):
   5. weekend_pattern_nudge       — gentle + loss framing
   6. subscription_surface        — analytical + gain framing
 
-Author: Financial Cognitive OS Team
+Author: Aryan Lomte
 Version: 3.0.0
 """
 from __future__ import annotations

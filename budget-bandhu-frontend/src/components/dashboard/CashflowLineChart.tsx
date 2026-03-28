@@ -20,6 +20,14 @@ export function CashflowLineChart({ data: spendingData }: CashflowLineChartProps
     const [selectedRange, setSelectedRange] = useState<[number, number]>([0, 29]);
     const [demoData, setDemoData] = useState<CashflowData[]>([]);
 
+    if (!spendingData || spendingData.length === 0) {
+        return (
+            <div className="flex items-center justify-center h-[420px] bg-gray-100 rounded-3xl border border-gray-200">
+                <p className="text-gray-500 font-medium">Accumulating cashflow data...</p>
+            </div>
+        );
+    }
+
     useEffect(() => {
         if (!spendingData || spendingData.length === 0) {
             setDemoData(generateCashflowData());

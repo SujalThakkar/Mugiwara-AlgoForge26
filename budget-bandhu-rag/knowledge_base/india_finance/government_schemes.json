@@ -1,0 +1,126 @@
+{
+  "document_id": "government_schemes_v3",
+  "source": "india_finance",
+  "category": "government_schemes",
+  "chunks": [
+    {
+      "id": "pm_jan_dhan",
+      "text": "PM Jan Dhan Yojana (PMJDY): Zero balance savings account for unbanked. Overdraft facility up to ₹10,000. Free RuPay debit card with ₹2L accidental insurance. Life cover ₹30,000 for accounts opened before Jan 26, 2015. PMJJBY (₹330/yr, ₹2L life) and PMSBY (₹20/yr, ₹2L accidental) linked. Access: all bank branches and BCs. Over 50 crore accounts opened.",
+      "tags": [
+        "Jan Dhan",
+        "PMJDY",
+        "zero balance",
+        "overdraft",
+        "RuPay",
+        "financial inclusion"
+      ]
+    },
+    {
+      "id": "atal_pension",
+      "text": "Atal Pension Yojana (APY): For unorganised sector workers, age 18-40. Fixed pension ₹1,000 to ₹5,000/month at 60. Contribution based on joining age — younger = less contribution. Example: ₹5,000 pension at age 18: ₹210/month. At age 30: ₹577/month. Government co-contribution: 50% of contribution or ₹1,000/yr (whichever lower) for 5 years — for those who joined before Dec 2015 and not income tax payers. Nominee gets corpus on death.",
+      "tags": [
+        "APY",
+        "Atal Pension",
+        "pension",
+        "unorganised",
+        "₹5000",
+        "retirement",
+        "60 years"
+      ]
+    },
+    {
+      "id": "pm_mudra",
+      "text": "PM Mudra Yojana (PMMY): Loans for micro/small businesses without collateral. Three tiers — Shishu: up to ₹50,000. Kishor: ₹50,001 to ₹5,00,000. Tarun: ₹5,00,001 to ₹10,00,000. No processing fee for Shishu. Available at all banks, NBFCs, MFIs. No minimum CIBIL required for Shishu. Targeted at first-generation entrepreneurs, SC/ST, women.",
+      "tags": [
+        "Mudra",
+        "PMMY",
+        "small business",
+        "Shishu",
+        "Kishor",
+        "Tarun",
+        "no collateral",
+        "loan"
+      ]
+    },
+    {
+      "id": "epfo_schemes",
+      "text": "EPFO Schemes: EPF — 12% employee + 12% employer contribution. EPS — 8.33% of employer share (max ₹1,250/month). EDLI — employer 0.5% for life insurance up to ₹7L. Advance from EPF allowed for: house purchase (90%), marriage (50%), medical (6x salary), COVID (75% or 3 months). EPFO Universal Account Number (UAN) — one number for life across all employers. Activate at unifiedportal-mem.epfindia.gov.in.",
+      "tags": [
+        "EPFO",
+        "EPF",
+        "EPS",
+        "EDLI",
+        "UAN",
+        "advance",
+        "withdrawal",
+        "employer"
+      ]
+    },
+    {
+      "id": "pm_kisan",
+      "text": "PM Kisan Samman Nidhi: ₹6,000/year in 3 instalments of ₹2,000 for small/marginal farmers (land ≤ 2 hectares). Direct benefit transfer to Aadhaar-linked bank account. Register at pmkisan.gov.in. Not taxable. State governments may provide additional top-up. Beneficiaries: over 11 crore farmers enrolled.",
+      "tags": [
+        "PM Kisan",
+        "farmer",
+        "₹6000",
+        "agriculture",
+        "direct benefit",
+        "DBT"
+      ]
+    },
+    {
+      "id": "ayushman_bharat",
+      "text": "Ayushman Bharat (PMJAY): World's largest health insurance scheme. Coverage: ₹5,00,000/year per family for secondary and tertiary hospitalisation. Targeted at bottom 40% of population by SECC database. Cashless treatment at 25,000+ empanelled hospitals. Covers pre-existing conditions from day 1. No premium for beneficiaries. Check eligibility at pmjay.gov.in with mobile number.",
+      "tags": [
+        "Ayushman Bharat",
+        "PMJAY",
+        "health insurance",
+        "5 lakh",
+        "cashless",
+        "hospital",
+        "free"
+      ]
+    },
+    {
+      "id": "nps_government",
+      "text": "NPS (National Pension System) — Government: Mandatory for central govt employees joining after 2004. State govts also enrolled. Tier 1 mandatory — 10% employee + 14% employer contribution (central govt). At 60: 40% minimum annuity. Tax benefit: 80CCD(1) within ₹1.5L, 80CCD(1B) additional ₹50,000, 80CCD(2) employer contribution additional. PFRDA (Pension Fund Regulatory and Development Authority) regulates.",
+      "tags": [
+        "NPS",
+        "government employee",
+        "PFRDA",
+        "80CCD",
+        "annuity",
+        "central govt",
+        "2004"
+      ]
+    },
+    {
+      "id": "senior_citizen_schemes",
+      "text": "Senior Citizen Schemes: SCSS (Senior Citizen Savings Scheme) — 8.2% p.a., max ₹30L deposit, quarterly payout, 5-year tenure (extendable by 3 years), 80C eligible. PMVVY (Pradhan Mantri Vaya Vandana Yojana) — LIC managed, 7.4% assured pension, max ₹15L, 10-year policy, monthly/quarterly/annual payout. Both for 60+ (55+ for retired govt/VRS). SCSS at post office or SBI/designated banks.",
+      "tags": [
+        "senior citizen",
+        "SCSS",
+        "PMVVY",
+        "8.2%",
+        "7.4%",
+        "post office",
+        "pension",
+        "elderly"
+      ]
+    },
+    {
+      "id": "startup_india",
+      "text": "Startup India Scheme: DPIIT-recognised startups get 3-year income tax holiday (u/s 80IAC). Capital gains exemption if invested in eligible startups. Angel tax (Section 56) exemption for DPIIT-recognised startups. Self-certification for 9 labour and environment laws. Fast-track patent application with 80% fee reduction. Fund of Funds: ₹10,000 Cr for SEBI-registered AIFs investing in startups. Register at startupindia.gov.in.",
+      "tags": [
+        "startup India",
+        "DPIIT",
+        "80IAC",
+        "angel tax",
+        "56",
+        "patent",
+        "tax holiday",
+        "recognition"
+      ]
+    }
+  ]
+}

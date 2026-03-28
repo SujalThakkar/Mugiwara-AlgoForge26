@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { ShoppingBag, Utensils, Car, Home, Heart, Zap, TrendingUp, AlertTriangle, Target } from 'lucide-react';
-import { mockData } from '@/lib/api/mock-data';
 
 interface BudgetCategory {
     id: string;
@@ -31,7 +30,15 @@ export function BudgetProgressBars({ allocations = [] }: BudgetProgressBarsProps
         }
     };
 
-    const budgets: BudgetCategory[] = (allocations.length > 0 ? allocations : mockData.budget.allocations)
+    if (!allocations || allocations.length === 0) {
+        return (
+            <div className="flex items-center justify-center h-[420px] bg-gray-100 rounded-3xl border border-gray-200">
+                <p className="text-gray-500 font-medium">Accumulating budget data...</p>
+            </div>
+        );
+    }
+
+    const budgets: BudgetCategory[] = allocations
         .slice(0, 6)
         .map((allocation, index) => {
             const styles = getCategoryStyles(allocation.category);

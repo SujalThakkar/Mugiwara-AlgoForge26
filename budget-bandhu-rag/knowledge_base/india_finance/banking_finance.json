@@ -1,0 +1,126 @@
+{
+  "document_id": "banking_finance_v3",
+  "source": "india_finance",
+  "category": "banking",
+  "chunks": [
+    {
+      "id": "rbi_rates",
+      "text": "RBI Policy Rates (2024-25): Repo Rate — 6.50% (rate at which RBI lends to banks). Reverse Repo Rate — 3.35% (rate at which RBI borrows from banks). CRR (Cash Reserve Ratio) — 4.50% (cash banks must keep with RBI). SLR (Statutory Liquidity Ratio) — 18% (liquid assets banks must maintain). MSF (Marginal Standing Facility) — 6.75%. Bank Rate — 6.75%. These rates influence home loan, FD, and savings account rates.",
+      "tags": [
+        "RBI",
+        "repo rate",
+        "6.5%",
+        "CRR",
+        "SLR",
+        "monetary policy",
+        "interest rate"
+      ]
+    },
+    {
+      "id": "savings_account",
+      "text": "Savings Account Interest Rates: SBI — 2.70%. HDFC — 3.00-3.50%. Kotak 811 — 3.50-4.00%. IDFC First — 6.00-7.25% (highest among large banks). Small Finance Banks — 6-9% (AU, Ujjivan, Jana). RBI mandate: interest compounded quarterly. Minimum balance: SBI ₹3,000 (metro), ₹1,000 (rural). Zero balance: Jan Dhan, BSBD accounts. Interest up to ₹10,000 deductible u/s 80TTA.",
+      "tags": [
+        "savings account",
+        "interest",
+        "SBI",
+        "HDFC",
+        "Kotak",
+        "IDFC",
+        "2.7%",
+        "minimum balance"
+      ]
+    },
+    {
+      "id": "credit_score",
+      "text": "CIBIL Score / Credit Score: Range 300-900. 750+ — excellent, best loan rates. 700-749 — good, most loans approved. 650-699 — fair, higher interest. Below 650 — poor, loan rejection likely. Checked by: CIBIL (TransUnion), Experian, CRIF High Mark, Equifax. Check free once/year at each bureau. Hard inquiry reduces score by 5-10 points. Late payments stay 7 years. Credit utilisation: keep below 30%.",
+      "tags": [
+        "CIBIL",
+        "credit score",
+        "750",
+        "loan",
+        "credit utilisation",
+        "Experian",
+        "bureau"
+      ]
+    },
+    {
+      "id": "upi_neft_rtgs",
+      "text": "Payment Systems: UPI — instant 24/7, limit ₹1-2 lakh/transaction (₹5L for certain categories). Free. NEFT — batch processing, 30-minute slots, available 24/7, min ₹1. RTGS — real-time, minimum ₹2 lakh, for large transfers, 24/7. IMPS — instant, ₹5 lakh limit, small fee (₹5-15). Cheque clearing via CTS (Cheque Truncation System). UPI 123PAY for feature phones. UPI Lite for small offline transactions up to ₹500.",
+      "tags": [
+        "UPI",
+        "NEFT",
+        "RTGS",
+        "IMPS",
+        "payment",
+        "transfer",
+        "instant",
+        "limit"
+      ]
+    },
+    {
+      "id": "bank_fd_rates_2024",
+      "text": "Bank FD Rates 2024-25 (1-3 year tenure): SBI — 6.80%. HDFC — 7.00%. ICICI — 7.00%. Axis — 7.10%. Kotak — 7.25%. Bank of Baroda — 6.85%. Small Finance Banks (AU, Ujjivan) — 7.50-8.50%. Senior citizen: add 0.25-0.50%. Tax Saving FD (5 yr): SBI 6.50%, HDFC 7.00%. Interest taxable as per slab. Compare using BankBazaar or Paisabazaar.",
+      "tags": [
+        "FD rates",
+        "SBI",
+        "HDFC",
+        "ICICI",
+        "Axis",
+        "Kotak",
+        "2024",
+        "bank comparison"
+      ]
+    },
+    {
+      "id": "loans_overview",
+      "text": "Loan Types & Typical Rates 2024-25: Home Loan — 8.50-9.50% (SBI 8.50%, HDFC 8.75%). Personal Loan — 10-24% (high risk, no collateral). Car Loan — 8.50-12%. Education Loan — 8.15-15% (SBI Scholar — 8.15%). Gold Loan — 7-29% (Muthoot, Manappuram). Loan Against FD — 0.5-2% above FD rate. CIBIL 750+ gets best rates. Processing fee: 0.5-2% of loan amount.",
+      "tags": [
+        "home loan",
+        "personal loan",
+        "car loan",
+        "education loan",
+        "interest rate",
+        "2024"
+      ]
+    },
+    {
+      "id": "insurance_types",
+      "text": "Insurance in India: Term Life Insurance — pure protection, ₹1Cr cover for ~₹10,000/year (30yr, non-smoker). ULIP — insurance + investment, high charges, avoid for pure investment. Endowment — low returns (4-6%), not recommended. Health Insurance — mandatory post-COVID, minimum ₹5L recommended. PMJJBY — ₹330/year, ₹2L life cover (govt). PMSBY — ₹20/year, ₹2L accidental cover (govt). Claim settlement ratio: check before buying (LIC 98%+, HDFC Life 99%+).",
+      "tags": [
+        "term insurance",
+        "ULIP",
+        "health insurance",
+        "PMJJBY",
+        "PMSBY",
+        "LIC",
+        "claim settlement"
+      ]
+    },
+    {
+      "id": "home_loan_tax",
+      "text": "Home Loan Tax Benefits: Principal repayment — 80C up to ₹1,50,000. Interest on self-occupied — Section 24(b) up to ₹2,00,000. First-time buyer additional — Section 80EEA up to ₹1,50,000 (stamp duty ≤ ₹45L). Total max deduction per year: ₹5,00,000 (₹1.5L + ₹2L + ₹1.5L). Under construction: pre-EMI interest deductible in 5 instalments post possession. Co-borrower: each can claim separately.",
+      "tags": [
+        "home loan",
+        "80C",
+        "24b",
+        "80EEA",
+        "first time buyer",
+        "co-borrower",
+        "tax benefit"
+      ]
+    },
+    {
+      "id": "credit_card",
+      "text": "Credit Cards in India: Interest rate: 24-48% per annum (2-4% per month). Interest-free period: 20-50 days. Minimum payment trap: paying only minimum = high interest spiral. Annual fee: ₹500-₹5,000 (many lifetime-free options). Reward points: 1-5 per ₹100 spent. Best no-fee cards: SBI Simply Click, IDFC FIRST. Best rewards: Axis Magnus, HDFC Regalia. Credit limit: typically 2-3x monthly salary. Closing unused cards: can affect credit score.",
+      "tags": [
+        "credit card",
+        "interest",
+        "reward points",
+        "annual fee",
+        "minimum payment",
+        "SBI",
+        "HDFC"
+      ]
+    }
+  ]
+}

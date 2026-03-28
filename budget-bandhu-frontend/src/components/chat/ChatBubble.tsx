@@ -5,6 +5,7 @@ import { ChatMessage } from '@/lib/types/chat';
 import { Bot, User, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ChatBubbleProps {
     message: ChatMessage;
@@ -63,6 +64,7 @@ export function ChatBubble({ message, onAction }: ChatBubbleProps) {
                     {message.type === 'text' || !message.type ? (
                         <div className="text-sm leading-relaxed prose prose-sm max-w-none">
                             <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
                                 components={{
                                     p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
                                     strong: ({ children }) => <strong className={isUser ? 'text-white' : 'text-gray-900'}>{children}</strong>,

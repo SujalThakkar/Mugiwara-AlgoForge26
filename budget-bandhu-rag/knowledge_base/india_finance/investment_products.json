@@ -1,0 +1,178 @@
+{
+  "document_id": "investment_products_v3",
+  "source": "india_finance",
+  "category": "investments",
+  "chunks": [
+    {
+      "id": "ppf",
+      "text": "PPF (Public Provident Fund): Government-backed, EEE tax status (Exempt-Exempt-Exempt). Current interest rate: 7.1% per annum (compounded annually, set by govt quarterly). Lock-in: 15 years, extendable in 5-year blocks. Minimum deposit: ₹500/year. Maximum: ₹1,50,000/year. Partial withdrawal after 7 years. Loan facility from 3rd to 6th year. Account at post office or authorised banks.",
+      "tags": [
+        "PPF",
+        "government",
+        "EEE",
+        "7.1%",
+        "15 years",
+        "safe"
+      ]
+    },
+    {
+      "id": "elss",
+      "text": "ELSS (Equity Linked Savings Scheme): Mutual funds with 80C benefit. Shortest lock-in: 3 years among 80C instruments. Primarily equity-oriented (min 80% in equity). Historical returns: 12-15% CAGR over 10 years. LTCG on redemption: 10% above ₹1 lakh/year. SIP allowed — each SIP instalment has separate 3-year lock-in. Best for young investors with ≥5 year horizon.",
+      "tags": [
+        "ELSS",
+        "mutual fund",
+        "equity",
+        "3 year lock-in",
+        "80C",
+        "SIP"
+      ]
+    },
+    {
+      "id": "nps",
+      "text": "NPS (National Pension System): Tier 1 (pension account) — locked till 60, 80CCD benefits. Tier 2 (voluntary savings) — no lock-in, no tax benefit. Asset classes: E (equity, max 75%), G (govt bonds), C (corporate bonds), A (alternative assets). At 60: min 40% must buy annuity, max 60% lump sum (tax free). Annuity income taxable. PRAN (Permanent Retirement Account Number) portable across jobs.",
+      "tags": [
+        "NPS",
+        "pension",
+        "annuity",
+        "PRAN",
+        "retirement",
+        "Tier1",
+        "Tier2"
+      ]
+    },
+    {
+      "id": "mutual_funds_types",
+      "text": "Mutual Fund Categories: Large Cap — top 100 companies, stable. Mid Cap — 101-250 rank, moderate risk. Small Cap — 251+, high risk/return. Flexi Cap — any market cap. Liquid Funds — < 91 day maturity, equivalent to savings account+. Debt Funds — LTCG taxed as per slab (post 2023 amendment). Equity LTCG — 10% above ₹1L (held > 1 year). STCG equity — 15%. Index Funds — passive, low expense ratio (0.1-0.2%).",
+      "tags": [
+        "mutual fund",
+        "large cap",
+        "mid cap",
+        "small cap",
+        "liquid",
+        "debt",
+        "index"
+      ]
+    },
+    {
+      "id": "sip",
+      "text": "SIP (Systematic Investment Plan): Invest fixed amount monthly in mutual funds. Rupee cost averaging — buy more units when NAV low, fewer when high. Recommended minimum: ₹500/month. Step-up SIP: increase amount annually (e.g., 10% per year). SIP calculator rule of thumb: ₹10,000/month at 12% for 20 years = ~₹99 lakhs. Start early — ₹5,000 SIP at 22 vs 32 difference = ₹1 Crore+.",
+      "tags": [
+        "SIP",
+        "systematic",
+        "rupee cost averaging",
+        "monthly",
+        "compounding"
+      ]
+    },
+    {
+      "id": "fd_rd",
+      "text": "Fixed Deposit (FD): Bank FDs — 3% to 7.5% depending on tenure and bank. Senior citizens: additional 0.25-0.50%. Tax Saving FD: 5-year lock-in, 80C benefit, interest taxable. Premature withdrawal penalty: 0.5-1%. Corporate FDs: higher rate (0.25-0.5% extra) but higher risk. Recurring Deposit (RD): monthly fixed investment, similar rates to FD. Interest from FD/RD fully taxable as per slab. TDS @ 10% if interest > ₹40,000 (₹50,000 for seniors).",
+      "tags": [
+        "FD",
+        "fixed deposit",
+        "RD",
+        "recurring",
+        "interest",
+        "TDS",
+        "senior"
+      ]
+    },
+    {
+      "id": "stocks_equity",
+      "text": "Direct Equity / Stocks: BSE (Bombay Stock Exchange) and NSE (National Stock Exchange). Regulated by SEBI. LTCG (held > 1 year): 10% tax above ₹1 lakh. STCG (held < 1 year): 15% tax u/s 111A. Demat account mandatory — NSDL or CDSL depositories. T+1 settlement cycle. Zerodha, Groww, Upstox — discount brokers with low brokerage. SEBI LODR regulations govern listed companies.",
+      "tags": [
+        "stocks",
+        "equity",
+        "BSE",
+        "NSE",
+        "SEBI",
+        "LTCG",
+        "STCG",
+        "Zerodha",
+        "Groww",
+        "demat"
+      ]
+    },
+    {
+      "id": "gold_investment",
+      "text": "Gold Investment options: Physical Gold — making charges (8-25%) reduce returns, storage risk. Gold ETF — traded on NSE/BSE, 0.5% expense ratio, no making charges. Sovereign Gold Bond (SGB) — RBI issued, 2.5% annual interest (taxable), 8-year tenure, LTCG exempt on maturity. Gold Mutual Funds — invest in Gold ETFs, SIP possible. 24K = 99.9% pure, 22K = 91.6% (jewellery standard). Gold LTCG (>3 years): 20% with indexation.",
+      "tags": [
+        "gold",
+        "SGB",
+        "ETF",
+        "sovereign bond",
+        "RBI",
+        "2.5%",
+        "24K",
+        "jewellery"
+      ]
+    },
+    {
+      "id": "real_estate",
+      "text": "Real Estate Investment: RERA (Real Estate Regulatory Authority) — mandatory registration of projects. Stamp duty: 5-7% of property value (varies by state), Maharashtra 6%, Delhi 4-6%, Karnataka 5%. Registration charges: 1%. Home loan interest deduction: ₹2L (self-occupied), unlimited (let-out). Property LTCG (> 2 years): 20% with indexation or 12.5% without (post Budget 2024). Rental income taxable. REITs — listed real estate, invest from ₹300+.",
+      "tags": [
+        "real estate",
+        "RERA",
+        "stamp duty",
+        "registration",
+        "home loan",
+        "REIT",
+        "rental"
+      ]
+    },
+    {
+      "id": "crypto_india",
+      "text": "Cryptocurrency in India: Taxed as Virtual Digital Assets (VDA) under Income Tax Act. Tax rate: flat 30% on profits regardless of holding period. No deduction allowed except cost of acquisition. TDS: 1% u/s 194S on transactions > ₹10,000 (₹50,000 for specified persons). Loss from crypto CANNOT be set off against any other income. Loss cannot be carried forward. Reporting mandatory in ITR Schedule VDA. Exchanges: CoinDCX, WazirX, CoinSwitch regulated by FIU-India.",
+      "tags": [
+        "crypto",
+        "VDA",
+        "30%",
+        "bitcoin",
+        "TDS",
+        "194S",
+        "digital asset",
+        "WazirX",
+        "CoinDCX"
+      ]
+    },
+    {
+      "id": "epf",
+      "text": "EPF (Employees Provident Fund): 12% of basic salary contributed by employee (80C eligible). 12% by employer — 8.33% to EPS (pension), 3.67% to EPF. Interest rate FY2023-24: 8.25%. Interest tax-free up to certain limits. Withdrawal: fully tax-free after 5 years continuous service. Premature withdrawal taxable + TDS 10% (if PAN given). UAN (Universal Account Number) portable. EPFO manages 6+ crore accounts.",
+      "tags": [
+        "EPF",
+        "provident fund",
+        "employer",
+        "UAN",
+        "EPFO",
+        "8.25%",
+        "EPS",
+        "pension"
+      ]
+    },
+    {
+      "id": "sukanya_samriddhi",
+      "text": "Sukanya Samriddhi Yojana (SSY): For girl child below 10 years. Interest rate: 8.2% p.a. (highest among small savings). EEE tax status. Minimum ₹250, maximum ₹1,50,000/year (80C eligible). Account matures at 21 years. Partial withdrawal (50%) at 18 years for education/marriage. Max 2 accounts per family (3 if twins). Account at post office or authorised bank.",
+      "tags": [
+        "Sukanya Samriddhi",
+        "girl child",
+        "8.2%",
+        "SSY",
+        "post office",
+        "education",
+        "marriage"
+      ]
+    },
+    {
+      "id": "nsc",
+      "text": "NSC (National Savings Certificate): 5-year lock-in. Interest rate: 7.7% p.a. (compounded annually, paid at maturity). 80C deduction on investment. Interest earned treated as reinvestment — also eligible for 80C each year except last. Minimum ₹1,000, no maximum. Available at post offices. TDS not deducted but interest taxable. No premature withdrawal (except death/court order).",
+      "tags": [
+        "NSC",
+        "national savings",
+        "post office",
+        "7.7%",
+        "5 years",
+        "80C"
+      ]
+    }
+  ]
+}

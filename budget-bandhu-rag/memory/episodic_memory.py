@@ -13,7 +13,7 @@ Index requirements (Atlas UI / mongocli):
   - episodic_vector_index: vector search on 'embedding', 384-dim, cosine
   - episodic_text_index: full-text on trigger_description, outcome_description, category
 
-Author: Financial Cognitive OS Team
+Author: Aryan Lomte
 Version: 3.0.0
 """
 from __future__ import annotations

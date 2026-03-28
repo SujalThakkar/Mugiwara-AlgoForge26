@@ -1,0 +1,461 @@
+﻿
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  PHASE 1 ΓÇö HEALTH CHECKS
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 1.1 ΓÇö RAG Service Health
+    {'status': 'healthy', 'mode': 'unified_mobile_core'}
+    Γ£à PASS  RAG responds 200
+    Γ£à PASS  RAG status healthy
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 1.2 ΓÇö ML Service Health
+    {'categorizer_loaded': True, 'anomaly_detector_loaded': True, 'forecaster_loaded': True, 'policy_learner_loaded': True, 'all_healthy': True, 'models_active': ['categorizer_ml', 'anomaly_isolation_forest', 'forecaster_bilstm', 'budget_qlearning']}
+    Γ£à PASS  ML responds 200
+    Γ£à PASS  all_healthy=true
+    Γ£à PASS  categorizer_loaded
+    Γ£à PASS  anomaly_detector_loaded
+    Γ£à PASS  forecaster_loaded
+    Γ£à PASS  policy_learner_loaded
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 1.3 ΓÇö MongoDB Connection
+    {'mongodb': 'connected', 'collections': ['policy_state', 'transactions', 'procedural_memory', 'users', 'conversations', 'user_profiles', 'semantic_memory', 'knowledge_base', 'knowledge_graph_edges', 'retrieval_audit', 'episodic_memory', 'literacy_sessions', 'trajectory_snapshots', 'system.buckets.trajectory_snapshots', 'forecast_cache', 'memories', 'budgets', 'budget_feedback']}
+    Γ£à PASS  DB endpoint responds
+    Γ£à PASS  MongoDB connected
+    Γ£à PASS  Collections present
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 1.4 ΓÇö Frontend Running
+    Γ£à PASS  Frontend HTTP 200
+    Γ£à PASS  Page contains app name
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  PHASE 2 ΓÇö ML SERVICE ROUTES
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 2.1 ΓÇö Categorizer
+    HTTP 200
+    Items returned: 10
+    Sample: {'category': 'Food & Dining', 'confidence': 1.0, 'alternatives': [], 'model_version': 'rule_fallback_v1'}
+    Γ£à PASS  Swiggy Food Delivery     ΓåÆ food & dining          conf=1.00
+    Γ£à PASS  Apollo Pharmacy          ΓåÆ healthcare             conf=1.00
+    Γ£à PASS  Delhi Metro DMRC         ΓåÆ transport              conf=1.00
+    Γ£à PASS  BigBasket BB Order       ΓåÆ groceries              conf=1.00
+    Γ£à PASS  Netflix India Subscripti ΓåÆ entertainment          conf=1.00
+    Γ£à PASS  Zerodha Trading App      ΓåÆ investments            conf=1.00
+    Γ£à PASS  Jio Recharge RJILPrepaid ΓåÆ utilities & bills      conf=1.00
+    Γ£à PASS  MakeMyTrip Hotel         ΓåÆ travel                 conf=1.00
+    Γ£à PASS  Unacademy Learn          ΓåÆ education              conf=1.00
+    Γ£à PASS  SBI ATM Withdrawal       ΓåÆ transfers & atm        conf=1.00
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 2.2 ΓÇö Anomaly Detector
+    HTTP 200
+    Response: {
+  "anomalies": [
+    {
+      "transaction_id": "t1",
+      "is_anomaly": true,
+      "anomaly_score": -0.9,
+      "anomaly_type": "SPIKE",
+      "severity": "HIGH",
+      "reason": "\u20b9150,000 is 996.7\u03c3 above your Food & Dining average of \u20b9500.",
+      "model_source": "zscore_fallback"
+    },
+    {
+      "transaction_id": "t2",
+      "is_anomaly": false,
+      "anomaly_score": 0.5,
+      "anomaly_type": null,
+      "severity": "LOW",
+      "reason": "Transaction within normal range.",
+      "model_source": "zscore_fallback"
+    }
+  ],
+  "total": 2,
+  "flagged": 1,
+  "high_severi
+    Γ£à PASS  Γé╣1.5L Swiggy is_anomaly=true
+    Γ£à PASS  Γé╣1.5L Swiggy severity=HIGH
+    Γ£à PASS  Γé╣250 Uber not HIGH anomaly
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 2.3 ΓÇö Forecaster
+    HTTP 422
+    Keys: ['detail']
+    Full response: {
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "daily_history"
+      ],
+      "msg": "Field required",
+      "input": {
+        "user_id": "+91-9876543210",
+        "transactions": [
+          {
+            "description": "Swiggy Food Delivery",
+            "amount": 350,
+            "category": "Food & Dining",
+            "date": "2026-03-01",
+            "transaction_type": "Debit"
+          },
+          {
+            "description": "Uber India Trip",
+  
+    Γ¥î FAIL  Forecast responds 200
+           HTTP 422
+    Γ¥î FAIL  predicted_spending/total > 0
+           predicted=0
+    Γ£à PASS  confidence 0-1
+    Γ¥î FAIL  forecast array has ΓëÑ7 items
+           count=0, key used=forecast_by_day
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 2.4 ΓÇö Goal ETA
+    HTTP 200
+    Response: {
+  "eta_days": 214,
+  "on_track": true,
+  "projected_completion_date": "2026-10-28",
+  "monthly_savings_needed": 10998.14,
+  "current_monthly_savings": 22000.0,
+  "shortfall_risk": false,
+  "confidence": 0.75,
+  "processing_ms": 0.0
+}
+    Γ£à PASS  Goal ETA responds 200
+    Γ£à PASS  eta_days > 0
+    Γ£à PASS  projected_completion_date present
+    Γ£à PASS  on_track is bool
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  PHASE 3 ΓÇö CHAT / RAG PIPELINE
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 3.1 ΓÇö Transaction Intent  ('I spent 450 on Swiggy')
+    HTTP 200  |  response: Γ£à **Transaction Recorded**
+
+≡ƒô¥ **Details:**
+ΓÇó Amount: Γé╣450 (Γé╣450)
+ΓÇó Item: Swiggy
+ΓÇó Category: Other
+
+≡ƒñû **ML Pipeline Results:**
+ΓÇó Categorization: ML method
+ΓÇó Confidence: 0.0%
+ΓÇó Anomaly Score: 0.00
+ΓÇó Severity: Low
+    Γ£à PASS  200 OK
+    Γ£à PASS  Response mentions transaction
+    Γ£à PASS  Category is Food (not Other)
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 3.2 ΓÇö Anomaly via Chat  ('I spent 1 lakh on Swiggy')
+    HTTP 200  |  response: Γ£à **Transaction Recorded**
+
+≡ƒô¥ **Details:**
+ΓÇó Amount: Γé╣1.00 Lakh (Γé╣100,000)
+ΓÇó Item: Swiggy
+ΓÇó Category: Other
+
+≡ƒñû **ML Pipeline Results:**
+ΓÇó Categorization: ML method
+ΓÇó Confidence: 0.0%
+ΓÇó Anomaly Score: 0.00
+ΓÇó Severity: Low
+    Γ£à PASS  200 OK
+    Γ£à PASS  Anomaly mentioned
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 3.3 ΓÇö Tax Slab Query (no hallucination)
+    HTTP 200  |  response: The income tax slabs in India for FY 2025-26 under new_regime regime would be as follows. There is no deduction like HRA or Saving Account, so the rates are higher compared to old regimes: Up to $3 lakhs - No Tax
+$3 Lakhs and above up till $7 lakh - 0% tax
+    Γ£à PASS  200 OK
+    Γ¥î FAIL  No dollar signs
+           $ found!
+    Γ£à PASS  Mentions regime/slab/lakh
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 3.4 ΓÇö Hinglish Query
+    HTTP 200  |  response: I'm Bandhu, your financial assistant. I can help with budgets, expenses, savings, and investments. Could you rephrase your question?
+    Γ£à PASS  200 OK, no crash
+    Γ£à PASS  Non-empty response
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 3.5 ΓÇö Budget Context Query
+    HTTP 200  |  memory={'episodic_count': 10, 'semantic_count': 0, 'total_memories': 10}  |  response: Based on the given information, you have spent $145,000 (Γé╣) in total for both Swiggy and Petrol categories under 'Other'. This is quite a significant amount considering your overall financial situation. It's important to evaluate whether these expenses align with your budgeting strategy of allocatin
+    Γ£à PASS  200 OK
+    Γ£à PASS  Non-empty response
+    Γ£à PASS  Memory/context used
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 3.6 ΓÇö Investment Advice (PPF vs ELSS)
+    HTTP 200  |  response: It depends on your risk tolerance and financial goals, but generally speaking you can get a higher return by putting money into equity funds like the SIPs of Reliance Industries (RIL) for example since they have an excellent track record over time in terms of delivering returns while also providing tax benefits.
+    Γ£à PASS  200 OK
+    Γ¥î FAIL  Mentions 80C
+           It depends on your risk tolerance and financial goals, but generally speaking you can get a higher return by putting money into equity funds like the SIPs of Reliance Industries (RIL) for example sinc
+    Γ¥î FAIL  Mentions PPF or ELSS
+           It depends on your risk tolerance and financial goals, but generally speaking you can get a higher return by putting money into equity funds like the SIPs of Reliance Industries (RIL) for example sinc
+    Γ£à PASS  No dollar signs
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  PHASE 4 ΓÇö TRANSACTION CRUD & ML PIPELINE
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 4.1 ΓÇö Manual Transaction Entry
+    HTTP 200
+    Response: {
+  "message": "Transaction added",
+  "transaction_id": "69c7dd542deb03d60d03706b",
+  "category": "Other",
+  "is_anomaly": true,
+  "anomaly_score": -0.55,
+  "anomaly_severity": "MEDIUM"
+}
+    Γ£à PASS  POST 200/201
+    Γ£à PASS  transaction_id present
+    Γ¥î FAIL  Category=Groceries (got 'Other')
+           cat=Other
+    Γ¥î FAIL  is_anomaly=false
+           True
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 4.2 ΓÇö List Transactions
+    HTTP 200  |  count=14
+    Keys: ['user_id', 'amount', 'description', 'category', 'category_confidence', 'categorization_method', 'type', 'source', 'date', 'is_anomaly', 'anomaly_score', 'anomaly_severity', 'created_at', 'id']
+    Γ£à PASS  200 OK
+    Γ£à PASS  Count > 0
+    Γ£à PASS  Has anomaly_severity
+    Γ£à PASS  Has category field
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 4.3 ΓÇö Anomaly Filter
+    HTTP 200  |  anomaly count=4
+    Γ£à PASS  200 OK
+    Γ£à PASS  All returned are anomalies
+    Γ£à PASS  ΓëÑ1 anomaly exists
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  PHASE 5 ΓÇö DASHBOARD & ANALYTICS
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 5.1 ΓÇö Dashboard with Forecast
+    HTTP 200  |  top keys: ['user', 'stats', 'category_breakdown', 'anomalies', 'insights', 'forecast', 'budget_summary', 'goals_summary']
+    forecast keys: ['predicted_spending', 'predicted_savings', 'confidence', 'forecast_7d', 'monthly_summary', 'processing_ms']
+    Γ£à PASS  200 OK
+    Γ£à PASS  forecast not null/empty
+    Γ¥î FAIL  predicted_spending > 0
+           predicted=0
+    Γ¥î FAIL  forecast_7d/by_day ΓëÑ7 items
+           count=0
+    Γ£à PASS  category_breakdown present
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 5.2 ΓÇö Analytics Insights
+    HTTP 200  |  insights=1  |  weekly={'save_potential': 2970302700.0, 'message': 'Save up to Γé╣2,970,302,700/month! ≡ƒöÑ'}
+    Sample: {
+  "id": "ins_anom_0",
+  "type": "anomaly",
+  "title": "Unusual transaction: \u20b9850 on Zepto Quick Grocery",
+  "description": "\u20b9850 is 2.3\u03c3 above your Groceries average.",
+  "severity": 
+    Γ£à PASS  200 OK
+    Γ£à PASS  insights non-empty
+    Γ£à PASS  insight has type+title
+    Γ£à PASS  weekly_summary present
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  PHASE 6 ΓÇö GOALS & BUDGET
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  SETUP ΓÇö Seed Goals for Test User
+    Seeded goal 'Emergency Fund': HTTP 422
+    Seeded goal 'Europe Trip': HTTP 422
+    Seeded goal 'New Laptop': HTTP 422
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 6.1 ΓÇö Goals with AI ETA
+    HTTP 200  |  count=0
+    Γ£à PASS  200 OK
+    Γ¥î FAIL  Goals non-empty
+           count=0
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 6.2 ΓÇö Budget Recommendations (PolicyLearner)
+    HTTP 200  |  recs count=9
+    Response: {
+  "user_id": "+91-9876543210",
+  "recommendations": [
+    {
+      "category": "Food & Drink",
+      "current_spend": 0,
+      "suggested_budget": 7500.0,
+      "savings_potential": 0,
+      "reasoning": "You're well under budget in Food & Drink. Consider reallocating \u20b97,500 to savings.",
+      "confidence": 0.5
+    },
+    {
+      "category": "Rent",
+      "current_spend": 0,
+      "suggested_budget": 12500.0,
+      "savings_potential": 0,
+      "reasoning": "You're well under budget in Re
+    Γ£à PASS  200 OK
+    Γ£à PASS  Recs non-empty
+    Γ¥î FAIL  current_spend != 0
+           spend=0
+    Γ£à PASS  total_savings_potential > 0
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 6.3 ΓÇö Budget Feedback (PolicyLearner persistence)
+    HTTP 200  |  {
+  "status": "ok",
+  "new_multiplier": 1.2102,
+  "message": "Thanks! Shopping policy updated (episode #3)."
+}
+    Γ£à PASS  Feedback 200
+    Γ£à PASS  Has message/status
+    Γ¥î FAIL  PolicyLearner episodes incremented
+           before=0 after=0
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  PHASE 7 ΓÇö AI LITERACY HUB
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 7.1 ΓÇö Personalized Lesson (Smart Budgeting)
+    HTTP 200
+    lesson.title: Smart Budgeting: Getting Started
+    content[:200]: Understanding finances is key. This month: Rs 2970305200. Top: Other Rs 2970305200. Target 20% savings. Current: 0%.
+    key_points: 3  |  quiz questions: 4
+    Γ£à PASS  200 OK
+    Γ£à PASS  lesson.title present
+    Γ£à PASS  content > 100 chars
+    Γ£à PASS  Γé╣ symbol in content
+    Γ£à PASS  key_points ΓëÑ 3
+    Γ£à PASS  Quiz has ΓëÑ 4 questions
+    Γ£à PASS  Question has 4 options
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 7.2 ΓÇö Tax Lesson (No Hallucination Check)
+    HTTP 200  |  content[:400]: Understanding finances is key. This month: Rs 2970305200. Top: Other Rs 2970305200. Target 20% savings. Current: 0%.
+    Γ£à PASS  200 OK
+    Γ¥î FAIL  Mentions 80C
+           Understanding finances is key. This month: Rs 2970305200. Top: Other Rs 2970305200. Target 20% savings. Current: 0%.
+    Γ£à PASS  No dollar signs
+    Γ¥î FAIL  Mentions 1,50,000 / 1.5L
+           Understanding finances is key. This month: Rs 2970305200. Top: Other Rs 2970305200. Target 20% savings. Current: 0%.
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  PHASE 8 ΓÇö CSV UPLOAD
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 8.1 ΓÇö Bank Statement CSV
+    HTTP 500  |  {
+  "_raw": "Internal Server Error"
+}
+    Γ¥î FAIL  Upload 200/201
+           HTTP 500
+    Γ¥î FAIL  Parsed ΓëÑ 10 transactions
+           parsed=0
+    Γ£à PASS  No 'Other' categories
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  PHASE 9 ΓÇö MEMORY SYSTEM
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 9.1a ΓÇö Set Memory (Europe trip)
+    HTTP 200  |  I'm Bandhu, your financial assistant. I can help with budgets, expenses, savings, and investments. Could you rephrase your question?
+    Γ£à PASS  Session-1 200
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 9.1b ΓÇö Recall Memory (new session)
+    HTTP 200  |  memory={'episodic_count': 10, 'semantic_count': 0, 'total_memories': 10}
+    Response: I'm Bandhu, your financial assistant. I can help with budgets, expenses, savings, and investments. Could you rephrase your question?
+    Γ£à PASS  Session-2 200
+    Γ¥î FAIL  Mentions Europe/travel/goal
+           I'm Bandhu, your financial assistant. I can help with budgets, expenses, savings, and investments. Could you rephrase your question?
+    Γ£à PASS  episodic/context count > 0
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  PHASE 11 ΓÇö EDGE CASES
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 11.1 ΓÇö Zero Amount
+    HTTP 200  |  Based on the provided financial data, it is not possible to determine how much you spent or did not spend at Swiggy as there are no transactions listed for that category in your recent events. You hav
+    Γ£à PASS  No crash (200 or 400)
+    Γ£à PASS  Not 500
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 11.2 ΓÇö Huge Amount (Γé╣99Cr)
+    HTTP 200  |  Γ£à **Transaction Recorded**
+
+≡ƒô¥ **Details:**
+ΓÇó Amount: Γé╣99.00 Crore (Γé╣990,000,000)
+ΓÇó Item: Petrol
+ΓÇó Category: Other
+
+≡ƒñû **ML Pipeline Results:**
+ΓÇó Categorization: ML method
+ΓÇó Confidence: 0.0%
+ΓÇó Anomaly S
+    Γ£à PASS  No crash (200)
+    Γ£à PASS  Not 500
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 11.3 ΓÇö Unknown Merchant Categorize
+    HTTP 200  |  {'results': [{'category': 'Food & Dining', 'confidence': 0.3953, 'alternatives': [['Travel', 0.1906], ['Shopping', 0.1103], ['Utilities & Bills', 0.0973]], 'model_version': '1.0'}, {'category': 'Shopping', 'confidence': 0.7378, 'alternatives': [['Groceries', 0.2181], ['Food & Dining', 0.025], ['Entertainment', 0.0069]], 'model_version': '1.0'}], 'count': 2, 'processing_ms': 9.7, 'model_active': True}
+    Γ£à PASS  200 OK, no crash
+    Γ£à PASS  Returns results
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 11.4 ΓÇö Chat with Empty Query
+    HTTP 200  |  {'response': "I'm Bandhu, your financial assistant. I can help with budgets, expenses, savings, and investments. Could you rephrase your question?", 'session_id': 'edge_003', 'confidence': 0.85, 'memory_used': {'episodic_count': 10, 'semantic_count': 0, 'total_memories': 10}, 'gates_passed': False, 'conversation_turns': 0}
+    Γ£à PASS  Empty query doesn't 500
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  TEST 11.5 ΓÇö Invalid User ID
+    HTTP 200  |  []
+    Γ£à PASS  Invalid user returns 200 or 404
+    Γ£à PASS  Not 500
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  FINAL SCORECARD
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  Phase 1   Health Checks            Γ£à PASS  (13/13 checks)
+  Phase 2   ML Service Routes        Γ¥î FAIL  (18/21 checks)
+  Phase 3   Chat / RAG Pipeline      Γ¥î FAIL  (14/17 checks)
+  Phase 4   Transaction CRUD + ML    Γ¥î FAIL  (9/11 checks)
+  Phase 5   Dashboard & Analytics    Γ¥î FAIL  (7/9 checks)
+  Phase 6   Goals & Budget           Γ¥î FAIL  (6/9 checks)
+  Phase 7   AI Literacy Hub          Γ¥î FAIL  (9/11 checks)
+  Phase 8   CSV Upload               Γ¥î FAIL  (1/3 checks)
+  Phase 9   Memory System            Γ¥î FAIL  (3/4 checks)
+  Phase 11  Edge Cases               Γ£à PASS  (9/9 checks)
+
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  Total: 89/107 checks passed
+
+  ΓÜá∩╕Å   BLOCKERS FOUND ΓÇö Fix before demo:
+       Γ¥î Phase 5   Dashboard & Analytics
+       Γ¥î Phase 4   Transaction CRUD + ML
+       Γ¥î Phase 3   Chat / RAG Pipeline
+       Γ¥î Phase 6   Goals & Budget
+       Γ¥î Phase 2   ML Service Routes
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  Completed: 2026-03-28 19:24:08
+

@@ -10,7 +10,7 @@ Stores attribute:value facts about a user with:
 Collection: semantic_memory
 Index: semantic_text_index (Atlas Search on 'attribute', 'value')
 
-Author: Financial Cognitive OS Team
+Author: Aryan Lomte
 Version: 3.0.0
 """
 from __future__ import annotations

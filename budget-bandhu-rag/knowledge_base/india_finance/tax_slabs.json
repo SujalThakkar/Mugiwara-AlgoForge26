@@ -1,0 +1,168 @@
+{
+  "document_id": "tax_slabs_v3",
+  "source": "india_finance",
+  "category": "taxation",
+  "chunks": [
+    {
+      "id": "tax_new_regime_2024",
+      "text": "New Tax Regime FY 2024-25: Income up to ₹3,00,000 — NIL. ₹3,00,001 to ₹7,00,000 — 5%. ₹7,00,001 to ₹10,00,000 — 10%. ₹10,00,001 to ₹12,00,000 — 15%. ₹12,00,001 to ₹15,00,000 — 20%. Above ₹15,00,000 — 30%. Standard deduction of ₹75,000 available. Rebate u/s 87A: tax nil if income ≤ ₹7,00,000.",
+      "tags": [
+        "new regime",
+        "tax slab",
+        "FY2024",
+        "income tax"
+      ]
+    },
+    {
+      "id": "tax_old_regime_2024",
+      "text": "Old Tax Regime FY 2024-25: Income up to ₹2,50,000 — NIL. ₹2,50,001 to ₹5,00,000 — 5%. ₹5,00,001 to ₹10,00,000 — 20%. Above ₹10,00,000 — 30%. Surcharge: 10% for income ₹50L–₹1Cr, 15% for ₹1Cr–₹2Cr, 25% for ₹2Cr–₹5Cr, 37% above ₹5Cr. Health & Education cess: 4% on tax+surcharge.",
+      "tags": [
+        "old regime",
+        "tax slab",
+        "surcharge",
+        "cess"
+      ]
+    },
+    {
+      "id": "sec_80c",
+      "text": "Section 80C: Maximum deduction ₹1,50,000 per year. Eligible investments: PPF, ELSS Mutual Funds, NSC, 5-year Tax Saving FD, EPF (employee contribution), Life Insurance Premium, Tuition fees (2 children), Home Loan Principal repayment, Sukanya Samriddhi, Senior Citizens Savings Scheme. Lock-in: ELSS 3 years, PPF 15 years, NSC 5 years.",
+      "tags": [
+        "80C",
+        "deduction",
+        "PPF",
+        "ELSS",
+        "NSC",
+        "tax saving"
+      ]
+    },
+    {
+      "id": "sec_80d",
+      "text": "Section 80D: Health Insurance Premium deduction. Self/family (below 60): ₹25,000. Self/family (senior citizen 60+): ₹50,000. Parents (below 60): additional ₹25,000. Parents (senior citizen 60+): additional ₹50,000. Maximum combined deduction: ₹1,00,000. Preventive health check-up: ₹5,000 included within limits.",
+      "tags": [
+        "80D",
+        "health insurance",
+        "medical",
+        "senior citizen"
+      ]
+    },
+    {
+      "id": "sec_80e",
+      "text": "Section 80E: Deduction on interest paid on education loan. No upper limit on deduction amount. Available for 8 consecutive years from year of first repayment. Applicable for higher education (graduation and above). Loan must be from bank/financial institution or approved charitable institution. Principal repayment not deductible.",
+      "tags": [
+        "80E",
+        "education loan",
+        "interest",
+        "higher education"
+      ]
+    },
+    {
+      "id": "sec_80g",
+      "text": "Section 80G: Donations to approved charitable funds. 100% deduction: PM National Relief Fund, CM Relief Fund, National Defence Fund, PM CARES Fund. 50% deduction: Jawaharlal Nehru Memorial Fund, Indira Gandhi Memorial Trust. Donations above ₹2,000 must be non-cash. Qualifying limit: 10% of adjusted gross total income for some funds.",
+      "tags": [
+        "80G",
+        "donation",
+        "charity",
+        "relief fund"
+      ]
+    },
+    {
+      "id": "sec_87a",
+      "text": "Section 87A Rebate: Under new regime — full tax rebate if total income ≤ ₹7,00,000. Under old regime — rebate up to ₹12,500 if total income ≤ ₹5,00,000. Rebate cannot exceed actual tax liability. Not available on special rate incomes (LTCG, STCG u/s 111A).",
+      "tags": [
+        "87A",
+        "rebate",
+        "tax nil",
+        "zero tax"
+      ]
+    },
+    {
+      "id": "sec_80tta_ttb",
+      "text": "Section 80TTA: Deduction up to ₹10,000 on interest from savings bank account. Available to individuals and HUF below 60 years. Section 80TTB: Deduction up to ₹50,000 on interest income (savings + FD + RD) for senior citizens (60+). 80TTB supersedes 80TTA for senior citizens.",
+      "tags": [
+        "80TTA",
+        "80TTB",
+        "savings interest",
+        "senior citizen",
+        "FD interest"
+      ]
+    },
+    {
+      "id": "sec_80ccd",
+      "text": "Section 80CCD(1): NPS contribution by employee — deductible up to 10% of salary, within ₹1.5L 80C limit. Section 80CCD(1B): Additional deduction of ₹50,000 for NPS contribution, OVER AND ABOVE ₹1.5L limit. Section 80CCD(2): Employer NPS contribution — up to 10% of salary (14% for govt employees), not included in ₹1.5L cap.",
+      "tags": [
+        "80CCD",
+        "NPS",
+        "pension",
+        "additional deduction",
+        "50000"
+      ]
+    },
+    {
+      "id": "sec_24b",
+      "text": "Section 24(b): Deduction on home loan interest. Self-occupied property: up to ₹2,00,000 per year. Let-out property: no limit on deduction. Loan must be for purchase/construction/repair of house. Construction must complete within 5 years of loan. Pre-construction interest deductible in 5 equal instalments.",
+      "tags": [
+        "24b",
+        "home loan",
+        "interest",
+        "housing",
+        "self occupied"
+      ]
+    },
+    {
+      "id": "sec_54",
+      "text": "Section 54: Capital Gains exemption on sale of residential house. LTCG from sale of house exempt if invested in another residential property within 1 year before or 2 years after sale, or constructed within 3 years. Maximum 2 properties allowed once in lifetime if LTCG ≤ ₹2 Crore. Unused amount must be deposited in Capital Gains Account Scheme.",
+      "tags": [
+        "54",
+        "capital gains",
+        "property",
+        "LTCG",
+        "exemption"
+      ]
+    },
+    {
+      "id": "tds_rates",
+      "text": "TDS Rates 2024-25: Salary — as per slab. FD interest (194A) — 10% if interest > ₹40,000 (₹50,000 senior citizens). Rent (194I) — 10% if > ₹2,40,000/year. Professional fees (194J) — 10%. Commission (194H) — 5%. Property sale (194IA) — 1% if consideration > ₹50 lakhs. Dividend (194) — 10% if > ₹5,000.",
+      "tags": [
+        "TDS",
+        "194A",
+        "194I",
+        "194J",
+        "194IA",
+        "tax deducted source"
+      ]
+    },
+    {
+      "id": "gst_rates",
+      "text": "GST Rate Slabs: 0% — essential food items, books, newspapers, fresh vegetables, milk, eggs. 5% — packaged food, footwear < ₹1000, transport services. 12% — processed food, computers, business class air travel. 18% — most services, electronics, AC restaurants, telecom. 28% — luxury cars, tobacco, aerated drinks, casino. GST on UPI transactions: NIL (no GST on payment services).",
+      "tags": [
+        "GST",
+        "rates",
+        "slabs",
+        "goods services tax"
+      ]
+    },
+    {
+      "id": "itr_forms",
+      "text": "ITR Forms: ITR-1 (Sahaj) — salaried, pension, one house property, income ≤ ₹50L. ITR-2 — capital gains, foreign income, multiple properties. ITR-3 — business/profession income. ITR-4 (Sugam) — presumptive income u/s 44AD/44ADA, income ≤ ₹50L. ITR-5 — partnerships, LLPs. ITR-6 — companies. Due date: July 31 for individuals (non-audit). Belated return: December 31. Revised return: December 31.",
+      "tags": [
+        "ITR",
+        "forms",
+        "filing",
+        "due date",
+        "Sahaj",
+        "Sugam"
+      ]
+    },
+    {
+      "id": "advance_tax",
+      "text": "Advance Tax Schedule: Applicable if tax liability > ₹10,000. By June 15 — 15% of tax. By September 15 — 45% of tax. By December 15 — 75% of tax. By March 15 — 100% of tax. Senior citizens without business income exempt. Interest u/s 234B for non-payment, 234C for deferment — 1% per month.",
+      "tags": [
+        "advance tax",
+        "234B",
+        "234C",
+        "installment",
+        "quarterly"
+      ]
+    }
+  ]
+}

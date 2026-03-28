@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from 'recharts';
 import { ShoppingBag, Utensils, Car, Home, Heart, Zap, TrendingUp, Sparkles } from 'lucide-react';
-import { mockData } from '@/lib/api/mock-data';
 
 interface SpendingCategory {
     name: string;
@@ -22,6 +21,14 @@ interface SpendingDonutChartProps {
 export function SpendingDonutChart({ data: categoryBreakdown }: SpendingDonutChartProps) {
     const PieComponent = Pie as any;
     const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
+
+    if (!categoryBreakdown || Object.keys(categoryBreakdown).length === 0) {
+        return (
+            <div className="flex items-center justify-center h-[420px] bg-gray-100 rounded-3xl border border-gray-200">
+                <p className="text-gray-500 font-medium">Accumulating category data...</p>
+            </div>
+        );
+    }
 
     const getCategoryDetails = (category: string) => {
         switch (category) {

@@ -11,6 +11,9 @@ interface Transaction {
     category: string;
     type: 'debit' | 'credit';
     isAnomaly: boolean;
+    anomalySeverity?: string;
+    anomalyReason?: string;
+    anomalyScore?: number;
 }
 
 interface TransactionListProps {
@@ -37,7 +40,7 @@ export function TransactionList({ transactions }: TransactionListProps) {
                     </h3>
                     <div className="space-y-2">
                         {txns.map((txn) => (
-                            <TransactionCard key={txn.id} transaction={txn} />
+                            <TransactionCard key={txn.id} transaction={txn as any} />
                         ))}
                     </div>
                 </div>

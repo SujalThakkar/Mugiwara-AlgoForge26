@@ -16,7 +16,6 @@ import { EmergencyFundBarometer } from "@/components/dashboard/EmergencyFundBaro
 import { SpendingInsights } from "@/components/dashboard/SpendingInsights";
 import { FinancialTimeMachine } from "@/components/dashboard/FinancialTimeMachine";
 import { TaxOptimizerDashboard } from "@/components/dashboard/TaxOptimizerDashboard";
-import { mockData } from "@/lib/api/mock-data";
 import { useDashboard } from "@/lib/hooks/useMLApi";
 import { useUserStore } from "@/lib/store/useUserStore";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
@@ -52,21 +51,20 @@ export default function DashboardPage() {
     },
     category_breakdown: apiData?.category_breakdown || {},
     insights: apiData?.insights || [],
+    weekly_summary: apiData?.weekly_summary || undefined,
     forecast: apiData?.forecast || undefined,
   } : {
-    ...mockData.dashboardSummary,
-    category_breakdown: mockData.budget.allocations.reduce<Record<string, { total: number; count: number }>>((acc, curr) => ({
-      ...acc,
-      [curr.category]: { total: curr.spent, count: 1 }
-    }), {}),
-    // Copy insights to mutable array
-    insights: [...mockData.insights],
-    // Transform forecast
-    forecast: {
-      horizon: '30 days',
-      predicted_savings: mockData.savingsForecast['30day'].predicted,
-      confidence: mockData.savingsForecast['30day'].confidence
-    }
+    currentBalance: 0,
+    monthSpent: 0,
+    monthSaved: 0,
+    savingsRate: 0,
+    budgetAdherence: 0,
+    financialScore: 0,
+    trend: { balance: '+0%', spending: '+0%', savings: '+0%' },
+    category_breakdown: {},
+    insights: [],
+    weekly_summary: undefined,
+    forecast: undefined
   };
 
   const [spendingTrend, setSpendingTrend] = useState<Array<{ date: string; amount: number }>>([]);
@@ -74,10 +72,7 @@ export default function DashboardPage() {
   const [goals, setGoals] = useState<any[]>([]);
 
   useEffect(() => {
-    // Mock trend data for now if not available
-    if (!spendingTrend.length) {
-      setSpendingTrend(mockData.spendingTrend);
-    }
+    // Left intentional structure for API hooks
   }, []);
 
 
@@ -491,7 +486,7 @@ export default function DashboardPage() {
                 transition={{ duration: 0.6, ease: MM_EASING }}
                 style={{ transformOrigin: 'center top' }}
               >
-                <SpendingInsights insights={dashboardData?.insights} />
+                <SpendingInsights insights={dashboardData?.insights} weeklySummary={dashboardData?.weekly_summary} />
               </motion.div>
 
               <motion.div

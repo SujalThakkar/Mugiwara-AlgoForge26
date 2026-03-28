@@ -1,0 +1,138 @@
+{
+  "document_id": "indirect_tax_fema_complete",
+  "source": "india_finance",
+  "category": "legal_indirect_tax",
+  "chunks": [
+    {
+      "id": "gst_act_complete",
+      "text": "CGST Act 2017 — Key Sections: Section 2 (Definitions — aggregate turnover, composite supply, input tax). Section 7 (Scope of supply). Section 8 (Tax on composite/mixed supply — highest rate applies). Section 9 (Levy — 0%/5%/12%/18%/28%). Section 10 (Composition scheme — 1%/5% of turnover, threshold ₹1.5Cr, no ITC). Section 11 (Exemption). Section 15 (Value of supply). Section 16 (Eligibility for ITC — goods/services received, tax paid, return filed). Section 17(5) (Blocked credits — motor vehicles, food, club membership, construction). Section 22 (Registration threshold — ₹40L goods, ₹20L services, ₹10L special category states). Section 24 (Mandatory registration — interstate supply, e-commerce, reverse charge). Section 25 (Registration procedure — GST portal). Section 31 (Tax invoice requirements). Section 37 (GSTR-1 — outward supplies by 11th). Section 39 (GSTR-3B — summary return by 20th). Section 44 (GSTR-9 annual return by December 31). Section 50 (Interest on late payment — 18% per annum). Section 61-65 (Audit). Section 73 (Tax not paid without fraud — 3 years to adjudicate). Section 74 (Tax not paid with fraud — 5 years, penalty 100% of tax). Section 122 (Offences — penalty ₹10,000 or tax amount, whichever higher). Section 132 (Prosecution — 1 to 5 years imprisonment for >₹5Cr evasion).",
+      "tags": [
+        "GST",
+        "CGST",
+        "Section 9",
+        "Section 16",
+        "Section 17(5)",
+        "Section 22",
+        "Section 74",
+        "Section 132",
+        "ITC",
+        "registration",
+        "GSTR",
+        "composition"
+      ]
+    },
+    {
+      "id": "fema_sections",
+      "text": "FEMA (Foreign Exchange Management Act) 1999 — Key Provisions: Section 2 (Definitions — authorised person, capital account, current account, foreign exchange). Section 3 (Dealing in foreign exchange — only through authorised dealers). Section 4 (Holding of foreign exchange — resident can hold up to LRS limit). Section 5 (Current account transactions — liberalised). Section 6 (Capital account transactions — RBI regulated). Section 7 (Export of goods — declaration mandatory). Section 10 (Authorised person). Section 13 (Penalties — up to 3x the amount involved or ₹2L, whichever higher). Section 14 (Penalty enforcement). LRS (Liberalised Remittance Scheme): $250,000 per person per year for residents. Allowed: education, travel, maintenance, investments abroad. TCS on LRS: 20% above ₹7L (education/medical: 5%). FEMA violations: civil offence (not criminal like FERA). ED investigates FEMA violations. Penalty: up to 3x violation amount.",
+      "tags": [
+        "FEMA",
+        "Section 3",
+        "Section 6",
+        "Section 13",
+        "LRS",
+        "$250000",
+        "foreign exchange",
+        "ED",
+        "TCS",
+        "remittance",
+        "NRI",
+        "capital account"
+      ]
+    },
+    {
+      "id": "pmla_complete",
+      "text": "PMLA (Prevention of Money Laundering Act) 2002: Section 2 (Definitions — attachment, money laundering, proceeds of crime, reporting entity). Section 3 (Offence of money laundering — knowingly dealing in proceeds of crime). Section 4 (Punishment — 3 to 7 years RI + fine; NDPS scheduled offence: up to 10 years). Section 5 (Attachment of property — provisional, up to 180 days). Section 8 (Adjudication). Section 12 (Reporting entities — banks, FIs, intermediaries — must maintain records 5 years). Section 12A (KYC obligation). Section 13 (Reporting entity violations — fine ₹10,000 per day). Section 17 (Search and seizure by ED). Section 19 (Arrest). Section 24 (Burden of proof — on accused to prove property is not proceeds of crime). Section 45 (Bail conditions — twin test: no reasonable grounds to believe guilty + no likely to commit offence). Predicate offences: scheduled offences under PMLA include IPC fraud, drug trafficking, corruption, terror financing. FATF: India is a member, implements FATF 40 recommendations.",
+      "tags": [
+        "PMLA",
+        "Section 3",
+        "Section 4",
+        "Section 5",
+        "Section 12",
+        "Section 24",
+        "Section 45",
+        "money laundering",
+        "ED",
+        "attachment",
+        "bail",
+        "KYC",
+        "FATF",
+        "proceeds of crime"
+      ]
+    },
+    {
+      "id": "companies_act_finance",
+      "text": "Companies Act 2013 — Finance Relevant Sections: Section 2(68) (Private company — max 200 members, restricted transfer). Section 12 (Registered office). Section 42 (Private placement — maximum 200 allottees, no public advertisement). Section 54 (Sweat equity shares — up to 15% of paid-up capital or ₹5Cr, whichever higher). Section 56 (Transfer and transmission of securities). Section 62 (Further issue of share capital — rights issue, ESOP, private placement). Section 68 (Buyback — max 25% of paid-up + free reserves per year, 15% in open market). Section 73-76 (Deposits — private companies cannot accept from public). Section 123 (Dividend — only from profits/free reserves, transfer 10% to reserves if declared from reserves). Section 135 (CSR — companies with net worth ₹500Cr or turnover ₹1000Cr or net profit ₹5Cr must spend 2% net profit on CSR). Section 139 (Auditor appointment). Section 185 (Loans to directors — prohibited except for employment). Section 186 (Loans/investments by company — max 60% net worth or 100% free reserves).",
+      "tags": [
+        "Companies Act",
+        "Section 42",
+        "Section 54",
+        "Section 62",
+        "Section 68",
+        "Section 123",
+        "Section 135",
+        "sweat equity",
+        "ESOP",
+        "buyback",
+        "CSR",
+        "private placement",
+        "dividend"
+      ]
+    },
+    {
+      "id": "sebi_regulations",
+      "text": "SEBI Act 1992 & Key Regulations: Section 11 (Powers of SEBI — protect investors, regulate securities market). Section 11B (Power to issue directions). Section 12 (Registration of market intermediaries). Section 15A-15HB (Penalties — ₹1L to ₹25Cr for various violations). Section 24 (Prosecution — imprisonment up to 10 years). SEBI (LODR) Regulations 2015: continuous disclosure obligations for listed companies. SEBI (PIT) Regulations 2015: Prohibition of Insider Trading — Section 3 (insider cannot trade on UPSI — Unpublished Price Sensitive Information). SEBI (ICDR) Regulations 2018: Issue of capital. SEBI (MF) Regulations 1996: mutual fund governance. IPO process: DRHP filing, 3-day subscription, allotment T+6. Offer for Sale (OFS). Rights Issue. Qualified Institutional Placement (QIP). SME IPO on BSE SME/NSE Emerge.",
+      "tags": [
+        "SEBI",
+        "Section 11",
+        "Section 15",
+        "insider trading",
+        "UPSI",
+        "LODR",
+        "PIT",
+        "ICDR",
+        "IPO",
+        "DRHP",
+        "QIP",
+        "OFS",
+        "listed company"
+      ]
+    },
+    {
+      "id": "rera_act",
+      "text": "RERA (Real Estate Regulation and Development Act) 2016: Section 3 (Mandatory registration of projects > 500 sq m or >8 apartments). Section 4 (Application for registration — developer discloses all project details, escrow 70% of collections). Section 11 (Functions of promoter — quarterly progress updates, no change in plan without 2/3rd buyer consent). Section 12 (Disclosures). Section 18 (Compensation for delay — interest equal to SBI MCLR + 2% per month to buyer). Section 31 (Complaint to RERA authority). Section 40 (Recovery of interest/penalty — as land revenue arrears). Section 59 (Non-registration penalty — 10% of project cost). Section 60 (Misrepresentation — 5% of project cost). Section 61 (Other contraventions — ₹10,000/day up to 5% project cost). Section 63 (Penalty for non-compliance of RERA order — imprisonment up to 1 year or fine or both).",
+      "tags": [
+        "RERA",
+        "Section 3",
+        "Section 4",
+        "Section 18",
+        "Section 31",
+        "Section 59",
+        "real estate",
+        "escrow",
+        "delay",
+        "compensation",
+        "developer",
+        "buyer",
+        "registration"
+      ]
+    },
+    {
+      "id": "rbi_acts",
+      "text": "RBI Act 1934 & Banking Regulation Act 1949 — Key Provisions: RBI Act Section 17 (Permissible activities for RBI). RBI Act Section 26 (Legal tender status of notes). RBI Act Section 42 (CRR maintenance by banks). Banking Regulation Act Section 5 (Definitions — banking, financial institution). Banking Regulation Act Section 11 (Minimum capital requirements). Banking Regulation Act Section 17 (Reserve fund — 20% of profits annually until fund = paid-up capital). Banking Regulation Act Section 29 (Balance sheet and P&L). Banking Regulation Act Section 35A (Directions by RBI to banks). SARFAESI Act 2002: Section 13 (60-day notice to defaulter), Section 13(4) (bank takes possession of secured asset), allows banks to recover NPA without court. Section 17 (borrower can appeal to DRT). IBC (Insolvency and Bankruptcy Code) 2016: Section 7 (financial creditor initiates CIRP), Section 9 (operational creditor), Section 10 (corporate debtor), 330-day resolution timeline.",
+      "tags": [
+        "RBI Act",
+        "Banking Regulation Act",
+        "SARFAESI",
+        "IBC",
+        "Section 13",
+        "Section 42",
+        "NPA",
+        "CIRP",
+        "insolvency",
+        "DRT",
+        "CRR",
+        "legal tender"
+      ]
+    }
+  ]
+}

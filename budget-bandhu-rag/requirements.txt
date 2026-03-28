@@ -1,6 +1,3 @@
-# BudgetBandhu Financial Cognitive OS — Python Dependencies
-# Python 3.11+
-
 # ── Core API ──────────────────────────────────────────────────────────
 fastapi>=0.111.0
 uvicorn[standard]>=0.29.0
@@ -27,7 +24,11 @@ langchain-core>=0.2.0
 # ── Scheduling (memory decay jobs) ───────────────────────────────────
 APScheduler>=3.10.0
 
-# ── REMOVED from previous version ────────────────────────────────────
-# faiss-cpu     → replaced by Atlas $vectorSearch
-# rank_bm25     → replaced by Atlas $search (Lucene BM25)
-# networkx      → replaced by Atlas $graphLookup
+# ── Other Utils ──────────────────────────────────────────────────────
+certifi
+pyngrok
+passlib
+python-jose[cryptography]
+qdrant-client
+neo4j
+pandas

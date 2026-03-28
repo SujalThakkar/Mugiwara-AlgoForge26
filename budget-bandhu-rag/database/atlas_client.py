@@ -20,6 +20,7 @@ import asyncio
 import logging
 import os
 import time
+import certifi
 from typing import Optional
 
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
@@ -100,6 +101,7 @@ async def init_atlas(
                 retryWrites             = True,
                 retryReads              = True,
                 appName                 = "BudgetBandhu-CognitiveOS",
+                tlsCAFile               = certifi.where(),
             )
 
             # Verify connectivity

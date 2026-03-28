@@ -2,7 +2,6 @@
 
 import { usePathname } from 'next/navigation';
 import { TopNavigation } from '@/components/layout/TopNavigation';
-import { MockToggle } from '@/components/shared/MockToggle';
 import { ChatWidget } from '@/components/chat/ChatWidget';
 
 export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
@@ -29,9 +28,6 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
 
             {/* AI Chat Widget */}
             <ChatWidget />
-
-            {/* Developer Mock Toggle */}
-            <MockToggle />
         </div>
     );
 }

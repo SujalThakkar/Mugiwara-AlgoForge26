@@ -16,7 +16,7 @@ Collection: trajectory_snapshots (Time Series)
   timeField : "timestamp"
   metaField : "metadata"  ← contains user_id
 
-Author: Financial Cognitive OS Team
+Author: Aryan Lomte
 Version: 3.0.0
 """
 from __future__ import annotations

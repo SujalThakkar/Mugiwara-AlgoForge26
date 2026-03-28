@@ -17,6 +17,7 @@ from typing import List, Optional
 
 from models.schemas import (
     GradedChunk, SimulationResult, UnifiedMemoryContext,
+    CausalFinding, QueryIntent
 )
 
 logger = logging.getLogger(__name__)
@@ -61,6 +62,8 @@ class ElitePromptBuilder:
         simulation_result: Optional[SimulationResult] = None,
         retry_instruction: Optional[str] = None,
         graded_chunks: Optional[List[GradedChunk]] = None,
+        causal_findings: Optional[List[CausalFinding]] = None,
+        query_intent: Optional[QueryIntent] = None,
     ) -> str:
         """
         Assemble the final prompt string.
@@ -91,6 +94,10 @@ class ElitePromptBuilder:
         episodes_block    = self._build_episodes(memory_context)
         graph_block       = self._build_graph(memory_context)
         graded_block      = self._build_graded_context(graded_chunks or [])
+        
+        causal_block = ""
+        if query_intent in (QueryIntent.BEHAVIORAL, QueryIntent.FULL_ADVISORY):
+            causal_block = self._build_causal(causal_findings or [])
 
         # ── Assemble with budget enforcement ─────────────────────────────────
         mandatory = "\n".join([system_block, user_profile_block])
@@ -101,6 +108,7 @@ class ElitePromptBuilder:
             ("analysis",    analysis_block),
             ("episodes",    episodes_block),
             ("graded",      graded_block),
+            ("causal",      causal_block),  # Higher drop priority (drops first)
             ("graph",       graph_block),
         ]
 
@@ -223,6 +231,20 @@ class ElitePromptBuilder:
         if not lines:
             return ""
         return _xml("USER_DATA", "\n".join(lines[:6]))
+
+    def _build_causal(self, findings: List[CausalFinding]) -> str:
+        """Causal insights block - 80 token budget (~320 chars)."""
+        if not findings:
+            return ""
+        f = findings[0]
+        # Strict 80-token (approx 320 char) budget for content
+        counterfactual = f.counterfactual[:180] 
+        content = (
+            f"  Root_cause: {f.cause_label}\n"
+            f"  Counterfactual: {counterfactual}\n"
+            f"  Controlled_for: income_volatility"
+        )
+        return _xml(f'CAUSAL_INSIGHTS confidence="{f.confidence:.2f}"', content)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

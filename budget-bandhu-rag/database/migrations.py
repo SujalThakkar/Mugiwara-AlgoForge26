@@ -12,7 +12,7 @@ Run standalone:
     python -m database.migrations
     python -m database.migrations --user <user_id>   # migrate specific user
 
-Author: Financial Cognitive OS Team
+Author: Aryan Lomte
 Version: 3.0.0
 """
 from __future__ import annotations

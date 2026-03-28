@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, TrendingUp, TrendingDown, ArrowRight, Zap, PiggyBank, Wallet, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
-import { mockData } from '@/lib/api/mock-data';
 
 interface TimeComparison {
     period: string;
@@ -14,9 +13,14 @@ interface TimeComparison {
 
 interface FinancialTimeMachineProps {
     forecast?: {
-        horizon: string;
-        predicted_savings: number;
-        confidence: number;
+        predicted_spending?: number;
+        predicted_savings?: number;
+        confidence?: number;
+        monthly_summary?: {
+            projected_total: number;
+            vs_last_month: number;
+            top_category: string;
+        };
     };
 }
 
@@ -25,8 +29,7 @@ export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
     const [currentPage, setCurrentPage] = useState(0);
 
     // Construct data including Future Forecast if available
-    const comparisons: Record<string, TimeComparison> = {
-        ...mockData.financialHistory as any,
+    const comparisons: Record<string, TimeComparison | null> = {
         future: forecast ? {
             period: 'Next 30 Days',
             label: 'AI Forecast',
@@ -38,14 +41,22 @@ export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
             },
             past: {
                 income: 0,
-                expenses: 0,
-                savings: forecast.predicted_savings,
+                expenses: forecast.predicted_spending || 0,
+                savings: forecast.predicted_savings || 0,
                 balance: 0
             }
         } : null
     };
 
-    const data = comparisons[selectedPeriod] || comparisons['month'];
+    const data = (comparisons[selectedPeriod] || null) as TimeComparison | null;
+
+    if (!data || !data.current) {
+        return (
+            <div className="flex items-center justify-center p-6 h-[420px] bg-white/5 rounded-3xl border border-teal-800">
+                <p className="text-teal-200 font-medium">Accumulating financial history...</p>
+            </div>
+        );
+    }
 
     const calculateChange = (current: number, past: number) => {
         const change = current - past;
@@ -57,7 +68,7 @@ export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
         { name: 'Income', current: data.current.income, past: data.past.income, icon: TrendingUp, color: 'bg-emerald-500', barColor: 'bg-emerald-400', goodDirection: 'up' },
         { name: 'Expenses', current: data.current.expenses, past: data.past.expenses, icon: Wallet, color: 'bg-rose-500', barColor: 'bg-rose-400', goodDirection: 'down' },
         { name: 'Savings', current: data.current.savings, past: data.past.savings, icon: PiggyBank, color: 'bg-cyan-500', barColor: 'bg-cyan-400', goodDirection: 'up' },
-        { name: 'Balance', current: data.current.balance, past: data.past.balance, icon: Zap, color: 'bg-amber-500', barColor: 'bg-amber-400', goodDirection: 'up' },
+        { name: 'Projected Total', current: data.current.balance, past: forecast?.monthly_summary?.projected_total || 0, icon: Zap, color: 'bg-amber-500', barColor: 'bg-amber-400', goodDirection: 'down' },
     ];
 
     // Show 4 metrics per page
@@ -153,30 +164,35 @@ export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
 
                         // Special handling for Future Forecast
                         if (selectedPeriod === 'future') {
-                            if (metric.name === 'Savings') {
+                            if (metric.name === 'Savings' || metric.name === 'Expenses' || metric.name === 'Projected Total') {
                                 return (
                                     <motion.div
                                         key={metric.name}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className="col-span-2 p-4 bg-white rounded-2xl border-2 border-teal-400 shadow-lg"
+                                        className="col-span-1 p-3 bg-white rounded-2xl border border-teal-200 shadow-md"
                                     >
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center">
-                                                <Sparkles className="w-5 h-5 text-white" />
+                                        <div className="flex flex-col gap-1 mb-1">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 rounded-lg bg-teal-500 flex items-center justify-center">
+                                                    <Sparkles className="w-4 h-4 text-white" />
+                                                </div>
+                                                <p className="text-xs text-gray-500 font-medium">Pred. {metric.name}</p>
                                             </div>
-                                            <div>
-                                                <p className="text-sm text-gray-500">AI Predicted Savings</p>
-                                                <p className="text-2xl font-black text-gray-900">₹{metric.past.toLocaleString('en-IN')}</p>
+                                            <p className="text-lg font-black text-gray-900 ml-1">₹{(metric.past || 0).toLocaleString('en-IN')}</p>
+                                        </div>
+                                        {metric.name === 'Projected Total' && forecast?.monthly_summary && (
+                                            <div className="mt-1 text-[10px] text-teal-600 font-medium bg-teal-50 p-1.5 rounded-lg flex flex-col gap-1">
+                                                <span>Top Cat: {forecast.monthly_summary.top_category}</span>
+                                                <span className={forecast.monthly_summary.vs_last_month > 0 ? 'text-red-500' : 'text-green-500'}>
+                                                    {forecast.monthly_summary.vs_last_month > 0 ? '+' : ''}{forecast.monthly_summary.vs_last_month}% vs last month
+                                                </span>
                                             </div>
-                                        </div>
-                                        <div className="mt-2 text-xs text-teal-600 font-medium bg-teal-50 p-2 rounded-lg">
-                                            Based on your recent spending habits (LSTM Model)
-                                        </div>
+                                        )}
                                     </motion.div>
                                 );
                             }
-                            return null; // Hide other metrics for now
+                            return null;
                         }
 
                         const change = calculateChange(metric.current, metric.past);

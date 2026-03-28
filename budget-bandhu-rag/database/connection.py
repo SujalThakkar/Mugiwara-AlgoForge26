@@ -10,7 +10,7 @@ ENV:
   MONGODB_ATLAS_URI  — Atlas connection string
   MONGODB_DATABASE   — Atlas database name (default: budget_bandhu)
 
-Author: Financial Cognitive OS Team
+Author: Aryan Lomte
 Version: 3.0.0
 """
 from __future__ import annotations

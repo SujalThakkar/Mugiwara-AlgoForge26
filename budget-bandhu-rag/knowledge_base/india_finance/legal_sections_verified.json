@@ -1,0 +1,48 @@
+{
+  "document_id": "legal_sections_verified",
+  "source": "india_finance",
+  "category": "legal_reference",
+  "chunks": [
+    {
+      "id": "income_tax_sections_verified",
+      "text": "Verified Income Tax Act Sections: 10 (exemptions), 10A/10B (export units), 16 (standard deduction), 24(b) (home loan interest), 44AD/44ADA (presumptive income), 54/54F (capital gains exemption property), 54EC (NHAI/REC bonds), 56(2) (angel tax), 80C to 80U (deductions chapter), 80CCD (NPS), 80D (health insurance), 80E (education loan), 80G (donations), 80TTA/80TTB (savings interest), 87A (rebate), 111A (STCG equity 15%), 112A (LTCG equity 10%), 139 (ITR filing), 143 (assessment), 194A/194I/194J/194IA (TDS), 271 (penalty false statement), 276C (prosecution tax evasion), 278A/278B/278C/278E (punishment abetment).",
+      "tags": [
+        "verified sections",
+        "80C",
+        "87A",
+        "111A",
+        "112A",
+        "TDS",
+        "penalty",
+        "legal",
+        "whitelist"
+      ]
+    },
+    {
+      "id": "gst_sections_verified",
+      "text": "Verified GST Act Sections: Section 9 (levy of GST), Section 10 (composition scheme), Section 15 (value of taxable supply), Section 16 (input tax credit eligibility), Section 17 (blocked credits), Section 22 (registration threshold ₹40L), Section 37/38/39 (GSTR returns), Section 44 (annual return), Section 74 (tax fraud penalty up to 100% of tax). GST returns: GSTR-1 (outward supplies), GSTR-3B (monthly summary), GSTR-9 (annual).",
+      "tags": [
+        "GST sections",
+        "Section 9",
+        "Section 16",
+        "GSTR",
+        "composition scheme",
+        "ITC",
+        "verified"
+      ]
+    },
+    {
+      "id": "companies_act_sections",
+      "text": "Verified Companies Act 2013 Sections relevant to personal finance/startups: Section 56 (transfer of securities), Section 62 (rights issue), Section 135 (CSR — 2% net profit for companies ≥ ₹500Cr revenue). For startups: Section 42 (private placement), Section 54 (sweat equity), Section 68 (buyback). DPIIT recognition required for Startup India benefits. MCA21 portal for company registration (₹0 for OPC/private company).",
+      "tags": [
+        "Companies Act",
+        "Section 56",
+        "startup",
+        "CSR",
+        "private placement",
+        "sweat equity",
+        "MCA"
+      ]
+    }
+  ]
+}
