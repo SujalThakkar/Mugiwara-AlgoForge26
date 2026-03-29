@@ -58,8 +58,8 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-!budget-bandhu-frontend/src/lib/
-!budget-bandhu-frontend/src/lib/**
+# !budget-bandhu-frontend/src/lib/
+# !budget-bandhu-frontend/src/lib/**
 
 # Virtual environments
 venv/

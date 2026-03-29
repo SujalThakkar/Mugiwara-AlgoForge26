@@ -65,6 +65,9 @@ from api.routes.literacy     import router as literacy_router
 # Web3 / Goals 2.0 routers
 from api.routes.escrow       import router as escrow_router
 from api.routes.savings      import router as savings_router
+# Multi-channel messaging routers
+from api.routes.whatsapp     import router as whatsapp_router
+from api.routes.telegram     import router as telegram_router
 
 app.include_router(chat_router)
 app.include_router(transactions_router)
@@ -75,6 +78,8 @@ app.include_router(insights_router)
 app.include_router(literacy_router)
 app.include_router(escrow_router)
 app.include_router(savings_router)
+app.include_router(whatsapp_router)
+app.include_router(telegram_router)
 
 
 # ── Health ───────────────────────────────────────────────────
@@ -105,10 +110,16 @@ async def startup():
     await Database.connect()
     # Start ngrok in background
     threading.Thread(target=start_ngrok, daemon=True).start()
-    # Pre-warm AgentController
+    # Pre-warm AgentController and inject into all channel routes
     try:
         from api.routes.chat import get_controller
-        get_controller()
+        ctrl = get_controller()
+        # Inject AgentController into WhatsApp and Telegram routes
+        from api.routes.whatsapp import set_agent_controller as set_wa_ctrl
+        from api.routes.telegram import set_agent_controller as set_tg_ctrl
+        set_wa_ctrl(ctrl)
+        set_tg_ctrl(ctrl)
+        logger.info("[MAIN] ✅ AgentController injected into Chat, WhatsApp, Telegram")
     except Exception as e:
         logger.warning(f"[MAIN] AgentController pre-warm failed (non-fatal): {e}")
     logger.info("[MAIN] ✅ Ready")

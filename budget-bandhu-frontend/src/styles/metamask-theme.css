@@ -1,0 +1,40 @@
+:root {
+  --mm-cream: #F2E8DC;
+  --mm-purple: #3C154E;
+  --mm-black: #24272A;
+  --mm-orange: #E17726;
+  --mm-green: #00E676;
+  --mm-blue: #87CEEB;
+  --mm-lavender: #B794F6;
+
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+
+  --font-display: 'DM Sans', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-roboto-mono: 'Roboto Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --shadow-soft: 0 18px 48px rgba(36, 39, 42, 0.08);
+  --shadow-card: 0 24px 64px rgba(36, 39, 42, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--mm-cream);
+  color: var(--mm-black);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: rgba(183, 148, 246, 0.3);
+  color: var(--mm-black);
+}
