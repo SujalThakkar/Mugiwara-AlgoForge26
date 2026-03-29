@@ -1,7 +1,7 @@
 import { mockData } from './mock-data';
 import { ChatMessage } from '../types/chat';
 
-const ML_API_BASE = process.env.NEXT_PUBLIC_ML_API_URL || 'http://localhost:8000';
+const ML_API_BASE = process.env.NEXT_PUBLIC_ML_API_URL || 'https://unoperated-merideth-sparklike.ngrok-free.dev';
 
 async function callApi<T>(endpoint: string, fallbackData: T, options?: RequestInit): Promise<T> {
     try {
@@ -32,7 +32,7 @@ async function callApi<T>(endpoint: string, fallbackData: T, options?: RequestIn
     }
 }
 
-const RAG_API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const RAG_API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://babylike-overtimorously-stacey.ngrok-free.dev';
 
 async function ragCallApi<T>(endpoint: string, fallbackData: T, options?: RequestInit): Promise<T> {
     try {

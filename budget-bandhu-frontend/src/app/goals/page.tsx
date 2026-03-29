@@ -79,7 +79,7 @@ interface EnrichedPool {
   creator_user_id: string;
 }
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://babylike-overtimorously-stacey.ngrok-free.dev";
 
 // Wrapper that always includes the header to bypass ngrok's browser interstitial
 const apiFetch = (url: string, options?: RequestInit) =>

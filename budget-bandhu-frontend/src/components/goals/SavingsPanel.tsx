@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrendingUp, ChevronDown, ChevronUp, Loader2, AlertCircle, Upload } from "lucide-react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://babylike-overtimorously-stacey.ngrok-free.dev";
 
 const apiFetch = (url: string, options?: RequestInit) =>
   fetch(url, {

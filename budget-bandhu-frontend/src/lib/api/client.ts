@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://babylike-overtimorously-stacey.ngrok-free.dev/api';
 
 // Axios instance
 export const apiClient = axios.create({

@@ -83,7 +83,7 @@ export default function SignupPage() {
         setIsLoading(true);
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_ML_API_URL || 'http://localhost:8000'}/api/v1/user/register`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_ML_API_URL || 'https://unoperated-merideth-sparklike.ngrok-free.dev'}/api/v1/user/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

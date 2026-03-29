@@ -7,7 +7,7 @@ import { Users, Coins, Shield, Loader2, CheckCircle2, ExternalLink } from "lucid
 import { useEscrowPool } from "@/lib/hooks/useEscrowPool";
 import { POLYGONSCAN_BASE } from "@/lib/contracts/config";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://babylike-overtimorously-stacey.ngrok-free.dev";
 
 interface PoolMember {
   user_id:   string;
