@@ -86,6 +86,21 @@ class AtlasFallbackBridge:
         _atlas_online = True
         logger.info("[FALLBACK] ✅ Atlas connection recovered")
 
+    async def start(self):
+        pass
+
+    async def stop(self):
+        pass
+
+    async def switch_to_fallback(self, reason: str):
+        self.switch_to_sqlite(reason)
+
+    async def fallback_episodic_read(self, user_id: str, limit: int = 8, query_text: str = ""):
+        return []
+
+    async def fallback_semantic_read(self, user_id: str, limit: int = 15):
+        return []
+
     async def write_episodic(self, user_id, event_type, content, metadata=None):
         try:
             conn = _get_conn()

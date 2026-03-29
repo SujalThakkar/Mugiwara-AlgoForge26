@@ -380,19 +380,28 @@ class CognitiveMemoryManager:
             Result of atlas_coro on success, result of fallback_coro on failure.
         """
         try:
-            return await asyncio.wait_for(atlas_coro, timeout=_ATLAS_TIMEOUT_S)
+            result = await asyncio.wait_for(atlas_coro, timeout=_ATLAS_TIMEOUT_S)
+            if fallback_coro:
+                fallback_coro.close()
+            return result
         except asyncio.TimeoutError:
             await self.fallback.switch_to_fallback("Atlas timeout in memory fetch")
-            try:
-                return await fallback_coro
-            except Exception:
-                return [] if isinstance(fallback_coro, list) else None
+            if fallback_coro:
+                try:
+                    res = await fallback_coro
+                    return res if res is not None else []
+                except Exception:
+                    pass
+            return []
         except Exception as exc:
             logger.warning(f"[CMM] Atlas fetch failed: {exc}")
-            try:
-                return await fallback_coro
-            except Exception:
-                return [] if isinstance(fallback_coro, list) else None
+            if fallback_coro:
+                try:
+                    res = await fallback_coro
+                    return res if res is not None else []
+                except Exception:
+                    pass
+            return []
 
 
 # ─────────────────────────────────────────────────────────────────────────────

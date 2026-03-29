@@ -25,7 +25,7 @@ from pydantic import BaseModel
 from typing import Any
 
 # ML Imports
-from intelligence.ml_client import categorize, detect_anomalies
+from intelligence.ml_client import categorize, detect_anomalies, analyze_csv
 from intelligence.user_anomaly_detector import UserAnomalyDetector
 
 router = APIRouter(prefix="/api/v1/transactions", tags=["Transactions"])
@@ -287,49 +287,89 @@ async def upload_csv(
     file: UploadFile = File(...),
     db=Depends(get_database)
 ):
-    """Upload transactions via CSV"""
+    """
+    Unified CSV Upload — Uses full 4-model ML Pipeline.
+    Stores finalized categorization and anomaly flags in MongoDB.
+    """
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database connection failed")
+        
     try:
-        # 1. Read file
-        content = await file.read()
-        df = pd.read_csv(io.BytesIO(content))
+        # 1. Read raw bytes
+        csv_bytes = await file.read()
         
-        # 2. Map columns (Case insensitive)
-        df.columns = [c.lower().strip() for c in df.columns]
+        # 2. Call unified 4-model ML pipeline
+        logger.info(f"🚀 [UPLOAD] Calling unified ML pipeline for user {user_id}...")
+        ml_result = await analyze_csv(csv_bytes, user_id)
         
-        # 3. Validation
-        required = ["date", "amount", "description"]
-        missing = [c for c in required if c not in df.columns]
-        if missing:
-            raise HTTPException(status_code=400, detail=f"Missing columns: {missing}")
+        if "error" in ml_result:
+            raise HTTPException(status_code=422, detail=ml_result["error"])
             
-        # 4. Convert to list of dicts (pandas-safe access, no .get())
-        transactions = []
-        for _, row in df.iterrows():
-            txn_type = str(row["type"]).strip().lower() if "type" in df.columns else "debit"
-            cat = row["category"] if "category" in df.columns and pd.notna(row["category"]) else None
-            transactions.append({
-                "date": str(row["date"]),
-                "amount": float(row["amount"]),
-                "description": str(row["description"]),
-                "type": txn_type if txn_type in ("debit", "credit") else "debit",
-                "category": cat if cat and str(cat).lower() not in ("nan", "none", "") else None
-            })
-            
-        # 5. Reuse bulk logic
-        from api.models.transaction import TransactionBulkUpload, TransactionCreate
-        data = TransactionBulkUpload(
-            user_id=user_id,
-            transactions=[TransactionCreate(**t) for t in transactions]
-        )
+        # 3. Extract finalized transactions from ML output
+        # Format: [{"transaction": {...}, "category_result": {...}}, ...]
+        ml_txns = ml_result.get("transactions_categorized", [])
+        anomalies = {a["transaction_id"]: a for a in ml_result.get("anomalies_detected", [])}
         
-        result = await add_transactions_bulk(data, db=db)
-        result["transactions_parsed"] = len(transactions)
-        result["inserted_count"] = len(transactions)
-        return result
+        docs = []
+        category_totals = {}
+        
+        for item in ml_txns:
+            raw_txn = item["transaction"]
+            cat_res = item["category_result"]
+            
+            txn_id = raw_txn.get("transaction_id")
+            anom = anomalies.get(txn_id, {})
+            
+            is_anomaly = anom.get("is_anomaly", False)
+            
+            # Map to Transaction Schema
+            doc = {
+                "user_id": user_id,
+                "date": str(raw_txn.get("date", datetime.utcnow().strftime("%Y-%m-%d"))),
+                "amount": float(raw_txn.get("amount", 0.0)),
+                "description": str(raw_txn.get("description", "Unknown")),
+                "type": "debit" if str(raw_txn.get("transaction_type", "Debit")).lower() == "debit" else "credit",
+                "category": cat_res.get("category", "Other"),
+                "category_confidence": cat_res.get("confidence", 0.0),
+                "categorization_method": "ml",
+                "is_anomaly": is_anomaly,
+                "anomaly_score": anom.get("anomaly_score", 0.0),
+                "anomaly_severity": anom.get("severity", "normal"),
+                "anomaly_reason": anom.get("reason", ""),
+                "anomaly_flagged_at": datetime.utcnow() if is_anomaly else None,
+                "created_at": datetime.utcnow()
+            }
+            docs.append(doc)
+            
+            # Aggregate for budget update
+            if doc["type"] == "debit":
+                cat = doc["category"]
+                category_totals[cat] = category_totals.get(cat, 0) + doc["amount"]
+
+        # 4. Persistence
+        if docs:
+            logger.info(f"📂 [UPLOAD] Persisting {len(docs)} categorized transactions to MongoDB...")
+            await db["transactions"].insert_many(docs)
+            
+            # Update budget counters
+            for cat, total in category_totals.items():
+                await update_budget_spent(db, user_id, cat, total)
+
+        return {
+            "message": f"Successfully processed and stored {len(docs)} transactions.",
+            "transactions_parsed": len(docs),
+            "inserted_count": len(docs),
+            "ml_summary": {
+                "high_severity_anomalies": ml_result.get("high_severity_anomalies", 0),
+                "monthly_income_est": ml_result.get("monthly_income_est", 0),
+                "models_used": ml_result.get("models_used", [])
+            }
+        }
+        
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"[CSV Upload] Error: {e}")
+        logger.error(f"❌ [UPLOAD] Failure: {e}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

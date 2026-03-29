@@ -172,12 +172,13 @@ class HybridRetriever:
                 "$vectorSearch": {
                     "index"        : _VECTOR_INDEX,
                     "path"         : "embedding",
-                    "queryVector"  : query_embedding,
+                    "queryVector"  : query_embedding[:384],
                     "numCandidates": k * 5,
                     "limit"        : k,
                     "filter"       : {
                         "user_id"    : user_id,
                         "decay_score": {"$gte": _MIN_DECAY},
+                        "event_type" : {"$ne": "question"},
                     },
                 }
             },
@@ -233,7 +234,11 @@ class HybridRetriever:
                     },
                 }
             },
-            {"$match": {"user_id": user_id, "decay_score": {"$gte": _MIN_DECAY}}},
+            {"$match": {
+                "user_id": user_id,
+                "decay_score": {"$gte": _MIN_DECAY},
+                "event_type": {"$ne": "question"}
+            }},
             {"$limit": k},
             {"$addFields": {"_score": {"$meta": "searchScore"}}},
             {

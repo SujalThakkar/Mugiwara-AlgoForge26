@@ -140,7 +140,7 @@ class AgentController:
             # Map back to internal variables for the rest of the turn logic
             episodic     = unified_ctx.episodic
             semantic     = unified_ctx.semantic
-            working      = {item.content_type: item.content_json for item in unified_ctx.working}
+            working      = unified_ctx.working
             procedural   = [unified_ctx.procedural] if unified_ctx.procedural else []
             trajectory   = unified_ctx.trajectory.__dict__ if unified_ctx.trajectory else {}
             cognitive    = unified_ctx.__dict__

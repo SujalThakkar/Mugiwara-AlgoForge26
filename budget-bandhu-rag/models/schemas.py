@@ -92,7 +92,7 @@ class UnifiedMemoryContext(BaseModel):
     user_id: str
     session_id: str
     query_intent: QueryIntent
-    working: List[Any] = []
+    working: Dict[str, Any] = Field(default_factory=dict)
     episodic: List[EpisodicMemory] = []
     semantic: List[SemanticMemory] = []
     graph_paths: List[Any] = []
