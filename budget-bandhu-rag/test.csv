@@ -1,0 +1,5 @@
+date,amount,description,type
+2026-03-29,99999.0,Unknown cash withdrawal,debit
+2026-03-29,88888.0,Suspicious large transfer,debit
+2026-03-28,150.0,Coffee shop,debit
+2026-03-28,5000.0,Salary deposit,credit

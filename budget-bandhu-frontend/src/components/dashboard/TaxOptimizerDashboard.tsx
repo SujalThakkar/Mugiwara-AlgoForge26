@@ -2,8 +2,13 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, TrendingUp, AlertCircle, CheckCircle, Plus, Calculator, PiggyBank, Heart, Home, GraduationCap, Shield } from 'lucide-react';
+import { FileText, TrendingUp, AlertCircle, CheckCircle, Plus, Calculator, PiggyBank, Shield } from 'lucide-react';
 import { mockData } from '@/lib/api/mock-data';
+import type { Tax80CData } from '@/lib/api/ml-api';
+
+interface TaxOptimizerDashboardProps {
+    taxData?: Tax80CData | null;
+}
 
 interface TaxInvestment {
     id: string;
@@ -16,10 +21,41 @@ interface TaxInvestment {
     description: string;
 }
 
-export function TaxOptimizerDashboard() {
-    const maxLimit80C = mockData.tax?.maxLimit80C || 150000;
-    
-    if (!mockData.tax || !mockData.tax.investments) {
+export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
+    const maxLimit80C = 150000;
+
+    // ── Use live Atlas data if available, else fall back to mock ──
+    const liveMode = taxData != null;
+    const totalInvested = liveMode ? (taxData?.total_invested ?? 0) : (mockData.tax?.investments?.reduce((s, i) => s + i.amount, 0) || 0);
+    const remaining     = liveMode ? (taxData?.remaining_limit ?? 0) : Math.max(0, maxLimit80C - totalInvested);
+    const percentage    = (totalInvested / maxLimit80C) * 100;
+    const taxSaved      = liveMode ? (taxData?.tax_saved ?? 0) : totalInvested * 0.3;
+    const potentialSavings = liveMode ? (taxData?.potential_additional_saving ?? 0) : remaining * 0.3;
+    const slabRate      = liveMode ? ((taxData?.slab_rate ?? 0.3) * 100).toFixed(0) : '30';
+
+    // Synthesize investment list from live breakdown (or mock)
+    const getInvestStyle = (category: string) => {
+        const c = category.toUpperCase();
+        if (c.includes('PPF'))  return { icon: PiggyBank, gradient: 'from-emerald-500 to-green-600' };
+        if (c.includes('ELSS')) return { icon: TrendingUp, gradient: 'from-blue-500 to-cyan-600' };
+        if (c.includes('NPS'))  return { icon: Shield, gradient: 'from-purple-500 to-pink-600' };
+        if (c.includes('LIC') || c.includes('LIFE')) return { icon: Shield, gradient: 'from-violet-500 to-purple-600' };
+        return { icon: FileText, gradient: 'from-gray-500 to-gray-600' };
+    };
+
+    const investments = liveMode
+        ? Object.entries(taxData?.breakdown ?? {}).map(([cat, data], i) => {
+            const style = getInvestStyle(cat);
+            return { id: String(i), category: cat.toUpperCase(), amount: data.amount, description: `${data.count} transaction${data.count > 1 ? 's' : ''}`, icon: style.icon, gradient: style.gradient };
+          })
+        : (mockData.tax?.investments || []).map((inv, i) => {
+            const style = getInvestStyle(inv.category);
+            return { id: inv.id || String(i), category: inv.category, amount: inv.amount, description: inv.description, icon: style.icon, gradient: style.gradient };
+          });
+
+    const noData = investments.length === 0;
+
+    if (!liveMode && (!mockData.tax || !mockData.tax.investments)) {
         return (
             <div className="flex items-center justify-center p-6 h-[300px] bg-white/70 rounded-2xl border border-white/50">
                 <p className="text-gray-500 font-medium">Accumulating tax data...</p>
@@ -27,42 +63,11 @@ export function TaxOptimizerDashboard() {
         );
     }
 
-    const getInvestStyle = (category: string) => {
-        switch (category) {
-            case 'PPF': return { icon: PiggyBank, color: 'emerald', gradient: 'from-emerald-500 to-green-600' };
-            case 'ELSS': return { icon: TrendingUp, color: 'blue', gradient: 'from-blue-500 to-cyan-600' };
-            case 'Life Insurance': return { icon: Shield, color: 'purple', gradient: 'from-purple-500 to-pink-600' };
-            case 'Home Loan': return { icon: Home, color: 'orange', gradient: 'from-orange-500 to-red-600' };
-            case 'Tuition Fees': return { icon: GraduationCap, color: 'indigo', gradient: 'from-indigo-500 to-purple-600' };
-            default: return { icon: FileText, color: 'gray', gradient: 'from-gray-500 to-gray-600' };
-        }
-    };
-
-    const investments: TaxInvestment[] = mockData.tax.investments.map(inv => {
-        const style = getInvestStyle(inv.category);
-        return {
-            id: inv.id,
-            category: inv.category,
-            amount: inv.amount,
-            limit: inv.limit,
-            description: inv.description,
-            icon: style.icon,
-            color: style.color,
-            gradient: style.gradient
-        };
-    });
-
-    const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
-    const remaining = maxLimit80C - totalInvested;
-    const percentage = (totalInvested / maxLimit80C) * 100;
-    const taxSaved = totalInvested * 0.3; // Assuming 30% tax bracket
-    const potentialSavings = remaining * 0.3;
-
     const getStatusColor = () => {
         if (percentage >= 100) return { color: 'text-emerald-600', bg: 'bg-emerald-50', status: 'Maxed Out!' };
-        if (percentage >= 75) return { color: 'text-blue-600', bg: 'bg-blue-50', status: 'Almost There' };
-        if (percentage >= 50) return { color: 'text-orange-600', bg: 'bg-orange-50', status: 'Good Progress' };
-        return { color: 'text-red-600', bg: 'bg-red-50', status: 'Needs Attention' };
+        if (percentage >= 75)  return { color: 'text-blue-600',    bg: 'bg-blue-50',    status: 'Almost There' };
+        if (percentage >= 50)  return { color: 'text-orange-600',  bg: 'bg-orange-50',  status: 'Good Progress' };
+        return                        { color: 'text-red-600',     bg: 'bg-red-50',     status: 'Needs Attention' };
     };
 
     const status = getStatusColor();
@@ -183,7 +188,7 @@ export function TaxOptimizerDashboard() {
                         <p className="text-3xl font-black text-emerald-800">
                             ₹{taxSaved.toLocaleString('en-IN')}
                         </p>
-                        <p className="text-xs text-emerald-600 mt-1">at 30% tax bracket</p>
+                        <p className="text-xs text-emerald-600 mt-1">at {slabRate}% tax bracket {liveMode ? '(your slab)' : ''}</p>
                     </motion.div>
 
                     {/* Remaining Limit */}
@@ -248,9 +253,15 @@ export function TaxOptimizerDashboard() {
                 </div>
 
                 <div className="space-y-3">
-                    {investments.map((inv, index) => {
+                {noData ? (
+                    <div className="p-6 text-center text-gray-400">
+                        <p className="font-medium">No 80C investments found this FY.</p>
+                        <p className="text-sm mt-1">Transactions with ELSS / PPF / NPS keywords will auto-appear here.</p>
+                    </div>
+                ) : (
+                    investments.map((inv, index) => {
                         const Icon = inv.icon;
-                        const invPercentage = (inv.amount / maxLimit80C) * 100;
+                        const invPercentage = Math.min((inv.amount / maxLimit80C) * 100, 100);
 
                         return (
                             <motion.div
@@ -290,7 +301,6 @@ export function TaxOptimizerDashboard() {
                                         transition={{ duration: 1, delay: 1.5 + index * 0.1 }}
                                         className={`h-full bg-gradient-to-r ${inv.gradient} rounded-full relative overflow-hidden`}
                                     >
-                                        {/* Shimmer */}
                                         <motion.div
                                             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
                                             animate={{ x: ['-100%', '200%'] }}
@@ -300,7 +310,8 @@ export function TaxOptimizerDashboard() {
                                 </div>
                             </motion.div>
                         );
-                    })}
+                    })
+                )}
                 </div>
             </div>
 

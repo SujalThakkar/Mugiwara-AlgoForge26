@@ -14,11 +14,18 @@ interface CashflowData {
 
 interface CashflowLineChartProps {
     data?: Array<{ date: string; amount: number }>;
+    monthlyIncome?: number;
 }
 
-export function CashflowLineChart({ data: spendingData }: CashflowLineChartProps) {
+export function CashflowLineChart({ data: spendingData, monthlyIncome = 50000 }: CashflowLineChartProps) {
     const [selectedRange, setSelectedRange] = useState<[number, number]>([0, 29]);
     const [demoData, setDemoData] = useState<CashflowData[]>([]);
+
+    useEffect(() => {
+        if (!spendingData || spendingData.length === 0) {
+            setDemoData(generateCashflowData());
+        }
+    }, [spendingData]);
 
     if (!spendingData || spendingData.length === 0) {
         return (
@@ -28,19 +35,13 @@ export function CashflowLineChart({ data: spendingData }: CashflowLineChartProps
         );
     }
 
-    useEffect(() => {
-        if (!spendingData || spendingData.length === 0) {
-            setDemoData(generateCashflowData());
-        }
-    }, [spendingData]);
-
     // Transform spending data or use fallback
     const allData: CashflowData[] = spendingData && spendingData.length > 0
         ? spendingData.map(d => ({
             date: d.date,
-            income: Math.round(d.amount * 1.2), // Simulated income for now (until API update)
+            income: Math.round(monthlyIncome / 30), // Distributed income for daily baseline
             expenses: d.amount,
-            netFlow: Math.round(d.amount * 0.2)
+            netFlow: Math.round((monthlyIncome / 30) - d.amount)
         }))
         : demoData;
 

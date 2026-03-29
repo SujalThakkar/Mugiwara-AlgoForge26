@@ -81,6 +81,16 @@ interface EnrichedPool {
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+// Wrapper that always includes the header to bypass ngrok's browser interstitial
+const apiFetch = (url: string, options?: RequestInit) =>
+  fetch(url, {
+    ...options,
+    headers: {
+      'ngrok-skip-browser-warning': '1',
+      ...options?.headers,
+    },
+  });
+
 const GOAL_TYPE_LABELS: Record<GoalType, { label: string; icon: string; color: string }> = {
   personal_csv:    { label: "Personal",        icon: "📊", color: "#6366f1" },
   personal_crypto: { label: "Crypto Goal",     icon: "🔷", color: "#8b5cf6" },
@@ -172,8 +182,8 @@ export default function GoalsPage() {
     if (!userId) return;
     try {
       const [gRes, pRes] = await Promise.all([
-        fetch(`${API}/api/v1/goals/${userId}`),
-        fetch(`${API}/api/v1/escrow/user/${userId}`),
+        apiFetch(`${API}/api/v1/goals/${userId}`),
+        apiFetch(`${API}/api/v1/escrow/user/${userId}`),
       ]);
       if (gRes.ok) setGoals(await gRes.json());
       if (pRes.ok) {
@@ -184,7 +194,7 @@ export default function GoalsPage() {
         const enriched = await Promise.all(
           summaries.map(async (s) => {
             try {
-              const r = await fetch(`${API}/api/v1/escrow/${s.pool_id}`);
+              const r = await apiFetch(`${API}/api/v1/escrow/${s.pool_id}`);
               if (r.ok) return await r.json();
             } catch {}
             return null;
@@ -209,7 +219,7 @@ export default function GoalsPage() {
     setMintingGoalId(goal.id);
     setMintMsg(null);
     try {
-      const res = await fetch(`${API}/api/v1/goals/${goal.id}/complete`, {
+      const res = await apiFetch(`${API}/api/v1/goals/${goal.id}/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wallet_address: wallet }),
@@ -578,7 +588,7 @@ function UploadCSVButton({ goalId, onDone }: { goalId: string; onDone: () => voi
     const form = new FormData();
     form.append("file", file);
     try {
-      await fetch(`${API}/api/v1/goals/${goalId}/progress`, { method: "POST", body: form });
+      await apiFetch(`${API}/api/v1/goals/${goalId}/progress`, { method: "POST", body: form });
       onDone();
     } catch {}
     setUploading(false);
@@ -648,7 +658,7 @@ function SyncWalletButton({ goalId, onDone }: { goalId: string; onDone: () => vo
       const balancePOL = Number(balanceWei) / 1e18;
 
       // 3. Send to backend
-      const res = await fetch(`${API}/api/v1/goals/${goalId}/progress/manual`, {
+      const res = await apiFetch(`${API}/api/v1/goals/${goalId}/progress/manual`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: parseFloat(balancePOL.toFixed(6)), mode: "set" }),
@@ -730,7 +740,7 @@ function CreateGoalModal({ userId, onClose, onCreated }: { userId: string; onClo
             salary: salary ? parseFloat(salary) : null,
           };
 
-      await fetch(endpoint, {
+      await apiFetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

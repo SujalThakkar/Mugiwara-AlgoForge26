@@ -1,106 +1,103 @@
 'use client';
 
+import { Animated3DWallet } from '@/components/3d/WalletModel';
 import Link from 'next/link';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { ArrowRight, PiggyBank, ShieldCheck, Sparkles, Wallet } from 'lucide-react';
 
 export function HeroSection() {
     return (
-        <div className="mm-container px-8 py-16 w-full max-w-7xl mx-auto">
-            <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-                <div className="space-y-8">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-sm font-bold text-mm-purple shadow-lg"
-                    >
-                        <Sparkles className="h-4 w-4" />
-                        Budget Bandhu AI
-                    </motion.div>
+        <section className="relative overflow-hidden py-20 md:py-32">
+            {/* Background Geometric Shapes */}
+            <div className="absolute inset-0 opacity-10">
+                <svg className="w-full h-full" viewBox="0 0 1000 1000" fill="none">
+                    <path d="M250 150 L350 400 L150 400 Z" fill="#E17726" />
+                    <path d="M750 200 L900 500 L600 500 Z" fill="#3C154E" />
+                    <path d="M100 700 L200 900 L0 900 Z" fill="#00E676" />
+                    <path d="M850 750 L950 900 L750 900 Z" fill="#B794F6" />
+                </svg>
+            </div>
 
+            <div className="mm-container relative z-10">
+                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                    {/* Left Side: Text Content */}
                     <motion.div
-                        initial={{ opacity: 0, y: 24 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.08 }}
-                        className="space-y-5"
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.8 }}
                     >
-                        <h1 className="mm-mega-heading max-w-4xl">
-                            Smart budgeting,
+                        <h1 className="mm-heading-mega mb-6">
+                            YOUR WEALTH
                             <br />
-                            faster decisions,
-                            <br />
-                            calmer money.
+                            IN CONTROL
                         </h1>
-                        <p className="max-w-2xl text-lg leading-8 text-mm-black/70 md:text-xl">
-                            Track transactions, talk to your finance assistant, and get ML-backed nudges
-                            across budgets, goals, anomalies, and spending patterns.
+
+                        <p className="mm-body-lg text-gray-700 mb-8 max-w-lg">
+                            Take charge of your financial future with AI-powered insights,
+                            smart budgeting, and personalized recommendations. Your personal
+                            finance companion for a better tomorrow.
                         </p>
+
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <Link href="/auth/signup" className="mm-btn mm-btn-primary group">
+                                GET STARTED
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </Link>
+
+                            <Link href="#features" className="mm-btn mm-btn-secondary">
+                                LEARN MORE
+                            </Link>
+                        </div>
+
+                        {/* Stats Row */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4, duration: 0.6 }}
+                            className="grid grid-cols-3 gap-8 mt-12 pt-12 border-t border-gray-300"
+                        >
+                            <div>
+                                <div className="text-3xl font-bold text-mm-purple">10K+</div>
+                                <div className="text-sm text-gray-600">Active Users</div>
+                            </div>
+                            <div>
+                                <div className="text-3xl font-bold text-mm-purple">₹500Cr+</div>
+                                <div className="text-sm text-gray-600">Money Managed</div>
+                            </div>
+                            <div>
+                                <div className="text-3xl font-bold text-mm-purple">4.9★</div>
+                                <div className="text-sm text-gray-600">User Rating</div>
+                            </div>
+                        </motion.div>
                     </motion.div>
 
+                    {/* Right Side: 3D Wallet */}
                     <motion.div
-                        initial={{ opacity: 0, y: 24 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.16 }}
-                        className="flex flex-wrap gap-4"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2, duration: 0.8 }}
+                        className="relative h-[500px] lg:h-[600px]"
                     >
-                        <Link href="/transactions" className="mm-btn mm-btn-primary text-base">
-                            Open Transactions
-                            <ArrowRight className="h-4 w-4" />
-                        </Link>
-                        <Link href="/goals" className="mm-btn mm-btn-secondary text-base">
-                            View Goals
-                        </Link>
+                        <Animated3DWallet />
+
+                        {/* Floating Badge */}
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 1, type: 'spring' }}
+                            className="absolute top-10 right-10 bg-white rounded-2xl p-4 shadow-lg"
+                        >
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="w-5 h-5 text-mm-green" />
+                                <div>
+                                    <div className="text-xs text-gray-500">Financial Score</div>
+                                    <div className="text-2xl font-bold text-mm-purple">782</div>
+                                </div>
+                            </div>
+                        </motion.div>
                     </motion.div>
                 </div>
-
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.96 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="grid gap-4 sm:grid-cols-2"
-                >
-                    <FeatureCard
-                        icon={Wallet}
-                        title="Track Everything"
-                        description="Manual entry, CSV imports, receipts, and chat-powered transaction logging."
-                    />
-                    <FeatureCard
-                        icon={PiggyBank}
-                        title="Budget Better"
-                        description="See category pressure early and get recommendation-driven allocations."
-                    />
-                    <FeatureCard
-                        icon={ShieldCheck}
-                        title="Catch Anomalies"
-                        description="Spot risky or unusual transactions before they quietly snowball."
-                    />
-                    <FeatureCard
-                        icon={Sparkles}
-                        title="Talk Naturally"
-                        description="Use voice or text to ask what changed, what’s risky, and what to do next."
-                    />
-                </motion.div>
             </div>
-        </div>
-    );
-}
-
-function FeatureCard({
-    icon: Icon,
-    title,
-    description,
-}: {
-    icon: typeof Wallet;
-    title: string;
-    description: string;
-}) {
-    return (
-        <div className="mm-card min-h-[180px] border border-white/60 bg-white/80 p-6">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-mm-purple/10 text-mm-purple">
-                <Icon className="h-6 w-6" />
-            </div>
-            <h3 className="mb-2 text-xl font-bold text-mm-black">{title}</h3>
-            <p className="text-sm leading-6 text-mm-black/65">{description}</p>
-        </div>
+        </section>
     );
 }

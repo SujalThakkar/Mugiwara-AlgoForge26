@@ -8,6 +8,8 @@ import {
     Goal,
     Gamification,
     TransactionStats,
+    Bill,
+    Tax80CData,
 } from '../api/ml-api';
 
 export function useDashboard(userId: string | null) {
@@ -294,4 +296,67 @@ export function useApiHealth() {
     }, []);
 
     return { healthy, checking };
+}
+
+// ── useBills: polls every 30s so dashboard refreshes when Bandhu adds a bill ──
+export function useBills(userId: string | null) {
+    const [bills, setBills] = useState<Bill[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchBills = useCallback(async () => {
+        if (!userId) return;
+        setLoading(true);
+        try {
+            const data = await mlApi.bills.getAll(userId);
+            setBills(data);
+            setError(null);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch bills');
+        } finally {
+            setLoading(false);
+        }
+    }, [userId]);
+
+    useEffect(() => {
+        void fetchBills();
+        // Poll every 30s so chat-added bills appear automatically
+        const interval = setInterval(() => void fetchBills(), 30_000);
+        return () => clearInterval(interval);
+    }, [fetchBills]);
+
+    const deleteBill = useCallback(async (billId: string) => {
+        if (!userId) return;
+        await mlApi.bills.delete(userId, billId);
+        await fetchBills();
+    }, [userId, fetchBills]);
+
+    return { bills, loading, error, refetch: fetchBills, deleteBill };
+}
+
+// ── useTax80C: fetches 80C tracker data from Atlas ───────────────────────────
+export function useTax80C(userId: string | null) {
+    const [taxData, setTaxData] = useState<Tax80CData | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchTax = useCallback(async () => {
+        if (!userId) return;
+        setLoading(true);
+        try {
+            const data = await mlApi.tax.get80C(userId);
+            setTaxData(data);
+            setError(null);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch 80C data');
+        } finally {
+            setLoading(false);
+        }
+    }, [userId]);
+
+    useEffect(() => {
+        void fetchTax();
+    }, [fetchTax]);
+
+    return { taxData, loading, error, refetch: fetchTax };
 }

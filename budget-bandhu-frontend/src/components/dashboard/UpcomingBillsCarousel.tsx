@@ -2,116 +2,87 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Zap, Wifi, Phone, Home, CreditCard, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { Calendar, Zap, Wifi, Phone, Home, CreditCard, ChevronLeft, ChevronRight, Clock, MessageSquare, Loader2 } from 'lucide-react';
 
-interface Bill {
+// ── Live bill interface (matches Atlas bills collection) ──────────────────────
+export interface LiveBill {
     id: string;
-    name: string;
+    title: string;
     amount: number;
-    dueDate: string;
-    category: 'electricity' | 'internet' | 'phone' | 'rent' | 'other';
-    status: 'upcoming' | 'due-soon' | 'overdue';
-    daysUntilDue: number;
+    due_date: string;
+    category: string;
+    status: 'upcoming' | 'due-soon' | 'overdue' | 'future';
+    days_until_due: number;
 }
 
-const mockBills: Bill[] = [
-    {
-        id: '1',
-        name: 'Electricity Bill',
-        amount: 2450,
-        dueDate: 'Dec 28, 2025',
-        category: 'electricity',
-        status: 'due-soon',
-        daysUntilDue: 4,
-    },
-    {
-        id: '2',
-        name: 'Internet - Airtel Fiber',
-        amount: 999,
-        dueDate: 'Dec 30, 2025',
-        category: 'internet',
-        status: 'upcoming',
-        daysUntilDue: 6,
-    },
-    {
-        id: '3',
-        name: 'Mobile Recharge',
-        amount: 599,
-        dueDate: 'Jan 5, 2026',
-        category: 'phone',
-        status: 'upcoming',
-        daysUntilDue: 12,
-    },
-    {
-        id: '4',
-        name: 'House Rent',
-        amount: 15000,
-        dueDate: 'Jan 1, 2026',
-        category: 'rent',
-        status: 'upcoming',
-        daysUntilDue: 8,
-    },
-    {
-        id: '5',
-        name: 'Credit Card Payment',
-        amount: 8750,
-        dueDate: 'Dec 26, 2025',
-        category: 'other',
-        status: 'due-soon',
-        daysUntilDue: 2,
-    },
-];
+interface UpcomingBillsCarouselProps {
+    bills?: LiveBill[];
+    loading?: boolean;
+}
 
-const categoryIcons = {
-    electricity: Zap,
-    internet: Wifi,
-    phone: Phone,
-    rent: Home,
-    other: CreditCard,
-};
+// ── Category icon mapping ─────────────────────────────────────────────────────
+function getCategoryIcon(category: string) {
+    const c = (category || '').toLowerCase();
+    if (c.includes('electric') || c.includes('power') || c.includes('utilities')) return Zap;
+    if (c.includes('internet') || c.includes('wifi') || c.includes('broadband')) return Wifi;
+    if (c.includes('phone') || c.includes('mobile') || c.includes('telecom')) return Phone;
+    if (c.includes('rent') || c.includes('housing') || c.includes('home')) return Home;
+    return CreditCard;
+}
 
-export function UpcomingBillsCarousel() {
+function getStatusBadge(status: LiveBill['status'], days: number) {
+    if (status === 'overdue') return { text: '🔴 Overdue', bg: 'bg-red-500' };
+    if (days <= 2)            return { text: `🟠 ${days}d left`, bg: 'bg-amber-500' };
+    if (days <= 7)            return { text: `🟡 ${days} days`, bg: 'bg-yellow-500' };
+    return                           { text: `🟢 ${days} days`, bg: 'bg-emerald-500' };
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+function EmptyBills() {
+    return (
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6">
+            <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center"
+            >
+                <MessageSquare className="w-8 h-8 text-indigo-200" />
+            </motion.div>
+            <div className="text-center">
+                <p className="text-white font-bold mb-1">No upcoming bills</p>
+                <p className="text-indigo-300 text-xs leading-relaxed max-w-[180px]">
+                    Tell Bandhu about your bills! Try:<br />
+                    <span className="italic text-indigo-200">"I have rent due ₹15,000 on April 1"</span>
+                </p>
+            </div>
+        </div>
+    );
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+export function UpcomingBillsCarousel({ bills = [], loading = false }: UpcomingBillsCarouselProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [direction, setDirection] = useState(0);
 
+    const totalDue = bills.reduce((sum, b) => sum + b.amount, 0);
+    const safeIndex = Math.min(currentIndex, Math.max(0, bills.length - 1));
+
     const nextBill = () => {
+        if (bills.length === 0) return;
         setDirection(1);
-        setCurrentIndex((prev) => (prev + 1) % mockBills.length);
+        setCurrentIndex((prev) => (prev + 1) % bills.length);
     };
 
     const prevBill = () => {
+        if (bills.length === 0) return;
         setDirection(-1);
-        setCurrentIndex((prev) => (prev - 1 + mockBills.length) % mockBills.length);
+        setCurrentIndex((prev) => (prev - 1 + bills.length) % bills.length);
     };
-
-    const currentBill = mockBills[currentIndex];
-    const Icon = categoryIcons[currentBill.category];
-
-    const getStatusBadge = (status: Bill['status'], days: number) => {
-        if (status === 'overdue') {
-            return { text: 'Overdue', bg: 'bg-red-500' };
-        } else if (status === 'due-soon') {
-            return { text: `${days} days left`, bg: 'bg-amber-500' };
-        } else {
-            return { text: `${days} days left`, bg: 'bg-emerald-500' };
-        }
-    };
-
-    const statusBadge = getStatusBadge(currentBill.status, currentBill.daysUntilDue);
 
     const variants = {
-        enter: (direction: number) => ({
-            x: direction > 0 ? 150 : -150,
-            opacity: 0,
-        }),
-        center: {
-            x: 0,
-            opacity: 1,
-        },
-        exit: (direction: number) => ({
-            x: direction < 0 ? 150 : -150,
-            opacity: 0,
-        }),
+        enter: (dir: number) => ({ x: dir > 0 ? 150 : -150, opacity: 0 }),
+        center: { x: 0, opacity: 1 },
+        exit:  (dir: number) => ({ x: dir < 0 ? 150 : -150, opacity: 0 }),
     };
 
     return (
@@ -139,10 +110,13 @@ export function UpcomingBillsCarousel() {
                         </motion.div>
                         <div>
                             <h3 className="text-xl font-bold text-white">Upcoming Bills</h3>
-                            <p className="text-sm text-indigo-300">{mockBills.length} bills pending</p>
+                            <p className="text-sm text-indigo-300">
+                                {loading ? 'Loading...' : bills.length > 0 ? `${bills.length} bill${bills.length > 1 ? 's' : ''} pending` : 'No bills yet'}
+                            </p>
                         </div>
                     </div>
 
+                    {/* Live badge */}
                     <motion.div
                         initial={{ scale: 0, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -151,109 +125,103 @@ export function UpcomingBillsCarousel() {
                     >
                         <p className="text-xs text-indigo-300 uppercase tracking-wider">Total Due</p>
                         <p className="text-xl font-bold text-white">
-                            ₹{mockBills.reduce((sum, bill) => sum + bill.amount, 0).toLocaleString('en-IN')}
+                            ₹{totalDue.toLocaleString('en-IN')}
                         </p>
                     </motion.div>
                 </div>
 
-                {/* Bill Card Display - Fixed Height */}
+                {/* Content */}
                 <div className="flex-1 flex flex-col min-h-0">
-                    <div className="relative flex-1 overflow-hidden mb-4">
-                        <AnimatePresence initial={false} custom={direction} mode="wait">
-                            <motion.div
-                                key={currentIndex}
-                                custom={direction}
-                                variants={variants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                transition={{
-                                    x: { type: 'spring', stiffness: 300, damping: 30 },
-                                    opacity: { duration: 0.15 },
-                                }}
-                                className="absolute inset-0 flex flex-col justify-center"
-                            >
-                                {/* Bill Card */}
-                                <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10">
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="w-10 h-10 rounded-xl bg-indigo-500/30 flex items-center justify-center">
-                                            <Icon className="w-5 h-5 text-indigo-200" />
-                                        </div>
-                                        <div className={`px-3 py-1 rounded-full ${statusBadge.bg} text-white text-xs font-bold`}>
-                                            {statusBadge.text}
-                                        </div>
-                                    </div>
-
-                                    <h4 className="text-lg font-bold text-white mb-1">
-                                        {currentBill.name}
-                                    </h4>
-
-                                    <div className="flex items-center gap-2 text-indigo-300 text-sm mb-3">
-                                        <Clock className="w-4 h-4" />
-                                        Due: {currentBill.dueDate}
-                                    </div>
-
-                                    <div className="text-3xl font-black text-white">
-                                        ₹{currentBill.amount.toLocaleString('en-IN')}
-                                    </div>
-                                </div>
+                    {loading ? (
+                        <div className="flex-1 flex items-center justify-center">
+                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                                <Loader2 className="w-8 h-8 text-indigo-300" />
                             </motion.div>
-                        </AnimatePresence>
-                    </div>
-
-                    {/* Navigation - Fixed at bottom */}
-                    <div className="flex items-center justify-center gap-4 mb-4">
-                        <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={prevBill}
-                            className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center cursor-pointer"
-                        >
-                            <ChevronLeft className="w-5 h-5 text-white" />
-                        </motion.button>
-
-                        <div className="flex items-center gap-2">
-                            {mockBills.map((_, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => {
-                                        setDirection(idx > currentIndex ? 1 : -1);
-                                        setCurrentIndex(idx);
-                                    }}
-                                    className="group"
-                                >
-                                    <motion.div
-                                        className={`h-2 rounded-full transition-all ${idx === currentIndex
-                                            ? 'w-6 bg-white'
-                                            : 'w-2 bg-white/30 group-hover:bg-white/50'
-                                            }`}
-                                        whileHover={{ scale: 1.2 }}
-                                    />
-                                </button>
-                            ))}
                         </div>
+                    ) : bills.length === 0 ? (
+                        <EmptyBills />
+                    ) : (
+                        <>
+                            {/* Bill Card */}
+                            <div className="relative flex-1 overflow-hidden mb-4">
+                                <AnimatePresence initial={false} custom={direction} mode="wait">
+                                    <motion.div
+                                        key={safeIndex}
+                                        custom={direction}
+                                        variants={variants}
+                                        initial="enter"
+                                        animate="center"
+                                        exit="exit"
+                                        transition={{ x: { type: 'spring', stiffness: 300, damping: 30 }, opacity: { duration: 0.15 } }}
+                                        className="absolute inset-0 flex flex-col justify-center"
+                                    >
+                                        {(() => {
+                                            const bill = bills[safeIndex];
+                                            const Icon = getCategoryIcon(bill.category);
+                                            const badge = getStatusBadge(bill.status, bill.days_until_due);
+                                            return (
+                                                <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10">
+                                                    <div className="flex items-center gap-3 mb-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-indigo-500/30 flex items-center justify-center">
+                                                            <Icon className="w-5 h-5 text-indigo-200" />
+                                                        </div>
+                                                        <div className={`px-3 py-1 rounded-full ${badge.bg} text-white text-xs font-bold`}>
+                                                            {badge.text}
+                                                        </div>
+                                                        <span className="ml-auto text-xs text-indigo-300 px-2 py-1 rounded-lg bg-white/10">
+                                                            {bill.category}
+                                                        </span>
+                                                    </div>
+                                                    <h4 className="text-lg font-bold text-white mb-1">{bill.title}</h4>
+                                                    <div className="flex items-center gap-2 text-indigo-300 text-sm mb-3">
+                                                        <Clock className="w-4 h-4" />
+                                                        Due: {new Date(bill.due_date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                    </div>
+                                                    <div className="text-3xl font-black text-white">
+                                                        ₹{bill.amount.toLocaleString('en-IN')}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
 
-                        <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={nextBill}
-                            className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center cursor-pointer"
-                        >
-                            <ChevronRight className="w-5 h-5 text-white" />
-                        </motion.button>
-                    </div>
+                            {/* Navigation dots */}
+                            <div className="flex items-center justify-center gap-4 mb-4">
+                                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={prevBill}
+                                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer">
+                                    <ChevronLeft className="w-5 h-5 text-white" />
+                                </motion.button>
+                                <div className="flex items-center gap-2">
+                                    {bills.map((_, idx) => (
+                                        <button key={idx} onClick={() => { setDirection(idx > safeIndex ? 1 : -1); setCurrentIndex(idx); }} className="group">
+                                            <motion.div
+                                                className={`h-2 rounded-full transition-all ${idx === safeIndex ? 'w-6 bg-white' : 'w-2 bg-white/30 group-hover:bg-white/50'}`}
+                                                whileHover={{ scale: 1.2 }}
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={nextBill}
+                                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer">
+                                    <ChevronRight className="w-5 h-5 text-white" />
+                                </motion.button>
+                            </div>
+                        </>
+                    )}
 
-                    {/* Pay Now Button - Always at bottom */}
-                    <motion.button
+                    {/* Footer CTA */}
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.9 }}
-                        whileHover={{ scale: 1.02, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full py-3 rounded-xl font-bold text-indigo-900 bg-white shadow-xl"
+                        className="mt-auto p-3 rounded-xl bg-white/10 border border-white/10 text-center"
                     >
-                        Pay Now
-                    </motion.button>
+                        <p className="text-xs text-indigo-300">
+                            💬 <span className="text-white font-medium">Tell Bandhu</span> about new bills in the chat →
+                        </p>
+                    </motion.div>
                 </div>
             </div>
         </motion.div>

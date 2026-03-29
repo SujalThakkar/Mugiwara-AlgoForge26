@@ -11,6 +11,12 @@ import { TrendingUp, ChevronDown, ChevronUp, Loader2, AlertCircle, Upload } from
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+const apiFetch = (url: string, options?: RequestInit) =>
+  fetch(url, {
+    ...options,
+    headers: { 'ngrok-skip-browser-warning': '1', ...options?.headers },
+  });
+
 const fmtINR = (n: number) =>
   n >= 1e7 ? `₹${(n / 1e7).toFixed(1)}Cr`
   : n >= 1e5 ? `₹${(n / 1e5).toFixed(1)}L`
@@ -32,7 +38,7 @@ export default function SavingsPanel({ userId }: { userId: string }) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${API}/api/v1/savings/${userId}`);
+        const res = await apiFetch(`${API}/api/v1/savings/${userId}`);
         if (res.ok) setData(await res.json());
       } catch {}
       setLoading(false);
