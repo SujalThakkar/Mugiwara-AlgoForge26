@@ -1,6 +1,6 @@
 import HeroRightPanel from '@/components/shared/HeroRightPanel';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 
@@ -10,17 +10,54 @@ export function HeroSection() {
     return (
         <section className="relative overflow-hidden pt-12 pb-20 md:pt-12 md:pb-32">
             <div className="mm-container relative z-10">
-                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div className="grid lg:grid-cols-2 gap-12 items-start">
                     {/* Left Side: Text Content */}
                     <motion.div
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <h1 className="mm-heading-mega mb-6">
-                            {t('hero_title_line1')}
-                            <br />
-                            {t('hero_title_line2')}
+                        {/* Brand Label */}
+                        <motion.div
+                            initial={{ opacity: 0, y: -16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                            className="inline-flex items-center gap-2 mb-6"
+                        >
+                            <span className="inline-flex items-center gap-1.5 bg-mm-purple/10 border border-mm-purple/20 text-mm-purple text-sm font-semibold px-4 py-1.5 rounded-full tracking-wide uppercase">
+                                <Sparkles className="w-3.5 h-3.5" />
+                                Budget Bandhu
+                            </span>
+                            <span className="h-px w-8 bg-gradient-to-r from-mm-purple/40 to-transparent" />
+                            <span className="text-xs font-medium text-gray-500 tracking-widest uppercase">AI Finance</span>
+                        </motion.div>
+
+                        {/* Hero Heading — styled per word */}
+                        <h1 className="hero-mega-heading mb-6">
+                            <motion.span
+                                className="hero-word hero-word--gradient block"
+                                initial={{ opacity: 0, x: -40 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.6, delay: 0.2 }}
+                            >
+                                YOUR WEALTH
+                            </motion.span>
+                            <motion.span
+                                className="hero-word hero-word--outline block"
+                                initial={{ opacity: 0, x: -40 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.6, delay: 0.35 }}
+                            >
+                                IN
+                            </motion.span>
+                            <motion.span
+                                className="hero-word hero-word--accent block"
+                                initial={{ opacity: 0, x: -40 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.6, delay: 0.5 }}
+                            >
+                                CONTROL
+                            </motion.span>
                         </h1>
 
                         <p className="mm-body-lg text-gray-700 mb-8 max-w-lg">
@@ -61,9 +98,14 @@ export function HeroSection() {
                     </motion.div>
 
                     {/* Right Side: New Animated Panel */}
-                    <div className="relative overflow-hidden min-h-[520px]">
+                    <motion.div
+                        className="relative overflow-hidden min-h-[520px] lg:pt-14"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.9, delay: 0.2 }}
+                    >
                         <HeroRightPanel />
-                    </div>
+                    </motion.div>
                 </div>
             </div>
         </section>

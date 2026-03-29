@@ -63,7 +63,7 @@ export function TopNavigation() {
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden lg:flex items-center gap-1">
+                    <div className="hidden lg:flex items-center gap-1 ml-6 pl-6 border-l border-gray-200">
                         {navItems.map((item, index) => (
                             <div key={index} className="relative">
                                 {item.submenu ? (
