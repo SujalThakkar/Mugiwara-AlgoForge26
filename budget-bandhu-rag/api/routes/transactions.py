@@ -339,7 +339,7 @@ async def upload_csv(
 @router.get("/{user_id}", response_model=List[dict])
 async def get_transactions(
     user_id: str,
-    limit: int = 50,
+    limit: int = 1000,
     category: Optional[str] = None,
     anomalies_only: bool = False,
     db=Depends(get_database)
@@ -361,7 +361,7 @@ async def get_transactions(
     return txns
 
 
-@router.get("/{user_id}/stats", response_model=TransactionStats)
+@router.get("/{user_id}/stats", response_model=dict)
 async def get_transaction_stats(user_id: str, db=Depends(get_database)):
     """Get transaction statistics for a user"""
     pipeline = [

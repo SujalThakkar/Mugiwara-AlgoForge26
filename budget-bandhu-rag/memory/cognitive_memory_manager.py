@@ -151,7 +151,7 @@ class CognitiveMemoryManager:
 
         # Tier 1 — always
         tasks["working"] = asyncio.ensure_future(
-            self._safe(self.working.get_session_items(session_id, user_id, limit=10), [])
+            self._safe(self.working.get_session_items(user_id=user_id, session_id=session_id), [])
         )
 
         if "episodic" in active_tiers:

@@ -400,20 +400,15 @@ class Phi3RAG(IntelligenceComponent):
 
         parts = ["<|user|>"]
 
-        # ── System persona + rules ────────────────────────────────
         parts.append(
-            "You are Bandhu, an AI financial assistant for Indian users.\n\n"
+            "You are Bandhu, an AI financial assistant for Indian users.\n"
+            "Answer using the VERIFIED KNOWLEDGE and USER DATA below.\n\n"
             "CRITICAL RULES — NEVER BREAK THESE:\n"
             "1. ALWAYS use ₹ (Indian Rupee). NEVER use $ or USD.\n"
             "2. Use Indian formatting: ₹1,00,000 | lakh | crore\n"
             "3. All tax/finance figures must be India-specific.\n"
-            "4. Unsure of a figure? Say 'Verify at incometax.gov.in'\n"
-            "5. NEVER cite a specific legal section number unless it appears "
-            "VERBATIM in the VERIFIED KNOWLEDGE below. "
-            "If unsure, say 'refer to the relevant section of the Income Tax Act'.\n"
-            "6. NEVER fabricate penalty amounts, interest rates, or deadlines. "
-            "Always add: verify at incometax.gov.in\n"
-            "Answer using the VERIFIED KNOWLEDGE and USER DATA below.\n"
+            "4. If a user states 'My salary is X', it is their MONTHLY in-hand income. NEVER divide it by 12.\n"
+            "5. If unsure of a figure, say 'Verify at incometax.gov.in'.\n"
         )
 
         # ── Verified KB chunks ────────────────────────────────────
@@ -436,6 +431,15 @@ class Phi3RAG(IntelligenceComponent):
         # ── User financial data ───────────────────────────────────
         parts.append("\n=== USER FINANCIAL DATA ===")
         has_data = False
+        
+        # 1. Master Profile
+        prof = context.get("user_profile", {})
+        if prof:
+            income = prof.get("income", 0)
+            name = prof.get("name", "User")
+            if income > 0:
+                parts.append(f"Active Profile: {name} earns ₹{income:,.0f} per MONTH (Net Salary).")
+                has_data = True
 
         # Semantic memory (user profile / preferences)
         for mem in context.get("semantic", [])[:3]:

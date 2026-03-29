@@ -109,11 +109,24 @@ class AgentController:
             # Non-blocking — continue even if gating fails
 
         # Step 4: Fetch UNIFIED memory context (parallel, non-blocking)
+        # ── Mandatory User Profile injection ───────────────────────────
+        try:
+            db = self.db.get_motor_db()
+            user_prof = await db["users"].find_one({"_id": user_id})
+            if not user_prof:
+                # Basic creation if missing (auto-registration)
+                user_prof = {"_id": user_id, "name": "User", "income": 50000.0, "currency": "INR"}
+                await db["users"].insert_one(user_prof)
+        except Exception as e:
+            logger.warning(f"[AGENT] Profile fetch failed: {e}")
+            user_prof = {"income": 50000.0}
+
         intent_map = {
-            "transaction":  QueryIntent.SIMPLE_LOOKUP,
-            "question":     QueryIntent.FULL_ADVISORY,
-            "goal_setting": QueryIntent.GOAL_PLANNING,
-            "goal_query":   QueryIntent.GOAL_PLANNING,
+            "transaction":    QueryIntent.SIMPLE_LOOKUP,
+            "question":       QueryIntent.FULL_ADVISORY,
+            "goal_setting":   QueryIntent.GOAL_PLANNING,
+            "goal_query":     QueryIntent.GOAL_PLANNING,
+            "profile_update": QueryIntent.SIMPLE_LOOKUP,
         }
         intent_enum = intent_map.get(self._classify_intent(q), QueryIntent.FULL_ADVISORY)
 
@@ -146,7 +159,8 @@ class AgentController:
             "cognitive":    cognitive,
             "graph":        graph,
             "conversation": conv_history,
-            "session_id":   session_id
+            "session_id":   session_id,
+            "user_profile": user_prof  # <--- INJECTED
         }
         memory_used = {
             "episodic_count":   len(episodic),
@@ -177,6 +191,8 @@ class AgentController:
             response_data = await self._handle_tax_query(user_id)
         elif intent == "budget_query":
             response_data = await self._handle_budget_query(q, user_id)
+        elif intent == "profile_update":
+            response_data = await self._handle_profile_update(q, user_id)
         else:
             response_data = self._handle_rag_query(q, context_bundle)
 
@@ -196,9 +212,9 @@ class AgentController:
         await asyncio.gather(
             safe_run(self.episodic.store_episode(user_id, intent, q, response_text, session_id)),
             safe_run(self._update_semantic_memory(user_id, q, intent, response_text)),
-            safe_run(self.working.add(session_id, user_id, "turn_context", {
+            safe_run(self.working.update_state(user_id, session_id, {"turn_context": {
                  "last_query": q, "last_intent": intent,
-                 "timestamp": datetime.now().isoformat()})),
+                 "timestamp": datetime.now().isoformat()}})),
             safe_run(self._update_procedural_memory(user_id, q, intent, response_data)),
             safe_run(self._update_knowledge_graph(user_id, q, intent)),
             safe_run(self.cognitive.write_episodic(user_id, intent, q, response_text, session_id)),
@@ -288,6 +304,16 @@ class AgentController:
         ]
         for p in GOAL_Q:
             if re.search(p, q): return "goal_query"
+
+        # Profile Update intent (Salary, Income)
+        PROFILE_UPD = [
+            r"my (salary|income|earnings?) (is|set to|increased to)",
+            r"i (earn|make) [\u20b9\d,]+",
+            r"update my (salary|income)",
+            r"change income to",
+        ]
+        for p in PROFILE_UPD:
+            if re.search(p, q): return "profile_update"
 
         return "question"
 
@@ -940,6 +966,50 @@ class AgentController:
         except Exception as e:
             logger.warning(f"[AGENT] Budget query failed: {e}")
             return {"response": "I couldn't load budget data right now. Check the dashboard for details.", "confidence": 0.6}
+
+    async def _handle_profile_update(self, query: str, user_id: str) -> Dict:
+        """Extract income and update the users collection + dashboard."""
+        try:
+            # Re-use transaction amount extractor for income
+            data = self._extract_transaction(query)
+            income = data.get("amount", 0)
+            
+            if income <= 0:
+                # Retry with specific regex if merchant-based extractor failed
+                m = re.search(r'(\d[\d,]*\.?\d*)', query)
+                if m:
+                    income = float(m.group(1).replace(',', ''))
+
+            if income <= 0:
+                return {"response": "I couldn't catch the exact amount. Could you say 'My salary is ₹50,000'?", "confidence": 0.8}
+
+            # 1. Update primary User profile (for dashboard)
+            db = self.db.get_motor_db()
+            await db["users"].update_one(
+                {"_id": user_id},
+                {"$set": {"income": income}},
+                upsert=True
+            )
+            
+            # 2. Update budgets collection if exists
+            await db["budgets"].update_one(
+                {"user_id": user_id},
+                {"$set": {"total_income": income}},
+                upsert=False
+            )
+
+            # 3. Confirmation
+            return {
+                "response": (
+                    f"✅ **Profile Updated!**\n\n"
+                    f"💰 **Monthly Income:** ₹{income:,.0f}\n"
+                    f"I've updated your dashboard and budget limit right away! 🎉"
+                ),
+                "confidence": 0.95
+            }
+        except Exception as e:
+            logger.warning(f"[AGENT] Profile update failed: {e}")
+            return {"response": "I encountered an error updating your profile. Please try again.", "confidence": 0.5}
 
 
     # ────────────────────────────────────────────────────────────
