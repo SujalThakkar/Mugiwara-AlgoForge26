@@ -446,8 +446,11 @@ export default function SettingsPage() {
                                             icon={LogOut}
                                             label="Sign Out"
                                             description="Sign out from all devices"
-                                            onClick={() => toast('Signed out successfully', { icon: '👋' })}
-
+                                            onClick={() => {
+                                                localStorage.clear();
+                                                toast.success('Signed out successfully');
+                                                window.location.href = '/auth/login';
+                                            }}
                                         />
 
                                         <div className="border-t border-gray-200 my-6" />

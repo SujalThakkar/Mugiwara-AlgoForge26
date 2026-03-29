@@ -14,22 +14,26 @@ export function formatCurrency(amount: number): string {
 }
 
 export function formatDate(date: string | Date): string {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return 'Invalid Date';
     return new Intl.DateTimeFormat('en-IN', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
-    }).format(new Date(date));
+    }).format(d);
 }
 
 export function formatRelativeTime(date: string | Date): string {
-    const now = new Date();
     const then = new Date(date);
+    if (isNaN(then.getTime())) return 'Invalid Date';
+    
+    const now = new Date();
     const diffMs = now.getTime() - then.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffDays <= 0) return 'Today';
+    if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    if (diffDays < 7 && diffDays > 0) return `${diffDays} days ago`;
+    if (diffDays < 30 && diffDays > 0) return `${Math.floor(diffDays / 7)} weeks ago`;
     return formatDate(date);
 }

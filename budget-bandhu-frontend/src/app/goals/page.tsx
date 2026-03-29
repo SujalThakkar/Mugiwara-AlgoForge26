@@ -173,7 +173,7 @@ export default function GoalsPage() {
       setUserId(saved);
     } else {
       // Fallback to demo user for development
-      setUserId("demo_user_001");
+      setUserId("917558497556");
     }
   }, []);
 
