@@ -15,10 +15,10 @@ interface RotatingModelProps {
   rotationSpeed?: number
 }
 
-const RotatingModel = memo(function RotatingModel({ 
-  url, 
-  onLoad, 
-  rotationSpeed = 0.6 
+const RotatingModel = memo(function RotatingModel({
+  url,
+  onLoad,
+  rotationSpeed = 0.6
 }: RotatingModelProps) {
   // Use GLTF with optional Draco (if handled by @react-three/drei's useGLTF default)
   const { scene } = useGLTF(url)
@@ -54,36 +54,36 @@ function Lighting() {
   return (
     <>
       <ambientLight intensity={1.5} />
-      
+
       {/* Target purple pop with key and rim lights */}
       <directionalLight
         position={[5, 5, 5]}
         intensity={2}
         castShadow={false}
       />
-      
+
       <directionalLight
         position={[-3, -2, -3]}
         intensity={0.8}
         color="#c4b5fd"
       />
-      
+
       <pointLight
         position={[2, 3, 2]}
         intensity={1.5}
         color="#a855f7"
       />
-      
+
       <pointLight
         position={[-2, -1, 2]}
         intensity={0.8}
         color="#2dd4bf"
       />
 
-      <pointLight 
-        position={[0, 5, 0]} 
-        intensity={1} 
-        color="#a855f7" 
+      <pointLight
+        position={[0, 5, 0]}
+        intensity={1}
+        color="#a855f7"
       />
     </>
   )
@@ -113,10 +113,10 @@ function Logo3DCanvas({ rotationSpeed = 0.6, onLoad }: Logo3DCanvasProps) {
     >
       <Lighting />
       <Suspense fallback={null}>
-        <RotatingModel 
-          url="/logo.glb" 
-          onLoad={onLoad} 
-          rotationSpeed={rotationSpeed} 
+        <RotatingModel
+          url="/logo.glb"
+          onLoad={onLoad}
+          rotationSpeed={rotationSpeed}
         />
       </Suspense>
       <OrbitControls
@@ -141,7 +141,7 @@ export function Logo3D({ heroMode = false }: Logo3DProps) {
   const [stage, setStage] = useState<Stage>('preloader')
   const [modelLoaded, setModelLoaded] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  
+
   // Ref to resolve the loading promise
   const modelLoadedResolverRef = useRef<((value: unknown) => void) | null>(null)
 
@@ -162,7 +162,7 @@ export function Logo3D({ heroMode = false }: Logo3DProps) {
   useEffect(() => {
     // Minimum 4.5s preloader time
     const minTimer = new Promise(res => setTimeout(res, 4500))
-    
+
     // Model load promise
     const loadPromise = new Promise(res => {
       if (modelLoaded) res(null)
@@ -172,10 +172,10 @@ export function Logo3D({ heroMode = false }: Logo3DProps) {
     // Transition preloader -> flight -> corner
     Promise.all([minTimer, loadPromise]).then(() => {
       setStage('flight')
-      
+
       // Page content visible trigger
       document.body.classList.add('page-visible')
-      
+
       // Flight duration 1.2s before settling into corner
       setTimeout(() => {
         setStage('corner')
@@ -200,70 +200,97 @@ export function Logo3D({ heroMode = false }: Logo3DProps) {
       <AnimatePresence>
         {stage === 'preloader' && (
           <motion.div
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center p-4 overflow-hidden"
+            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-0 overflow-hidden"
             style={{
               background: 'radial-gradient(ellipse at center, #1a0a3d 0%, #0d0520 60%, #080310 100%)'
             }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {/* Visual spacer for centered canvas */}
-            <div className="flex flex-col items-center">
-               <div className="w-[300px] h-[300px]" /> {/* Reserved space */}
-               
-               {/* Loading Bar */}
-               <div className="w-[240px] h-[3px] bg-white/10 rounded-full mt-4 relative overflow-hidden">
-                 <motion.div
-                   className="absolute inset-0 bg-gradient-to-r from-[#7c3aed] to-[#2dd4bf]"
-                   initial={{ width: '0%' }}
-                   animate={{ width: '100%' }}
-                   transition={{ duration: 4.5, ease: 'easeInOut' }}
-                 />
-               </div>
+            {/* Brand Title — TOP, large and prominent */}
+            <motion.div
+              className="flex flex-col items-center mb-2"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: 'easeOut' }}
+            >
+              <h1
+                className="font-extrabold text-transparent bg-clip-text"
+                style={{
+                  fontSize: '2.8rem',
+                  letterSpacing: '-0.02em',
+                  backgroundImage: 'linear-gradient(135deg, #ffffff 0%, #c4b5fd 50%, #2dd4bf 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                Budget Bandhu
+              </h1>
+              <motion.p
+                className="text-purple-300/80 text-sm font-medium tracking-widest uppercase mt-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                Your Smart Finance Friend
+              </motion.p>
+            </motion.div>
 
-               {/* Brand Text */}
-               <motion.h1
-                 className="text-[20px] font-[800] text-white mt-[16px]"
-                 initial={{ opacity: 0 }}
-                 animate={{ opacity: 1 }}
-                 transition={{ delay: 0.3 }}
-               >
-                 Budget Bandhu
-               </motion.h1>
-            </div>
+            {/* 3D Pig Canvas — Reserved space in center */}
+            <div className="w-[300px] h-[300px]" />
+
+            {/* Loading Bar + status — BOTTOM */}
+            <motion.div
+              className="flex flex-col items-center gap-3 mt-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="w-[240px] h-[3px] bg-white/10 rounded-full relative overflow-hidden">
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  style={{ background: 'linear-gradient(90deg, #7c3aed, #2dd4bf)' }}
+                  initial={{ width: '0%' }}
+                  animate={{ width: '100%' }}
+                  transition={{ duration: 4.5, ease: 'easeInOut' }}
+                />
+              </div>
+              <motion.p
+                className="text-white/40 text-xs tracking-widest"
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                Loading your financial universe...
+              </motion.p>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* PERSISTENT CANVAS CONTAINER — NO UNMOUNTING */}
+      {/* PERSISTENT CANVAS CONTAINER — fixed 300px, scale-shrinks to corner */}
+      {/* Using scale transform instead of width/height to prevent 3D viewport clipping */}
       <motion.div
-        layout
         initial={false}
         className="fixed z-[1000] will-change-transform"
+        style={{ width: 300, height: 300 }}
         animate={stage === 'preloader' ? {
           top: '50%',
           left: '50%',
           x: '-50%',
           y: '-50%',
-          width: 300,
-          height: 300,
-          position: 'fixed' as any
+          scale: 1,
         } : {
-          bottom: 24,
-          right: 24,
+          bottom: 24 - 95, // offset: 110px corner target, centered in 300px = (300-110)/2 = 95
+          right: 24 - 95,
           top: 'auto',
           left: 'auto',
           x: 0,
           y: 0,
-          width: 110,
-          height: 110,
-          position: 'fixed' as any
+          scale: 110 / 300,  // shrink to 110px visually without changing Canvas size
         }}
         transition={{
-          duration: 1.2,
-          ease: [0.25, 0.46, 0.45, 0.94],
-          width: { duration: 1.0 },
-          height: { duration: 1.0 },
+          duration: 1.1,
+          ease: [0.34, 1.1, 0.64, 1], // spring-like, smooth
         }}
       >
         <motion.div
@@ -280,16 +307,16 @@ export function Logo3D({ heroMode = false }: Logo3DProps) {
           onMouseEnter={() => stage === 'corner' && setIsHovered(true)}
           onMouseLeave={() => stage === 'corner' && setIsHovered(false)}
           onClick={() => stage === 'corner' && scrollToTop()}
-          whileHover={stage === 'corner' ? { 
-            scale: 1.1, 
-            boxShadow: '0 12px 40px rgba(124,58,237,0.4)' 
+          whileHover={stage === 'corner' ? {
+            scale: 1.1,
+            boxShadow: '0 12px 40px rgba(124,58,237,0.4)'
           } : {}}
           whileTap={stage === 'corner' ? { scale: 0.9 } : {}}
         >
           {/* Use higher rotation in corner/loaded states */}
-          <Logo3DCanvas 
-            rotationSpeed={stage === 'preloader' ? 0.4 : 0.6} 
-            onLoad={handleModelLoad} 
+          <Logo3DCanvas
+            rotationSpeed={stage === 'preloader' ? 0.4 : 0.6}
+            onLoad={handleModelLoad}
           />
 
           {/* Tooltip Pill */}
