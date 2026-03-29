@@ -3,6 +3,18 @@
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { formatCurrency } from "@/lib/utils";
+import { useTranslation } from "@/lib/hooks/useTranslation";
+import { TranslationKey } from "@/lib/translations";
+
+const categoryMapping: Record<string, TranslationKey> = {
+    'Shopping': 'cat_shopping',
+    'Food & Drink': 'cat_food',
+    'Transport': 'cat_transport',
+    'Bills': 'cat_bills',
+    'Housing': 'cat_housing',
+    'Healthcare': 'cat_healthcare',
+    'Others': 'cat_others',
+};
 
 interface Allocation {
     category: string;
@@ -16,6 +28,8 @@ interface CategoryAllocationProps {
 }
 
 export function CategoryAllocation({ allocations }: CategoryAllocationProps) {
+    const { t } = useTranslation();
+
     return (
         <div className="space-y-6">
             {allocations.map((item) => {
@@ -25,7 +39,9 @@ export function CategoryAllocation({ allocations }: CategoryAllocationProps) {
                 return (
                     <div key={item.category} className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <span className="font-medium text-gray-900">{item.category}</span>
+                            <span className="font-medium text-gray-900">
+                                {categoryMapping[item.category] ? t(categoryMapping[item.category]) : item.category}
+                            </span>
                             <div className="text-right">
                                 <span className={`font-semibold ${isOverBudget ? 'text-coral-600' : 'text-gray-900'}`}>
                                     {formatCurrency(item.spent)}
@@ -35,8 +51,8 @@ export function CategoryAllocation({ allocations }: CategoryAllocationProps) {
                         </div>
                         <Progress value={item.spent} max={item.allocated} />
                         <div className="flex items-center justify-between text-xs text-gray-500">
-                            <span>{spentPercentage.toFixed(1)}% used</span>
-                            <span>{formatCurrency(item.allocated - item.spent)} remaining</span>
+                            <span>{spentPercentage.toFixed(1)}% {t('budget_used_label')}</span>
+                            <span>{formatCurrency(item.allocated - item.spent)} {t('remaining_label')}</span>
                         </div>
                     </div>
                 );

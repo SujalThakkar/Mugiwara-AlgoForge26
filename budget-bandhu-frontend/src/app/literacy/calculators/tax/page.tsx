@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
+import { useLanguageStore } from '@/lib/store/useLanguageStore';
 
 export default function TaxCalculator() {
     const router = useRouter();
+    const { currentLanguage, t } = useLanguageStore();
     const [income, setIncome] = useState(1200000);
     const [deductions80C, setDeductions80C] = useState(150000);
     const [hra, setHra] = useState(0);
@@ -107,7 +109,7 @@ export default function TaxCalculator() {
         <div className="max-w-7xl mx-auto">
             <Button onClick={() => router.back()} variant="ghost" className="mb-6">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
+                {t('btn_back')}
             </Button>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -118,8 +120,8 @@ export default function TaxCalculator() {
                             <FileText className="w-6 h-6 text-lavender-600" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Tax Calculator</h1>
-                            <p className="text-sm text-gray-600">FY 2025-26 (AY 2026-27)</p>
+                            <h1 className="text-2xl font-bold text-gray-900">{t('calc_tax')}</h1>
+                            <p className="text-sm text-gray-600">{t('tax_desc')}</p>
                         </div>
                     </div>
 
@@ -127,7 +129,7 @@ export default function TaxCalculator() {
                         {/* Tax Regime Selection */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-3">
-                                Select Tax Regime
+                                {t('select_regime')}
                             </label>
                             <div className="grid grid-cols-2 gap-3">
                                 <button
@@ -137,8 +139,8 @@ export default function TaxCalculator() {
                                             : 'bg-white border-gray-200 hover:border-mint-500'
                                         }`}
                                 >
-                                    <div className="font-semibold mb-1">New Regime</div>
-                                    <div className="text-xs text-gray-600">Lower rates, fewer deductions</div>
+                                    <div className="font-semibold mb-1">{t('new_regime')}</div>
+                                    <div className="text-xs text-gray-600">{t('new_regime_desc')}</div>
                                 </button>
                                 <button
                                     onClick={() => setRegime('old')}
@@ -147,8 +149,8 @@ export default function TaxCalculator() {
                                             : 'bg-white border-gray-200 hover:border-skyBlue-500'
                                         }`}
                                 >
-                                    <div className="font-semibold mb-1">Old Regime</div>
-                                    <div className="text-xs text-gray-600">All deductions allowed</div>
+                                    <div className="font-semibold mb-1">{t('old_regime')}</div>
+                                    <div className="text-xs text-gray-600">{t('old_regime_desc')}</div>
                                 </button>
                             </div>
                         </div>
@@ -156,7 +158,7 @@ export default function TaxCalculator() {
                         {/* Annual Income */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Annual Gross Income
+                                {t('gross_income')}
                             </label>
                             <Input
                                 type="number"
@@ -170,7 +172,7 @@ export default function TaxCalculator() {
                             <>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        80C Deductions (Max ₹1.5L)
+                                        {t('deductions_80c')}
                                     </label>
                                     <Input
                                         type="number"
@@ -184,7 +186,7 @@ export default function TaxCalculator() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        HRA Exemption
+                                        {t('hra_exemption')}
                                     </label>
                                     <Input
                                         type="number"
@@ -195,7 +197,7 @@ export default function TaxCalculator() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Home Loan Interest (Max ₹2L)
+                                        {t('home_loan_interest')}
                                     </label>
                                     <Input
                                         type="number"
@@ -217,7 +219,7 @@ export default function TaxCalculator() {
                         animate={{ scale: 1 }}
                         className="glass p-8 rounded-2xl border-2 border-white/50 text-center"
                     >
-                        <p className="text-sm text-gray-600 mb-2">Total Tax Payable</p>
+                        <p className="text-sm text-gray-600 mb-2">{t('total_tax_payable')}</p>
                         <motion.h2
                             className="text-5xl font-bold bg-gradient-to-r from-lavender-600 to-coral-600 bg-clip-text text-transparent mb-6"
                             initial={{ opacity: 0, y: 20 }}
@@ -228,13 +230,13 @@ export default function TaxCalculator() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="p-4 bg-gray-50 rounded-xl">
-                                <p className="text-xs text-gray-600 mb-1">Gross Income</p>
+                                <p className="text-xs text-gray-600 mb-1">{t('gross_income')}</p>
                                 <p className="text-lg font-bold text-gray-900">
                                     {formatCurrency(taxData.grossIncome)}
                                 </p>
                             </div>
                             <div className="p-4 bg-mint-50 rounded-xl">
-                                <p className="text-xs text-gray-600 mb-1">Take Home</p>
+                                <p className="text-xs text-gray-600 mb-1">{t('take_home')}</p>
                                 <p className="text-lg font-bold text-mint-600">
                                     {formatCurrency(taxData.takeHome)}
                                 </p>
@@ -244,18 +246,18 @@ export default function TaxCalculator() {
 
                     {/* Tax Breakdown */}
                     <div className="glass p-6 rounded-2xl border-2 border-white/50">
-                        <h3 className="font-bold text-gray-900 mb-4">Tax Breakdown</h3>
+                        <h3 className="font-bold text-gray-900 mb-4">{t('tax_breakdown')}</h3>
 
                         <div className="space-y-3 text-sm">
                             <div className="flex justify-between">
-                                <span className="text-gray-600">Gross Income</span>
+                                <span className="text-gray-600">{t('gross_income')}</span>
                                 <span className="font-semibold text-gray-900">
                                     {formatCurrency(taxData.grossIncome)}
                                 </span>
                             </div>
                             {taxData.totalDeductions > 0 && (
                                 <div className="flex justify-between">
-                                    <span className="text-gray-600">Total Deductions</span>
+                                    <span className="text-gray-600">{t('label_total_deductions')}</span>
                                     <span className="font-semibold text-mint-600">
                                         - {formatCurrency(taxData.totalDeductions)}
                                     </span>
@@ -263,40 +265,40 @@ export default function TaxCalculator() {
                             )}
                             <div className="h-px bg-gray-200" />
                             <div className="flex justify-between">
-                                <span className="text-gray-600">Taxable Income</span>
+                                <span className="text-gray-600">{t('taxable_income')}</span>
                                 <span className="font-semibold text-gray-900">
                                     {formatCurrency(taxData.taxableIncome)}
                                 </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-600">Tax Before Rebate</span>
+                                <span className="text-gray-600">{t('tax_before_rebate')}</span>
                                 <span className="font-semibold text-gray-900">
                                     {formatCurrency(taxData.taxBeforeRebate)}
                                 </span>
                             </div>
                             {taxData.rebate > 0 && (
                                 <div className="flex justify-between">
-                                    <span className="text-gray-600">Rebate u/s 87A</span>
+                                    <span className="text-gray-600">{t('rebate_87a')}</span>
                                     <span className="font-semibold text-mint-600">
                                         - {formatCurrency(taxData.rebate)}
                                     </span>
                                 </div>
                             )}
                             <div className="flex justify-between">
-                                <span className="text-gray-600">Health & Edu Cess (4%)</span>
+                                <span className="text-gray-600">{t('cess')}</span>
                                 <span className="font-semibold text-gray-900">
                                     {formatCurrency(taxData.cess)}
                                 </span>
                             </div>
                             <div className="h-px bg-gray-200" />
                             <div className="flex justify-between text-base">
-                                <span className="font-semibold text-gray-900">Total Tax</span>
+                                <span className="font-semibold text-gray-900">{t('total_tax_payable') || 'Total Tax'}</span>
                                 <span className="font-bold text-lavender-600">
                                     {formatCurrency(taxData.totalTax)}
                                 </span>
                             </div>
                             <div className="flex justify-between text-base pt-3 border-t-2 border-gray-200">
-                                <span className="font-bold text-gray-900">Take Home Salary</span>
+                                <span className="font-bold text-gray-900">{t('take_home_salary')}</span>
                                 <span className="font-bold text-mint-600">
                                     {formatCurrency(taxData.takeHome)}
                                 </span>

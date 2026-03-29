@@ -2,17 +2,19 @@
 
 import { motion } from 'framer-motion';
 import { Shield, TrendingUp, AlertTriangle, CheckCircle, DollarSign, Calendar } from 'lucide-react';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 interface EmergencyFundBarometerProps {
     goal?: any;
 }
 
 export function EmergencyFundBarometer({ goal }: EmergencyFundBarometerProps) {
+    const { t } = useTranslation();
     const emergencyGoal = goal;
     if (!emergencyGoal) {
         return (
             <div className="flex items-center justify-center h-full min-h-[300px] bg-gray-100/10 rounded-3xl border border-white/5">
-                <p className="text-indigo-200 font-medium">Accumulating goal data...</p>
+                <p className="text-indigo-200 font-medium">{t('accumulating_data')}</p>
             </div>
         );
     }
@@ -25,13 +27,13 @@ export function EmergencyFundBarometer({ goal }: EmergencyFundBarometerProps) {
 
     const getStatus = () => {
         if (monthsCovered >= 6) {
-            return { level: 'Excellent', color: 'text-emerald-600', bgColor: 'bg-emerald-500', thermometerColor: '#10B981', icon: CheckCircle, message: 'Your emergency fund is well-established! 🎉' };
+            return { level: t('health_excellent'), color: 'text-emerald-600', bgColor: 'bg-emerald-500', thermometerColor: '#10B981', icon: CheckCircle, message: t('health_msg_excellent') };
         } else if (monthsCovered >= 4) {
-            return { level: 'Good', color: 'text-blue-600', bgColor: 'bg-blue-500', thermometerColor: '#3B82F6', icon: TrendingUp, message: 'Good progress! Keep building your fund. 👍' };
+            return { level: t('health_good'), color: 'text-blue-600', bgColor: 'bg-blue-500', thermometerColor: '#3B82F6', icon: TrendingUp, message: t('health_msg_good') };
         } else if (monthsCovered >= 2) {
-            return { level: 'Fair', color: 'text-orange-600', bgColor: 'bg-orange-500', thermometerColor: '#F59E0B', icon: AlertTriangle, message: 'Getting there! Aim for at least 6 months. ⚠️' };
+            return { level: t('status_fair'), color: 'text-orange-600', bgColor: 'bg-orange-500', thermometerColor: '#F59E0B', icon: AlertTriangle, message: t('health_msg_caution') };
         } else {
-            return { level: 'Critical', color: 'text-red-600', bgColor: 'bg-red-500', thermometerColor: '#EF4444', icon: AlertTriangle, message: 'Priority! Build your emergency fund now. 🚨' };
+            return { level: t('health_critical'), color: 'text-red-600', bgColor: 'bg-red-500', thermometerColor: '#EF4444', icon: AlertTriangle, message: t('health_msg_critical') };
         }
     };
 
@@ -74,8 +76,8 @@ export function EmergencyFundBarometer({ goal }: EmergencyFundBarometerProps) {
                         <Shield className="w-6 h-6 text-white" />
                     </motion.div>
                     <div>
-                        <h3 className="text-xl font-bold text-white">Emergency Fund</h3>
-                        <p className="text-sm text-indigo-300">Your financial safety net</p>
+                        <h3 className="text-xl font-bold text-white">{t('emergency_fund_title')}</h3>
+                        <p className="text-sm text-indigo-300">{t('financial_safety_net')}</p>
                     </div>
                 </div>
                 <motion.div
@@ -137,7 +139,7 @@ export function EmergencyFundBarometer({ goal }: EmergencyFundBarometerProps) {
                             className="absolute left-full ml-4 top-1/2 -translate-y-1/2 text-center"
                         >
                             <div className="text-4xl font-black text-white">{percentage.toFixed(0)}%</div>
-                            <p className="text-xs text-indigo-300">of target</p>
+                            <p className="text-xs text-indigo-300">{t('of_target_label')}</p>
                         </motion.div>
                     </div>
                 </div>
@@ -151,7 +153,7 @@ export function EmergencyFundBarometer({ goal }: EmergencyFundBarometerProps) {
                         transition={{ delay: 0.6 }}
                         className="p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10"
                     >
-                        <p className="text-xs text-indigo-300 mb-1">Current Balance</p>
+                        <p className="text-xs text-indigo-300 mb-1">{t('current_balance_label')}</p>
                         <p className="text-2xl font-black text-white">₹{currentAmount.toLocaleString('en-IN')}</p>
                     </motion.div>
 
@@ -162,7 +164,7 @@ export function EmergencyFundBarometer({ goal }: EmergencyFundBarometerProps) {
                         transition={{ delay: 0.7 }}
                         className="p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10"
                     >
-                        <p className="text-xs text-indigo-300 mb-1">Target Amount</p>
+                        <p className="text-xs text-indigo-300 mb-1">{t('target_amount_label')}</p>
                         <p className="text-xl font-bold text-white">₹{targetAmount.toLocaleString('en-IN')}</p>
                         <div className="h-2 bg-white/10 rounded-full overflow-hidden mt-2">
                             <motion.div
@@ -184,11 +186,11 @@ export function EmergencyFundBarometer({ goal }: EmergencyFundBarometerProps) {
                     >
                         <div className="flex items-center gap-2 mb-1">
                             <Calendar className="w-4 h-4 text-indigo-300" />
-                            <p className="text-xs text-indigo-300">Coverage Period</p>
+                            <p className="text-xs text-indigo-300">{t('coverage_period_label')}</p>
                         </div>
                         <div className="flex items-baseline gap-2">
                             <span className="text-3xl font-black text-white">{monthsCovered.toFixed(1)}</span>
-                            <span className="text-sm text-indigo-300">months</span>
+                            <span className="text-sm text-indigo-300">{t('months_label')}</span>
                         </div>
                     </motion.div>
 
@@ -201,7 +203,7 @@ export function EmergencyFundBarometer({ goal }: EmergencyFundBarometerProps) {
                         <div className="flex items-start gap-3">
                             <StatusIcon className="w-5 h-5 text-white flex-shrink-0" />
                             <div>
-                                <h4 className="font-bold text-white mb-1">Status</h4>
+                                <h4 className="font-bold text-white mb-1">{t('status_label')}</h4>
                                 <p className="text-sm text-indigo-200">{status.message}</p>
                             </div>
                         </div>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, TrendingUp, ArrowUpRight, Send, Plus, } from 'lucide-react';
 import { NumericFormat } from 'react-number-format';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 interface BalanceCardProps {
     balance: number;
@@ -12,6 +13,7 @@ interface BalanceCardProps {
 }
 
 export function BalanceCard({ balance, trend, trendPercentage }: BalanceCardProps) {
+    const { t } = useTranslation();
     const [showBalance, setShowBalance] = useState(true);
 
     return (
@@ -28,8 +30,8 @@ export function BalanceCard({ balance, trend, trendPercentage }: BalanceCardProp
                             <span className="text-2xl">💼</span>
                         </div>
                         <div>
-                            <h3 className="mm-heading-md text-lg">My Wallet</h3>
-                            <p className="text-sm text-gray-500">Total Balance</p>
+                            <h3 className="mm-heading-md text-lg">{t('my_wallet_title')}</h3>
+                            <p className="text-sm text-gray-500">{t('total_balance_label')}</p>
                         </div>
                     </div>
 
@@ -73,7 +75,7 @@ export function BalanceCard({ balance, trend, trendPercentage }: BalanceCardProp
                                         }`}>
                                         <TrendingUp className="w-4 h-4" />
                                         <span className="text-sm font-bold">
-                                            +{trendPercentage}% this month
+                                            +{trendPercentage}% {t('this_month_trend')}
                                         </span>
                                     </div>
                                 </div>
@@ -96,27 +98,27 @@ export function BalanceCard({ balance, trend, trendPercentage }: BalanceCardProp
                 {/* Quick Actions */}
                 <div className="pt-6 border-t border-gray-200">
                     <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                        <span>⚡</span> Quick Actions
+                        <span>⚡</span> {t('quick_actions_title')}
                     </p>
                     <div className="grid grid-cols-3 gap-3">
                         <button className="flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-200 hover:border-mm-purple hover:bg-mm-purple/5 transition-all">
                             <Plus className="w-5 h-5 text-mm-purple" />
-                            <span className="text-xs font-medium text-gray-700">Add Money</span>
+                            <span className="text-xs font-medium text-gray-700">{t('add_money_btn')}</span>
                         </button>
                         <button className="flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-200 hover:border-mm-purple hover:bg-mm-purple/5 transition-all">
                             <Send className="w-5 h-5 text-mm-purple" />
-                            <span className="text-xs font-medium text-gray-700">Transfer</span>
+                            <span className="text-xs font-medium text-gray-700">{t('transfer_btn')}</span>
                         </button>
                         <button className="flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-200 hover:border-mm-purple hover:bg-mm-purple/5 transition-all">
                             <ArrowUpRight className="w-5 h-5 text-mm-purple" />
-                            <span className="text-xs font-medium text-gray-700">Pay Bills</span>
+                            <span className="text-xs font-medium text-gray-700">{t('pay_bills_btn')}</span>
                         </button>
                     </div>
                 </div>
 
                 {/* View Details Link */}
                 <button className="w-full py-3 text-mm-purple font-semibold hover:bg-mm-purple/5 rounded-xl transition-colors flex items-center justify-center gap-2">
-                    View Details
+                    {t('view_details_btn')}
                     <ArrowUpRight className="w-4 h-4" />
                 </button>
             </div>

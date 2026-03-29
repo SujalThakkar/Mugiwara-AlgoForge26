@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { TrendingUp, AlertCircle, Lightbulb, Star, Sparkles } from 'lucide-react';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 import { mockData } from '@/lib/api/mock-data';
 
 interface Insight {
@@ -22,6 +23,7 @@ interface SpendingInsightsProps {
 }
 
 export function SpendingInsights(props: SpendingInsightsProps) {
+    const { t } = useTranslation();
     const getInsightStyles = (type: string) => {
         switch (type) {
             case 'spending_spike':
@@ -103,8 +105,8 @@ export function SpendingInsights(props: SpendingInsightsProps) {
                         <Sparkles className="w-6 h-6 text-white" />
                     </motion.div>
                     <div>
-                        <h3 className="text-xl font-black text-gray-900">Smart Insights</h3>
-                        <p className="text-sm text-gray-500">AI-powered analysis</p>
+                        <h3 className="text-xl font-black text-gray-900">{t('insights_title')}</h3>
+                        <p className="text-sm text-gray-500">{t('insights_subtitle')}</p>
                     </div>
                 </div>
                 <motion.div
@@ -114,7 +116,7 @@ export function SpendingInsights(props: SpendingInsightsProps) {
                     className="flex items-center gap-2 px-4 py-2 bg-emerald-100 rounded-full"
                 >
                     <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                    <span className="text-sm font-bold text-emerald-700">{insights.length} Active</span>
+                    <span className="text-sm font-bold text-emerald-700">{insights.length} {t('insights_active_count')}</span>
                 </motion.div>
             </div>
 
@@ -160,12 +162,12 @@ export function SpendingInsights(props: SpendingInsightsProps) {
                     <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                         <Lightbulb className="w-5 h-5 text-white" />
                     </div>
-                    <>
-                        <p className="text-sm text-white font-semibold">Weekly Summary</p>
+                    <div>
+                        <p className="text-sm text-white font-semibold">{t('insights_weekly_summary')}</p>
                         <p className="text-xs text-white/80">
-                            {weeklySummary?.message || <>Save up to <span className="font-bold text-white">₹5,300/month</span>! 💰</>}
+                            {weeklySummary?.message || <>{t('insight_saving_potential')} <span className="font-bold text-white">₹5,300/month</span>! 💰</>}
                         </p>
-                    </>
+                    </div>
                 </div>
             </motion.div>
         </motion.div>

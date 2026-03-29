@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { Gauge, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useTranslation } from '@/lib/hooks/useTranslation';
+import { TranslationKey } from '@/lib/translations';
 
 interface BudgetHealthGaugeProps {
     spent: number;
@@ -9,6 +11,7 @@ interface BudgetHealthGaugeProps {
 }
 
 export function BudgetHealthGauge({ spent, budget }: BudgetHealthGaugeProps) {
+    const { t } = useTranslation();
     const percentage = Math.min((spent / budget) * 100, 100);
     const remaining = Math.max(budget - spent, 0);
     const remainingPercentage = Math.max(100 - percentage, 0);
@@ -16,35 +19,35 @@ export function BudgetHealthGauge({ spent, budget }: BudgetHealthGaugeProps) {
     const getHealthStatus = () => {
         if (percentage < 50) {
             return {
-                status: 'Excellent',
+                status: t('health_excellent'),
                 color: 'text-emerald-600',
                 bgColor: 'bg-emerald-100',
                 icon: CheckCircle,
-                message: 'You are well within budget! Keep it up! 🎉',
+                message: t('health_msg_excellent'),
             };
         } else if (percentage < 75) {
             return {
-                status: 'Good',
+                status: t('health_good'),
                 color: 'text-blue-600',
                 bgColor: 'bg-blue-100',
                 icon: TrendingUp,
-                message: 'Spending on track. Stay mindful! 👍',
+                message: t('health_msg_good'),
             };
         } else if (percentage < 90) {
             return {
-                status: 'Caution',
+                status: t('health_caution'),
                 color: 'text-amber-600',
                 bgColor: 'bg-amber-100',
                 icon: AlertTriangle,
-                message: 'Approaching budget limit. Watch spending! ⚠️',
+                message: t('health_msg_caution'),
             };
         } else {
             return {
-                status: 'Critical',
+                status: t('health_critical'),
                 color: 'text-red-600',
                 bgColor: 'bg-red-100',
                 icon: AlertTriangle,
-                message: 'Budget nearly exhausted! Reduce spending! 🚨',
+                message: t('health_msg_critical'),
             };
         }
     };
@@ -77,8 +80,8 @@ export function BudgetHealthGauge({ spent, budget }: BudgetHealthGaugeProps) {
                             <Gauge className="w-5 h-5 text-white" />
                         </motion.div>
                         <div>
-                            <h3 className="text-xl font-bold text-gray-900">Budget Health</h3>
-                            <p className="text-sm text-gray-500">This month's status</p>
+                            <h3 className="text-xl font-bold text-gray-900">{t('budget_health_title')}</h3>
+                            <p className="text-sm text-gray-500">{t('budget_status_label')}</p>
                         </div>
                     </div>
 
@@ -164,7 +167,7 @@ export function BudgetHealthGauge({ spent, budget }: BudgetHealthGaugeProps) {
                         <div className="text-4xl font-black text-gray-900 leading-none">
                             {percentage.toFixed(0)}%
                         </div>
-                        <div className="text-xs text-gray-500 font-medium mt-1">Budget Used</div>
+                        <div className="text-xs text-gray-500 font-medium mt-1">{t('budget_used_label')}</div>
                     </motion.div>
                 </div>
 
@@ -176,13 +179,13 @@ export function BudgetHealthGauge({ spent, budget }: BudgetHealthGaugeProps) {
                     className="grid grid-cols-2 gap-3 mb-4"
                 >
                     <div className="p-3 rounded-xl bg-gray-50 border border-gray-100">
-                        <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Total Budget</p>
+                        <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">{t('total_budget_label')}</p>
                         <p className="text-lg font-bold text-gray-900">
                             ₹{budget.toLocaleString('en-IN')}
                         </p>
                     </div>
                     <div className="p-3 rounded-xl bg-gray-50 border border-gray-100">
-                        <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Spent</p>
+                        <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">{t('spent_label')}</p>
                         <p className={`text-lg font-bold ${health.color}`}>
                             ₹{spent.toLocaleString('en-IN')}
                         </p>
@@ -197,7 +200,7 @@ export function BudgetHealthGauge({ spent, budget }: BudgetHealthGaugeProps) {
                     className={`p-4 rounded-xl ${health.bgColor} border flex-1`}
                 >
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-semibold text-gray-700">Remaining</span>
+                        <span className="text-sm font-semibold text-gray-700">{t('remaining_label')}</span>
                         <span className={`text-sm font-bold ${health.color} px-2 py-0.5 rounded-full bg-white/70`}>
                             {remainingPercentage.toFixed(0)}%
                         </span>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Zap, Wifi, Phone, Home, CreditCard, ChevronLeft, ChevronRight, Clock, MessageSquare, Loader2 } from 'lucide-react';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 // ── Live bill interface (matches Atlas bills collection) ──────────────────────
 export interface LiveBill {
@@ -30,16 +31,25 @@ function getCategoryIcon(category: string) {
     return CreditCard;
 }
 
-function getStatusBadge(status: LiveBill['status'], days: number) {
-    if (status === 'overdue') return { text: '🔴 Overdue', bg: 'bg-red-500' };
-    if (days <= 2)            return { text: `🟠 ${days}d left`, bg: 'bg-amber-500' };
-    if (days <= 7)            return { text: `🟡 ${days} days`, bg: 'bg-yellow-500' };
-    return                           { text: `🟢 ${days} days`, bg: 'bg-emerald-500' };
-}
+// ── Main Component ─────────────────────────────────────────────────────────────
+export function UpcomingBillsCarousel({ bills = [], loading = false }: UpcomingBillsCarouselProps) {
+    const { t, currentLanguage } = useTranslation();
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [direction, setDirection] = useState(0);
 
-// ── Empty state ───────────────────────────────────────────────────────────────
-function EmptyBills() {
-    return (
+    const totalDue = bills.reduce((sum, b) => sum + b.amount, 0);
+    const safeIndex = Math.min(currentIndex, Math.max(0, bills.length - 1));
+
+    // ── Internal Helper: Status Badge ──────────────────────────────────────────
+    const getStatusBadge = (status: LiveBill['status'], days: number) => {
+        if (status === 'overdue') return { text: `🔴 ${t('health_critical')}`, bg: 'bg-red-500' };
+        if (days <= 2) return { text: `🟠 ${days} ${t('remaining_label')}`, bg: 'bg-amber-500' };
+        if (days <= 7) return { text: `🟡 ${days} ${t('remaining_label')}`, bg: 'bg-yellow-500' };
+        return { text: `🟢 ${days} ${t('remaining_label')}`, bg: 'bg-emerald-500' };
+    };
+
+    // ── Internal Component: Empty State ───────────────────────────────────────
+    const EmptyBills = () => (
         <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6">
             <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
@@ -49,23 +59,13 @@ function EmptyBills() {
                 <MessageSquare className="w-8 h-8 text-indigo-200" />
             </motion.div>
             <div className="text-center">
-                <p className="text-white font-bold mb-1">No upcoming bills</p>
+                <p className="text-white font-bold mb-1">{t('bills_none')}</p>
                 <p className="text-indigo-300 text-xs leading-relaxed max-w-[180px]">
-                    Tell Bandhu about your bills! Try:<br />
-                    <span className="italic text-indigo-200">"I have rent due ₹15,000 on April 1"</span>
+                    {t('bills_cta_text')}
                 </p>
             </div>
         </div>
     );
-}
-
-// ── Main Component ─────────────────────────────────────────────────────────────
-export function UpcomingBillsCarousel({ bills = [], loading = false }: UpcomingBillsCarouselProps) {
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [direction, setDirection] = useState(0);
-
-    const totalDue = bills.reduce((sum, b) => sum + b.amount, 0);
-    const safeIndex = Math.min(currentIndex, Math.max(0, bills.length - 1));
 
     const nextBill = () => {
         if (bills.length === 0) return;
@@ -82,7 +82,7 @@ export function UpcomingBillsCarousel({ bills = [], loading = false }: UpcomingB
     const variants = {
         enter: (dir: number) => ({ x: dir > 0 ? 150 : -150, opacity: 0 }),
         center: { x: 0, opacity: 1 },
-        exit:  (dir: number) => ({ x: dir < 0 ? 150 : -150, opacity: 0 }),
+        exit: (dir: number) => ({ x: dir < 0 ? 150 : -150, opacity: 0 }),
     };
 
     return (
@@ -109,9 +109,9 @@ export function UpcomingBillsCarousel({ bills = [], loading = false }: UpcomingB
                             <Calendar className="w-5 h-5 text-white" />
                         </motion.div>
                         <div>
-                            <h3 className="text-xl font-bold text-white">Upcoming Bills</h3>
+                            <h3 className="text-xl font-bold text-white">{t('bills_title')}</h3>
                             <p className="text-sm text-indigo-300">
-                                {loading ? 'Loading...' : bills.length > 0 ? `${bills.length} bill${bills.length > 1 ? 's' : ''} pending` : 'No bills yet'}
+                                {loading ? t('ai_status_thinking') : bills.length > 0 ? `${bills.length} ${t('bills_pending_count')}` : t('bills_none')}
                             </p>
                         </div>
                     </div>
@@ -123,7 +123,7 @@ export function UpcomingBillsCarousel({ bills = [], loading = false }: UpcomingB
                         transition={{ delay: 0.6, type: 'spring' }}
                         className="text-right"
                     >
-                        <p className="text-xs text-indigo-300 uppercase tracking-wider">Total Due</p>
+                        <p className="text-xs text-indigo-300 uppercase tracking-wider">{t('bills_total_due')}</p>
                         <p className="text-xl font-bold text-white">
                             ₹{totalDue.toLocaleString('en-IN')}
                         </p>
@@ -165,7 +165,7 @@ export function UpcomingBillsCarousel({ bills = [], loading = false }: UpcomingB
                                                         <div className="w-10 h-10 rounded-xl bg-indigo-500/30 flex items-center justify-center">
                                                             <Icon className="w-5 h-5 text-indigo-200" />
                                                         </div>
-                                                        <div className={`px-3 py-1 rounded-full ${badge.bg} text-white text-xs font-bold`}>
+                                                        <div className={`px-3 py-1 rounded-full ${badge.bg} text-white text-xs font-bold whitespace-nowrap`}>
                                                             {badge.text}
                                                         </div>
                                                         <span className="ml-auto text-xs text-indigo-300 px-2 py-1 rounded-lg bg-white/10">
@@ -175,7 +175,14 @@ export function UpcomingBillsCarousel({ bills = [], loading = false }: UpcomingB
                                                     <h4 className="text-lg font-bold text-white mb-1">{bill.title}</h4>
                                                     <div className="flex items-center gap-2 text-indigo-300 text-sm mb-3">
                                                         <Clock className="w-4 h-4" />
-                                                        Due: {new Date(bill.due_date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                        {t('bills_due_label')}: {(() => {
+                                                            const locales: Record<string, string> = {
+                                                                'en': 'en-IN', 'hi': 'hi-IN', 'mr': 'mr-IN', 'gu': 'gu-IN',
+                                                                'ta': 'ta-IN', 'te': 'te-IN', 'kn': 'kn-IN', 'bn': 'bn-IN',
+                                                                'pa': 'pa-IN', 'ml': 'ml-IN'
+                                                            };
+                                                            return new Date(bill.due_date + 'T00:00:00').toLocaleDateString(locales[currentLanguage] || 'en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                                                        })()}
                                                     </div>
                                                     <div className="text-3xl font-black text-white">
                                                         ₹{bill.amount.toLocaleString('en-IN')}
@@ -219,7 +226,7 @@ export function UpcomingBillsCarousel({ bills = [], loading = false }: UpcomingB
                         className="mt-auto p-3 rounded-xl bg-white/10 border border-white/10 text-center"
                     >
                         <p className="text-xs text-indigo-300">
-                            💬 <span className="text-white font-medium">Tell Bandhu</span> about new bills in the chat →
+                            💬 <span className="text-white font-medium">{t('bills_cta_text')}</span> →
                         </p>
                     </motion.div>
                 </div>

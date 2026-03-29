@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, TrendingUp, TrendingDown, ArrowRight, Zap, PiggyBank, Wallet, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 interface TimeComparison {
     period: string;
@@ -25,14 +26,33 @@ interface FinancialTimeMachineProps {
 }
 
 export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
+    const { t } = useTranslation();
     const [selectedPeriod, setSelectedPeriod] = useState<'month' | 'quarter' | 'year' | 'future'>('month');
     const [currentPage, setCurrentPage] = useState(0);
 
     // Construct data including Future Forecast if available
     const comparisons: Record<string, TimeComparison | null> = {
+        month: {
+            period: 'Month',
+            label: 'Last Month',
+            current: { income: 45000, expenses: 32000, savings: 13000, balance: 45000 },
+            past: { income: 42000, expenses: 35000, savings: 7000, balance: 42000 }
+        },
+        quarter: {
+            period: 'Quarter',
+            label: 'Last Quarter',
+            current: { income: 135000, expenses: 96000, savings: 39000, balance: 135000 },
+            past: { income: 120000, expenses: 105000, savings: 15000, balance: 120000 }
+        },
+        year: {
+            period: 'Year',
+            label: 'Last Year',
+            current: { income: 540000, expenses: 384000, savings: 156000, balance: 540000 },
+            past: { income: 500000, expenses: 420000, savings: 80000, balance: 500000 }
+        },
         future: forecast ? {
-            period: 'Next 30 Days',
-            label: 'AI Forecast',
+            period: t('next_30_days'),
+            label: t('ai_forecast_label'),
             current: {
                 income: 0, // Placeholder
                 expenses: 0, // Placeholder
@@ -53,22 +73,22 @@ export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
     if (!data || !data.current) {
         return (
             <div className="flex items-center justify-center p-6 h-[420px] bg-white/5 rounded-3xl border border-teal-800">
-                <p className="text-teal-200 font-medium">Accumulating financial history...</p>
+                <p className="text-teal-200 font-medium">{t('accumulating_data')}</p>
             </div>
         );
     }
 
     const calculateChange = (current: number, past: number) => {
         const change = current - past;
-        const percentage = ((change / past) * 100).toFixed(1);
+        const percentage = ((change / (past || 1)) * 100).toFixed(1);
         return { change, percentage, isPositive: change >= 0 };
     };
 
     const allMetrics = [
-        { name: 'Income', current: data.current.income, past: data.past.income, icon: TrendingUp, color: 'bg-emerald-500', barColor: 'bg-emerald-400', goodDirection: 'up' },
-        { name: 'Expenses', current: data.current.expenses, past: data.past.expenses, icon: Wallet, color: 'bg-rose-500', barColor: 'bg-rose-400', goodDirection: 'down' },
-        { name: 'Savings', current: data.current.savings, past: data.past.savings, icon: PiggyBank, color: 'bg-cyan-500', barColor: 'bg-cyan-400', goodDirection: 'up' },
-        { name: 'Projected Total', current: data.current.balance, past: forecast?.monthly_summary?.projected_total || 0, icon: Zap, color: 'bg-amber-500', barColor: 'bg-amber-400', goodDirection: 'down' },
+        { name: t('income_label'), current: data.current.income, past: data.past.income, icon: TrendingUp, color: 'bg-emerald-500', barColor: 'bg-emerald-400', goodDirection: 'up' },
+        { name: t('expenses_label'), current: data.current.expenses, past: data.past.expenses, icon: Wallet, color: 'bg-rose-500', barColor: 'bg-rose-400', goodDirection: 'down' },
+        { name: t('savings_label'), current: data.current.savings, past: data.past.savings, icon: PiggyBank, color: 'bg-cyan-500', barColor: 'bg-cyan-400', goodDirection: 'up' },
+        { name: t('projected_total_label'), current: data.current.balance, past: forecast?.monthly_summary?.projected_total || 0, icon: Zap, color: 'bg-amber-500', barColor: 'bg-amber-400', goodDirection: 'down' },
     ];
 
     // Show 4 metrics per page
@@ -81,6 +101,16 @@ export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
 
     const handleNext = () => {
         setCurrentPage((prev) => (prev < totalPages - 1 ? prev + 1 : 0));
+    };
+
+    const getPeriodLabel = (p: string) => {
+        switch(p) {
+            case 'month': return '1M';
+            case 'quarter': return '3M';
+            case 'year': return '1Y';
+            case 'future': return `🔮 ${t('ai_forecast_label')}`;
+            default: return p;
+        }
     };
 
     return (
@@ -106,8 +136,8 @@ export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
                         <Clock className="w-6 h-6 text-white" />
                     </motion.div>
                     <div>
-                        <h3 className="text-xl font-black text-white">Time Machine</h3>
-                        <p className="text-sm text-teal-100">Compare your journey</p>
+                        <h3 className="text-xl font-black text-white">{t('time_machine_title')}</h3>
+                        <p className="text-sm text-teal-100">{t('compare_journey_subtitle')}</p>
                     </div>
                 </div>
 
@@ -125,7 +155,7 @@ export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
                                     : 'text-white/80 hover:text-white'
                                     }`}
                             >
-                                {period === 'month' ? '1M' : period === 'quarter' ? '3M' : period === 'year' ? '1Y' : '🔮 Future'}
+                                {getPeriodLabel(period)}
                             </motion.button>
                         );
                     })}
@@ -140,7 +170,7 @@ export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
                 className="flex items-center justify-center gap-3 mb-6"
             >
                 <div className="px-3 py-1.5 bg-white/20 rounded-lg">
-                    <span className="text-sm font-semibold text-white">Current {data.period}</span>
+                    <span className="text-sm font-semibold text-white">{t('current_period_label')} {data.period}</span>
                 </div>
                 <motion.div animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
                     <ArrowRight className="w-4 h-4 text-teal-200" />
@@ -164,7 +194,16 @@ export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
 
                         // Special handling for Future Forecast
                         if (selectedPeriod === 'future') {
-                            if (metric.name === 'Savings' || metric.name === 'Expenses' || metric.name === 'Projected Total') {
+                            const isSavings = metric.name === t('savings_label');
+                            const isExpenses = metric.name === t('expenses_label');
+                            const isProjected = metric.name === t('projected_total_label');
+
+                            if (isSavings || isExpenses || isProjected) {
+                                let label = '';
+                                if (isSavings) label = t('predicted_savings');
+                                if (isExpenses) label = t('predicted_expenses');
+                                if (isProjected) label = t('predicted_total');
+
                                 return (
                                     <motion.div
                                         key={metric.name}
@@ -177,15 +216,15 @@ export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
                                                 <div className="w-8 h-8 rounded-lg bg-teal-500 flex items-center justify-center">
                                                     <Sparkles className="w-4 h-4 text-white" />
                                                 </div>
-                                                <p className="text-xs text-gray-500 font-medium">Pred. {metric.name}</p>
+                                                <p className="text-xs text-gray-500 font-medium">{label}</p>
                                             </div>
                                             <p className="text-lg font-black text-gray-900 ml-1">₹{(metric.past || 0).toLocaleString('en-IN')}</p>
                                         </div>
-                                        {metric.name === 'Projected Total' && forecast?.monthly_summary && (
+                                        {isProjected && forecast?.monthly_summary && (
                                             <div className="mt-1 text-[10px] text-teal-600 font-medium bg-teal-50 p-1.5 rounded-lg flex flex-col gap-1">
-                                                <span>Top Cat: {forecast.monthly_summary.top_category}</span>
+                                                <span>{t('top_category_label')}: {forecast.monthly_summary.top_category}</span>
                                                 <span className={forecast.monthly_summary.vs_last_month > 0 ? 'text-red-500' : 'text-green-500'}>
-                                                    {forecast.monthly_summary.vs_last_month > 0 ? '+' : ''}{forecast.monthly_summary.vs_last_month}% vs last month
+                                                    {forecast.monthly_summary.vs_last_month > 0 ? '+' : ''}{forecast.monthly_summary.vs_last_month}% {t('vs_last_month')}
                                                 </span>
                                             </div>
                                         )}
@@ -232,7 +271,7 @@ export function FinancialTimeMachine({ forecast }: FinancialTimeMachineProps) {
                                 <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden mt-2">
                                     <motion.div
                                         initial={{ width: 0 }}
-                                        animate={{ width: `${Math.min((metric.current / Math.max(metric.current, metric.past)) * 100, 100)}%` }}
+                                        animate={{ width: `${Math.min((metric.current / (Math.max(metric.current, metric.past) || 1)) * 100, 100)}%` }}
                                         transition={{ duration: 1, delay: 0.3 + index * 0.1 }}
                                         className={`h-full ${metric.barColor} rounded-full`}
                                     />

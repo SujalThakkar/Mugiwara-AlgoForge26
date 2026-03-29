@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { AILearningModal } from '../../components/literacy/AILearningModal';
+import { useLanguageStore } from '@/lib/store/useLanguageStore';
 
 interface LearningTopic {
     id: string;
@@ -34,6 +35,7 @@ interface LearningTopic {
 }
 
 export default function LiteracyPage() {
+    const { t } = useLanguageStore();
     const [selectedTopic, setSelectedTopic] = useState<LearningTopic | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -107,12 +109,12 @@ export default function LiteracyPage() {
     ];
 
     const calculators = [
-        { name: 'SIP Calculator', href: '/literacy/calculators/sip', icon: TrendingUp, color: 'from-emerald-500 to-blue-500' },
-        { name: 'EMI Calculator', href: '/literacy/calculators/emi', icon: Calculator, color: 'from-blue-500 to-purple-500' },
-        { name: 'Tax Calculator', href: '/literacy/calculators/tax', icon: Wallet, color: 'from-purple-500 to-pink-500' },
-        { name: 'Compound Interest', href: '/literacy/calculators/compound', icon: Sparkles, color: 'from-orange-500 to-red-500' },
-        { name: 'Retirement Planner', href: '/literacy/calculators/retirement', icon: Target, color: 'from-pink-500 to-red-500' },
-        { name: 'Lumpsum Calculator', href: '/literacy/calculators/lumpsum', icon: PiggyBank, color: 'from-cyan-500 to-blue-500' },
+        { name: t('calc_sip'), href: '/literacy/calculators/sip', icon: TrendingUp, color: 'from-emerald-500 to-blue-500' },
+        { name: t('calc_emi'), href: '/literacy/calculators/emi', icon: Calculator, color: 'from-blue-500 to-purple-500' },
+        { name: t('calc_tax'), href: '/literacy/calculators/tax', icon: Wallet, color: 'from-purple-500 to-pink-500' },
+        { name: t('calc_compound'), href: '/literacy/calculators/compound', icon: Sparkles, color: 'from-orange-500 to-red-500' },
+        { name: t('calc_retirement'), href: '/literacy/calculators/retirement', icon: Target, color: 'from-pink-500 to-red-500' },
+        { name: t('calc_lumpsum'), href: '/literacy/calculators/lumpsum', icon: PiggyBank, color: 'from-cyan-500 to-blue-500' },
     ];
 
     const handleTopicClick = (topic: LearningTopic) => {
@@ -162,22 +164,22 @@ export default function LiteracyPage() {
                             </div>
                             <div>
                                 <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-                                    AI Learning Hub
+                                    {t('literacy_title')}
                                 </h1>
-                                <p className="text-sm text-gray-600">Powered by Phi3 Model</p>
+                                <p className="text-sm text-gray-600">{t('literacy_subtitle')}</p>
                             </div>
                         </div>
                         <p className="text-gray-700 text-lg mb-4">
-                            Learn financial literacy with personalized lessons generated from YOUR transaction data and spending patterns.
+                            {t('literacy_desc')}
                         </p>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl">
                                 <Sparkles className="w-5 h-5 text-emerald-600" />
-                                <span className="text-sm font-semibold text-emerald-700">100% Personalized</span>
+                                <span className="text-sm font-semibold text-emerald-700">{t('label_personalized')}</span>
                             </div>
                             <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-xl">
                                 <Zap className="w-5 h-5 text-blue-600" />
-                                <span className="text-sm font-semibold text-blue-700">Interactive AI Chat</span>
+                                <span className="text-sm font-semibold text-blue-700">{t('label_interactive_chat')}</span>
                             </div>
                         </div>
                     </div>
@@ -203,13 +205,13 @@ export default function LiteracyPage() {
                 transition={{ delay: 0.1 }}
                 className="backdrop-blur-xl bg-white/70 rounded-2xl shadow-xl border border-white/50 p-6"
             >
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">How AI Learning Works</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('how_it_works')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     {[
-                        { step: '1', title: 'Choose Topic', desc: 'Select what you want to learn', icon: BookOpen },
-                        { step: '2', title: 'AI Analyzes', desc: 'Phi3 studies your financial data', icon: Brain },
-                        { step: '3', title: 'Custom Lesson', desc: 'Get personalized explanations', icon: Sparkles },
-                        { step: '4', title: 'Interactive Quiz', desc: 'Test with real scenarios', icon: Trophy },
+                        { step: '1', title: t('step_1_title'), desc: t('step_1_desc'), icon: BookOpen },
+                        { step: '2', title: t('step_2_title'), desc: t('step_2_desc'), icon: Brain },
+                        { step: '3', title: t('step_3_title'), desc: t('step_3_desc'), icon: Sparkles },
+                        { step: '4', title: t('step_4_title'), desc: t('step_4_desc'), icon: Trophy },
                     ].map((item, idx) => {
                         const Icon = item.icon;
                         return (
@@ -236,8 +238,8 @@ export default function LiteracyPage() {
                 transition={{ delay: 0.2 }}
             >
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold text-gray-800">Choose Your Learning Path</h2>
-                    <span className="text-sm text-gray-500">{topics.length} topics available</span>
+                    <h2 className="text-2xl font-bold text-gray-800">{t('choose_path')}</h2>
+                    <span className="text-sm text-gray-500">{topics.length} {t('lessons_count')}</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -302,9 +304,9 @@ export default function LiteracyPage() {
                 transition={{ delay: 0.3 }}
                 className="backdrop-blur-xl bg-white/70 rounded-2xl shadow-xl border border-white/50 p-6"
             >
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Financial Calculators</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('calculators_title')}</h2>
                 <p className="text-gray-600 mb-6">
-                    Plan your investments and understand returns with our interactive calculators
+                    {t('calculators_desc')}
                 </p>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">

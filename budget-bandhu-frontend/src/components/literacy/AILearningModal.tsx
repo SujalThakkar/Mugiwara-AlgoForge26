@@ -16,6 +16,7 @@ import {
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useUserStore } from '@/lib/store/useUserStore';
+import { useLanguageStore } from '@/lib/store/useLanguageStore';
 import { mlApi } from '@/lib/api/ml-api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -42,6 +43,7 @@ interface Message {
 
 export function AILearningModal({ topic, isOpen, onClose }: AILearningModalProps) {
     const router = useRouter();
+    const { t } = useLanguageStore();
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -64,14 +66,14 @@ export function AILearningModal({ topic, isOpen, onClose }: AILearningModalProps
                         role: 'ai',
                         content: lessonText,
                         suggestions: [
-                            'Generate a quiz',
-                            'Show an example',
-                            'Tell me more',
+                            t('btn_quiz'),
+                            t('btn_example'),
+                            t('btn_more'),
                         ],
                     };
                     setMessages([greeting]);
                 } catch (e) {
-                    setMessages([{ id: '1', role: 'ai', content: 'Could not load lesson right now.' }]);
+                    setMessages([{ id: '1', role: 'ai', content: t('ai_lesson_error') }]);
                 } finally {
                     setIsLoading(false);
                 }
@@ -113,7 +115,7 @@ export function AILearningModal({ topic, isOpen, onClose }: AILearningModalProps
             setMessages((prev) => [...prev, {
                 id: Date.now().toString(),
                 role: 'ai',
-                content: "Sorry, I couldn't reach the AI server right now."
+                content: t('ai_chat_error')
             }]);
         } finally {
             setIsLoading(false);
@@ -125,7 +127,7 @@ export function AILearningModal({ topic, isOpen, onClose }: AILearningModalProps
     };
 
     const handleCalculatorClick = (href: string) => {
-        toast.success('Opening calculator with your data!');
+        toast.success(t('msg_opening_calc'));
         router.push(href);
         onClose();
     };
@@ -156,7 +158,7 @@ export function AILearningModal({ topic, isOpen, onClose }: AILearningModalProps
                             </div>
                             <div>
                                 <h2 className="text-2xl font-bold">{topic.title}</h2>
-                                <p className="text-sm opacity-90">AI-Powered Learning Session</p>
+                                <p className="text-sm opacity-90">{t('ai_learning_session')}</p>
                             </div>
                         </div>
                         <button
@@ -184,7 +186,7 @@ export function AILearningModal({ topic, isOpen, onClose }: AILearningModalProps
                                 {message.role === 'ai' && (
                                     <div className="flex items-center gap-2 mb-2">
                                         <Sparkles className="w-4 h-4 text-emerald-600" />
-                                        <span className="text-xs font-semibold text-emerald-600">AI Assistant</span>
+                                        <span className="text-xs font-semibold text-emerald-600">{t('ai_assistant_label')}</span>
                                     </div>
                                 )}
                                 <div className={`prose prose-sm max-w-none prose-p:leading-relaxed prose-p:mb-2 prose-ul:my-1 prose-li:my-0 ${message.role === 'user' ? 'text-white prose-strong:text-emerald-100' : 'text-gray-800 prose-strong:text-emerald-600'}`}>
@@ -230,7 +232,7 @@ export function AILearningModal({ topic, isOpen, onClose }: AILearningModalProps
                             <div className="bg-white/70 border border-gray-200 rounded-2xl p-4">
                                 <div className="flex items-center gap-2">
                                     <Loader2 className="w-5 h-5 text-emerald-600 animate-spin" />
-                                    <span className="text-sm text-gray-600">AI is thinking...</span>
+                                    <span className="text-sm text-gray-600">{t('ai_thinking_msg')}</span>
                                 </div>
                             </div>
                         </div>
@@ -242,12 +244,12 @@ export function AILearningModal({ topic, isOpen, onClose }: AILearningModalProps
                 {/* Input */}
                 <div className="p-4 bg-white/50 border-t border-gray-200">
                     <div className="flex items-center gap-3">
-                        <input
+                         <input
                             type="text"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                            placeholder="Ask me anything about this topic..."
+                            placeholder={t('ai_ask_placeholder')}
                             className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all bg-white/70"
                         />
                         <motion.button
@@ -258,7 +260,7 @@ export function AILearningModal({ topic, isOpen, onClose }: AILearningModalProps
                             className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             <Send className="w-5 h-5" />
-                            Send
+                            {t('btn_send')}
                         </motion.button>
                     </div>
                 </div>

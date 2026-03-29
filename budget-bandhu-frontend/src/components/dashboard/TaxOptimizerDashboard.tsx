@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, TrendingUp, AlertCircle, CheckCircle, Plus, Calculator, PiggyBank, Shield } from 'lucide-react';
 import { mockData } from '@/lib/api/mock-data';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 import type { Tax80CData } from '@/lib/api/ml-api';
 
 interface TaxOptimizerDashboardProps {
@@ -22,6 +23,7 @@ interface TaxInvestment {
 }
 
 export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
+    const { t } = useTranslation();
     const maxLimit80C = 150000;
 
     // ── Use live Atlas data if available, else fall back to mock ──
@@ -58,19 +60,19 @@ export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
     if (!liveMode && (!mockData.tax || !mockData.tax.investments)) {
         return (
             <div className="flex items-center justify-center p-6 h-[300px] bg-white/70 rounded-2xl border border-white/50">
-                <p className="text-gray-500 font-medium">Accumulating tax data...</p>
+                <p className="text-gray-500 font-medium">{t('accumulating_data')}</p>
             </div>
         );
     }
 
-    const getStatusColor = () => {
-        if (percentage >= 100) return { color: 'text-emerald-600', bg: 'bg-emerald-50', status: 'Maxed Out!' };
-        if (percentage >= 75)  return { color: 'text-blue-600',    bg: 'bg-blue-50',    status: 'Almost There' };
-        if (percentage >= 50)  return { color: 'text-orange-600',  bg: 'bg-orange-50',  status: 'Good Progress' };
-        return                        { color: 'text-red-600',     bg: 'bg-red-50',     status: 'Needs Attention' };
+    const getStatusDetails = () => {
+        if (percentage >= 100) return { color: 'text-emerald-600', bg: 'bg-emerald-50', status: t('status_maxed_out') };
+        if (percentage >= 75)  return { color: 'text-blue-600',    bg: 'bg-blue-50',    status: t('status_almost_there') };
+        if (percentage >= 50)  return { color: 'text-orange-600',  bg: 'bg-orange-50',  status: t('status_good_progress') };
+        return                        { color: 'text-red-600',     bg: 'bg-red-50',     status: t('status_needs_attention') };
     };
 
-    const status = getStatusColor();
+    const status = getStatusDetails();
 
     return (
         <motion.div
@@ -86,8 +88,8 @@ export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
                         <FileText className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-gray-900">Tax Optimizer</h3>
-                        <p className="text-sm text-gray-500">Section 80C Deductions</p>
+                        <h3 className="text-xl font-bold text-gray-900">{t('tax_optimizer_title')}</h3>
+                        <p className="text-sm text-gray-500">{t('section_80c_deductions')}</p>
                     </div>
                 </div>
 
@@ -162,7 +164,7 @@ export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
                                 ₹{totalInvested.toLocaleString('en-IN')}
                             </div>
                             <div className="text-xs text-gray-500">
-                                of ₹1,50,000
+                                {t('of_limit_label')} ₹1,50,000
                             </div>
                         </motion.div>
                     </div>
@@ -182,13 +184,13 @@ export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
                                 <CheckCircle className="w-5 h-5 text-white" />
                             </div>
                             <div>
-                                <p className="text-xs text-emerald-700 font-medium">Tax Saved</p>
+                                <p className="text-xs text-emerald-700 font-medium">{t('tax_saved_label')}</p>
                             </div>
                         </div>
                         <p className="text-3xl font-black text-emerald-800">
                             ₹{taxSaved.toLocaleString('en-IN')}
                         </p>
-                        <p className="text-xs text-emerald-600 mt-1">at {slabRate}% tax bracket {liveMode ? '(your slab)' : ''}</p>
+                        <p className="text-xs text-emerald-600 mt-1">{slabRate}% {t('slab_bracket_label')} {liveMode ? `(${t('btn_learn_more')})` : ''}</p>
                     </motion.div>
 
                     {/* Remaining Limit */}
@@ -203,14 +205,14 @@ export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
                                 <Calculator className="w-5 h-5 text-white" />
                             </div>
                             <div>
-                                <p className="text-xs text-orange-700 font-medium">Remaining Limit</p>
+                                <p className="text-xs text-orange-700 font-medium">{t('remaining_limit_label')}</p>
                             </div>
                         </div>
                         <p className="text-3xl font-black text-orange-800">
                             ₹{remaining.toLocaleString('en-IN')}
                         </p>
                         <p className="text-xs text-orange-600 mt-1">
-                            Save ₹{potentialSavings.toLocaleString('en-IN')} more in tax
+                            {t('save_more_tax_label')} ₹{potentialSavings.toLocaleString('en-IN')}
                         </p>
                     </motion.div>
 
@@ -222,8 +224,8 @@ export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
                         className="p-4 bg-blue-50 rounded-xl border border-blue-200"
                     >
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold text-blue-900">FY 2025-26</span>
-                            <span className="text-xs text-blue-600">Due: March 31, 2026</span>
+                            <span className="text-sm font-semibold text-blue-900">{t('fy_label')} 2025-26</span>
+                            <span className="text-xs text-blue-600">{t('due_label')}: March 31, 2026</span>
                         </div>
                         <div className="mt-2 h-2 bg-blue-200 rounded-full overflow-hidden">
                             <motion.div
@@ -233,7 +235,7 @@ export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
                                 className="h-full bg-gradient-to-r from-blue-500 to-cyan-600 rounded-full"
                             />
                         </div>
-                        <p className="text-xs text-blue-600 mt-1">65% of FY elapsed</p>
+                        <p className="text-xs text-blue-600 mt-1">65% {t('fy_elapsed_label')}</p>
                     </motion.div>
                 </div>
             </div>
@@ -241,22 +243,22 @@ export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
             {/* Investment Categories */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-lg font-bold text-gray-900">Your Investments</h4>
+                    <h4 className="text-lg font-bold text-gray-900">{t('your_investments_title')}</h4>
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all"
                     >
                         <Plus className="w-4 h-4" />
-                        Add Investment
+                        {t('add_investment_btn')}
                     </motion.button>
                 </div>
 
                 <div className="space-y-3">
                 {noData ? (
                     <div className="p-6 text-center text-gray-400">
-                        <p className="font-medium">No 80C investments found this FY.</p>
-                        <p className="text-sm mt-1">Transactions with ELSS / PPF / NPS keywords will auto-appear here.</p>
+                        <p className="font-medium">{t('no_investments_found')}</p>
+                        <p className="text-sm mt-1">{t('auto_appear_msg')}</p>
                     </div>
                 ) : (
                     investments.map((inv, index) => {
@@ -289,7 +291,7 @@ export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
                                         <p className="text-lg font-bold text-gray-900">
                                             ₹{inv.amount.toLocaleString('en-IN')}
                                         </p>
-                                        <p className="text-xs text-gray-500">{invPercentage.toFixed(1)}% of limit</p>
+                                        <p className="text-xs text-gray-500">{invPercentage.toFixed(1)}% {t('of_limit_label')}</p>
                                     </div>
                                 </div>
 
@@ -327,25 +329,19 @@ export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
                         <Calculator className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1">
-                        <h4 className="font-bold text-gray-900 mb-2">Tax Saving Recommendation 💡</h4>
+                        <h4 className="font-bold text-gray-900 mb-2">{t('tax_recommendation_title')} 💡</h4>
                         <p className="text-sm text-gray-700 leading-relaxed mb-3">
                             {percentage >= 100 ? (
-                                <>
-                                    Excellent! You've maxed out your 80C deductions. Consider exploring other tax-saving options like
-                                    <span className="font-semibold text-orange-600"> 80D (Health Insurance)</span> and
-                                    <span className="font-semibold text-orange-600"> NPS (80CCD)</span> for additional savings!
-                                </>
+                                t('tax_rec_maxed')
                             ) : percentage >= 75 ? (
                                 <>
-                                    You're close to maximizing your 80C limit! Invest the remaining
-                                    <span className="font-bold text-orange-600"> ₹{remaining.toLocaleString('en-IN')}</span> before March 31st
-                                    to save an additional <span className="font-bold text-emerald-600">₹{potentialSavings.toLocaleString('en-IN')}</span> in taxes.
+                                    {t('tax_rec_close')} ₹
+                                    <span className="font-bold text-orange-600">{remaining.toLocaleString('en-IN')}</span>
                                 </>
                             ) : (
                                 <>
-                                    You have <span className="font-bold text-orange-600">₹{remaining.toLocaleString('en-IN')}</span> remaining in your 80C limit.
-                                    Investing this amount could save you <span className="font-bold text-emerald-600">₹{potentialSavings.toLocaleString('en-IN')}</span> in taxes.
-                                    Consider PPF, ELSS, or life insurance to maximize savings! 🚀
+                                    {t('tax_rec_start')} ₹
+                                    <span className="font-bold text-orange-600">{remaining.toLocaleString('en-IN')}</span>
                                 </>
                             )}
                         </p>
@@ -354,7 +350,7 @@ export function TaxOptimizerDashboard({ taxData }: TaxOptimizerDashboardProps) {
                             whileTap={{ scale: 0.95 }}
                             className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all"
                         >
-                            Explore Options
+                            {t('explore_options_btn')}
                         </motion.button>
                     </div>
                 </div>

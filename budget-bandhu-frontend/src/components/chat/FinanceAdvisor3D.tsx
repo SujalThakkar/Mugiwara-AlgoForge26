@@ -92,7 +92,7 @@ function FinanceAdvisorModel({ isThinking = false, isSpeaking = false }: Finance
     });
 
     // Smaller model - camera zoomed out to show full body including hands
-    return <primitive ref={meshRef} object={scene} scale={1.2} position={[0, -0.3, 0]} />;
+    return <primitive ref={meshRef} object={scene} scale={1.2} position={[0, -0.35, 0]} />;
 }
 
 function LoadingFallback() {

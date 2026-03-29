@@ -8,9 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
+import { useLanguageStore } from '@/lib/store/useLanguageStore';
 
 export default function SIPCalculator() {
     const router = useRouter();
+    const { currentLanguage, t } = useLanguageStore();
     const [monthlyInvestment, setMonthlyInvestment] = useState(5000);
     const [returnRate, setReturnRate] = useState(12);
     const [years, setYears] = useState(10);
@@ -34,7 +36,7 @@ export default function SIPCalculator() {
         <div className="max-w-5xl mx-auto">
             <Button onClick={() => router.back()} variant="ghost" className="mb-6">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
+                {t('btn_back')}
             </Button>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -45,8 +47,8 @@ export default function SIPCalculator() {
                             <TrendingUp className="w-6 h-6 text-mint-600" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-mm-purple">SIP Calculator</h1>
-                            <p className="text-sm text-gray-600">Calculate your mutual fund returns</p>
+                            <h1 className="text-2xl font-bold text-mm-purple">{t('calc_sip')}</h1>
+                            <p className="text-sm text-gray-600">{t('sip_desc')}</p>
                         </div>
                     </div>
 
@@ -54,7 +56,7 @@ export default function SIPCalculator() {
                         {/* Monthly Investment */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Monthly Investment
+                                {t('monthly_investment')}
                             </label>
                             <Input
                                 type="number"
@@ -78,7 +80,7 @@ export default function SIPCalculator() {
                         {/* Expected Return Rate */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Expected Return Rate (% p.a.)
+                                {t('expected_returns')}
                             </label>
                             <Input
                                 type="number"
@@ -102,7 +104,7 @@ export default function SIPCalculator() {
                         {/* Time Period */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Time Period (Years)
+                                {t('time_period')}
                             </label>
                             <Input
                                 type="number"
@@ -118,8 +120,8 @@ export default function SIPCalculator() {
                                 step={1}
                             />
                             <div className="flex justify-between text-xs text-gray-500 mt-1">
-                                <span>1 Year</span>
-                                <span>40 Years</span>
+                                <span>1 {t('time_period').includes('Year') ? 'Year' : 'वर्ष'}</span>
+                                <span>40 {t('time_period').includes('Year') ? 'Years' : 'वर्ष'}</span>
                             </div>
                         </div>
                     </div>
@@ -134,7 +136,7 @@ export default function SIPCalculator() {
                         animate={{ scale: 1 }}
                         className="bg-[#FFF1EB] shadow-sm p-8 rounded-2xl border-2 border-white/50 text-center"
                     >
-                        <p className="text-sm text-gray-600 mb-2">Future Value</p>
+                        <p className="text-sm text-gray-600 mb-2">{t('future_value')}</p>
                         <motion.h2
                             className="text-5xl font-bold bg-gradient-to-r from-mint-600 to-skyBlue-600 bg-clip-text text-transparent mb-6"
                             initial={{ opacity: 0, y: 20 }}
@@ -145,13 +147,13 @@ export default function SIPCalculator() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="p-4 bg-gray-50 rounded-xl">
-                                <p className="text-xs text-gray-600 mb-1">Total Invested</p>
+                                <p className="text-xs text-gray-600 mb-1">{t('total_invested')}</p>
                                 <p className="text-xl font-bold text-gray-900">
                                     {formatCurrency(invested)}
                                 </p>
                             </div>
                             <div className="p-4 bg-mint-50 rounded-xl">
-                                <p className="text-xs text-gray-600 mb-1">Est. Returns</p>
+                                <p className="text-xs text-gray-600 mb-1">{t('est_returns')}</p>
                                 <p className="text-xl font-bold text-mint-600">
                                     {formatCurrency(returns)}
                                 </p>
@@ -161,26 +163,26 @@ export default function SIPCalculator() {
 
                     {/* Breakdown */}
                     <div className="bg-[#FFF1EB] shadow-sm p-6 rounded-2xl border-2 border-white/50">
-                        <h3 className="font-bold text-gray-900 mb-4">Investment Breakdown</h3>
+                        <h3 className="font-bold text-gray-900 mb-4">{t('investment_breakdown')}</h3>
 
                         <div className="space-y-3">
                             <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Monthly Investment</span>
+                                <span className="text-gray-600">{t('monthly_investment')}</span>
                                 <span className="font-semibold text-gray-900">
                                     {formatCurrency(monthlyInvestment)}
                                 </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Total Months</span>
+                                <span className="text-gray-600">{t('total_months')}</span>
                                 <span className="font-semibold text-gray-900">{years * 12}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Expected Return</span>
+                                <span className="text-gray-600">{t('expected_returns')}</span>
                                 <span className="font-semibold text-gray-900">{returnRate}% p.a.</span>
                             </div>
                             <div className="h-px bg-gray-200 my-3" />
                             <div className="flex justify-between">
-                                <span className="font-semibold text-gray-900">Wealth Gain</span>
+                                <span className="font-semibold text-gray-900">{t('wealth_gain')}</span>
                                 <span className="font-bold text-mint-600">
                                     {((returns / invested) * 100).toFixed(1)}%
                                 </span>
@@ -191,7 +193,7 @@ export default function SIPCalculator() {
                     {/* Tips */}
                     <div className="glass p-6 rounded-2xl border-2 border-skyBlue-200 bg-skyBlue-50">
                         <p className="text-sm text-skyBlue-900">
-                            💡 <strong>Pro Tip:</strong> Starting SIPs early and staying invested for long durations can significantly multiply your wealth due to the power of compounding!
+                            💡 {t('pro_tip')}
                         </p>
                     </div>
                 </div>

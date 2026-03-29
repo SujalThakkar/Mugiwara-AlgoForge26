@@ -7,11 +7,13 @@ import { VoiceRecorder } from '@/components/chat/VoiceRecorder';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { FinanceAdvisor3D } from '@/components/chat/FinanceAdvisor3D';
 import { ChatMessage } from '@/lib/types/chat';
+import { Logo3D } from '@/components/shared/Logo3D';
 import { Send, Mic, Camera, TrendingUp, PiggyBank, Target } from 'lucide-react';
 import { useUserStore } from '@/lib/store/useUserStore';
 import { mlApi } from '@/lib/api/ml-api';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { translateText } from '@/lib/utils/translate';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -25,26 +27,22 @@ const quickActions = [
 export default function ChatPage() {
     const router = useRouter();
     const { userId, isLoggedIn } = useUserStore();
-    const { currentLanguage, translate } = useTranslation();
+    const { currentLanguage, t, translate } = useTranslation();
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [sessionId, setSessionId] = useState<string | undefined>(undefined);
 
+    const [selectedLanguage, setSelectedLanguage] = useState('en'); // Defaults to English but updated by VoiceRecorder
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Force login
-    useEffect(() => {
-        if (!isLoggedIn || !userId) {
-            router.push('/auth/login');
-        }
-    }, [isLoggedIn, userId, router]);
+    // Chat initialization and history logic handles guest/demo users automatically
 
     // Load chat history
     useEffect(() => {
-        if (!userId) return; // Wait for login check
 
         const loadHistory = async () => {
             const activeUserId = userId || 'demo_user';
@@ -59,29 +57,30 @@ export default function ChatPage() {
             }
 
             // Fallback to welcome message if no history
-            const welcomeText = "Hey there! 👋 I'm your AI financial buddy powered by **Phi-3.5**. I can help you with budgeting, insights, and more. What would you like to know?";
-            const translatedWelcome = await translate(welcomeText);
-
+            const welcomeText = t('ai_welcome_msg');
+            
             setMessages([{
                 id: 'welcome',
                 role: 'assistant',
-                content: translatedWelcome,
+                content: welcomeText,
                 timestamp: new Date().toISOString(),
                 type: 'text',
             }]);
         };
         loadHistory();
-    }, [userId, translate]);
+    }, [userId]); // Removed translate dependency to avoid infinite loops if it changes
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, isTyping]);
 
-    const handleSend = async (text?: string) => {
+    const handleSend = async (text?: string, isVoiceTranslation?: boolean) => {
         const messageText = text || input;
-        if (!messageText.trim() || isTyping || !userId) return;
+        if (!messageText.trim() || isTyping) return;
+        
+        const activeUserId = userId || 'demo_user';
 
-        // 1. Add User Message
+        // 1. Add User Message (Show original text in chat)
         const userMessage: ChatMessage = {
             id: `msg_${Date.now()}`,
             role: 'user',
@@ -95,22 +94,30 @@ export default function ChatPage() {
         setIsTyping(true);
 
         try {
-            // 2. Send to API
-            const response = await mlApi.chat.send(userId, messageText, sessionId);
+            // 2. Send to API (Always English for backend)
+            // If it's a voice translation, 'text' is already English.
+            // If it's manual input, we might need to translate it if the user language is not English? 
+            // In this specific task, the user primarily wants Voice -> English.
+            const textToSend = isVoiceTranslation ? text : messageText;
+
+            const response = await mlApi.chat.send(activeUserId, textToSend || '', sessionId);
 
             // Update session ID if returned
             if (response.session_id) {
                 setSessionId(response.session_id);
             }
 
-            // 3. Translate Response
-            const translatedContent = await translate(response.response);
+            // 3. Translate Response back to user's language
+            let finalResponseContent = response.response;
+            if (selectedLanguage !== 'en') {
+                finalResponseContent = await translateText(response.response, 'en', selectedLanguage);
+            }
 
             // 4. Add Assistant Message
             const aiMessage: ChatMessage = {
                 id: `msg_${Date.now()}_ai`,
                 role: 'assistant',
-                content: translatedContent,
+                content: finalResponseContent,
                 timestamp: new Date().toISOString(),
                 type: 'text',
                 metadata: {
@@ -127,7 +134,10 @@ export default function ChatPage() {
         } catch (error) {
             console.error('Chat error:', error);
             const errorMsg = "Sorry, I'm having trouble connecting to the brain. Please try again.";
-            const translatedError = await translate(errorMsg);
+            let translatedError = errorMsg;
+            if (selectedLanguage !== 'en') {
+                translatedError = await translateText(errorMsg, 'en', selectedLanguage);
+            }
 
             setMessages(prev => [...prev, {
                 id: `err_${Date.now()}`,
@@ -141,10 +151,12 @@ export default function ChatPage() {
         }
     };
 
-    const handleVoiceTranscript = (transcript: string) => {
-        setInput(transcript);
-        // Optional: auto-send
-        // setTimeout(() => handleSend(transcript), 500);
+    const handleVoiceTranscript = (original: string, translated: string, gcode: string) => {
+        setSelectedLanguage(gcode); // Sync language for response translation
+        // Show original in input (or just send it)
+        setInput(original);
+        // Automatically send the translated English version to backend
+        handleSend(translated, true);
     };
 
     const handleQuickAction = (actionId: string) => {
@@ -157,7 +169,9 @@ export default function ChatPage() {
     };
 
     return (
-        <div className="chat-page-bg h-screen overflow-hidden flex flex-col">
+        <>
+            <Logo3D />
+            <div className="chat-page-bg h-screen overflow-hidden flex flex-col">
             {/* Header / Nav would go here, but focusing on page content */}
 
             <div className="chat-split-layout flex-1 flex overflow-hidden">
@@ -225,7 +239,7 @@ export default function ChatPage() {
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                                placeholder={currentLanguage === 'en' ? "Ask about your finances..." : "अपने वित्त के बारे में पूछें..."} // Simple fallback
+                                placeholder={t('ai_input_placeholder')}
                                 disabled={isTyping}
                                 className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder-slate-500"
                             />
@@ -268,5 +282,6 @@ export default function ChatPage() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

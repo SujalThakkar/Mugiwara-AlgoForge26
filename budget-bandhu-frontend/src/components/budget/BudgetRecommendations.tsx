@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, TrendingUp, TrendingDown, Minus, Check, X, Loader2, RefreshCw } from 'lucide-react';
 import { BudgetRecommendation } from '@/lib/api/ml-api';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 interface BudgetRecommendationsProps {
     recommendations: BudgetRecommendation[];
@@ -27,6 +28,7 @@ export function BudgetRecommendations({
     onRefresh,
     loading = false
 }: BudgetRecommendationsProps) {
+    const { t } = useTranslation();
     const [processingCategory, setProcessingCategory] = useState<string | null>(null);
     const [dismissedCategories, setDismissedCategories] = useState<Set<string>>(new Set());
 
@@ -78,9 +80,9 @@ export function BudgetRecommendations({
             <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 p-6 border border-amber-200">
                 <div className="flex items-center gap-3 mb-4">
                     <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
-                    <h3 className="text-lg font-bold text-gray-800">Analyzing your spending...</h3>
+                    <h3 className="text-lg font-bold text-gray-800">{t('status_analyzing_spending')}</h3>
                 </div>
-                <p className="text-sm text-gray-600">PolicyLearner is generating personalized recommendations</p>
+                <p className="text-sm text-gray-600">{t('status_generating_recs')}</p>
             </div>
         );
     }
@@ -94,14 +96,14 @@ export function BudgetRecommendations({
                             <Check className="w-6 h-6 text-green-600" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-gray-800">Budget Looking Good!</h3>
-                            <p className="text-sm text-gray-600">No adjustments needed right now</p>
+                            <h3 className="text-lg font-bold text-gray-800">{t('msg_budget_good')}</h3>
+                            <p className="text-sm text-gray-600">{t('msg_no_adjustments')}</p>
                         </div>
                     </div>
                     <button
                         onClick={onRefresh}
                         className="p-2 rounded-lg hover:bg-green-100 transition-colors"
-                        title="Refresh recommendations"
+                        title={t('tooltip_refresh')}
                     >
                         <RefreshCw className="w-5 h-5 text-green-600" />
                     </button>
@@ -119,15 +121,15 @@ export function BudgetRecommendations({
                         <Sparkles className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-gray-800">AI Budget Recommendations</h3>
+                        <h3 className="text-lg font-bold text-gray-800">{t('label_ai_recs')}</h3>
                         <p className="text-sm text-gray-600">
-                            {activeRecommendations.length} suggestions from PolicyLearner
+                            {activeRecommendations.length} {t('label_suggestions_from')}
                         </p>
                     </div>
                 </div>
                 {savingsPotential > 0 && (
                     <div className="text-right">
-                        <p className="text-xs text-gray-500 uppercase tracking-wide">Savings Potential</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">{t('label_savings_potential')}</p>
                         <p className="text-xl font-bold text-green-600">{formatCurrency(savingsPotential)}</p>
                     </div>
                 )}
@@ -154,11 +156,11 @@ export function BudgetRecommendations({
                                     <p className="text-sm text-gray-600 mb-2">{rec.reasoning}</p>
                                     <div className="flex items-center gap-4 text-sm">
                                         <span className="text-gray-500">
-                                            Current: <span className="font-medium">{formatCurrency(rec.current_spend)}</span>
+                                            {t('label_current')}: <span className="font-medium">{formatCurrency(rec.current_spend)}</span>
                                         </span>
                                         <span className="text-gray-400">→</span>
                                         <span className={rec.change === 'decrease' ? 'text-green-600' : 'text-red-600'}>
-                                            Suggested: <span className="font-bold">{formatCurrency(rec.suggested_budget)}</span>
+                                            {t('label_suggested')}: <span className="font-bold">{formatCurrency(rec.suggested_budget)}</span>
                                         </span>
                                     </div>
                                 </div>
@@ -172,14 +174,14 @@ export function BudgetRecommendations({
                                             <button
                                                 onClick={() => handleAccept(rec.category)}
                                                 className="p-2 rounded-lg bg-green-100 hover:bg-green-200 text-green-600 transition-colors"
-                                                title="Accept recommendation"
+                                                title={t('tooltip_accept')}
                                             >
                                                 <Check className="w-5 h-5" />
                                             </button>
                                             <button
                                                 onClick={() => handleReject(rec.category)}
                                                 className="p-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition-colors"
-                                                title="Reject recommendation"
+                                                title={t('tooltip_reject')}
                                             >
                                                 <X className="w-5 h-5" />
                                             </button>
@@ -194,7 +196,7 @@ export function BudgetRecommendations({
 
             {/* Footer Note */}
             <p className="text-xs text-gray-500 mt-4 text-center">
-                💡 Your feedback helps PolicyLearner improve future recommendations
+                💡 {t('msg_ai_feedback_note')}
             </p>
         </div>
     );

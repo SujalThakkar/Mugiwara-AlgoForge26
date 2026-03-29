@@ -71,9 +71,35 @@
   left: 0;
   width: 100vw !important;
   height: 100vh !important;
-  z-index: 50;
+  z-index: 9999;
   pointer-events: none;
   /* Let clicks pass through */
+  transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  will-change: transform, width, height, bottom, right, top, left !important;
+}
+
+.piggy-canvas.is-corner {
+  bottom: 24px !important;
+  right: 24px !important;
+  left: auto !important;
+  top: auto !important;
+  width: 120px !important;
+  height: 120px !important;
+  transform: none !important;
+}
+
+.preloader-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, #1a0a3d 0%, #0d0520 60%, #080310 100%);
+  z-index: 9998;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: all;
+}
+
+.preloader-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ============================================

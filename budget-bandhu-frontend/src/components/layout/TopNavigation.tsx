@@ -16,25 +16,28 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LanguageSelector } from '@/components/shared/LanguageSelector';
+import { useTranslation } from '@/lib/hooks/useTranslation';
+import { TranslationKey } from '@/lib/translations';
 
-const navItems = [
-    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/budget', label: 'Budget', icon: Wallet },
-    { href: '/transactions', label: 'Transactions', icon: null },
-    { href: '/goals', label: 'Goals', icon: Target },
+const navItems: { href?: string; label: TranslationKey; icon: any; submenu?: { href: string; label: TranslationKey }[] }[] = [
+    { href: '/', label: 'nav_dashboard', icon: LayoutDashboard },
+    { href: '/budget', label: 'nav_budget', icon: Wallet },
+    { href: '/transactions', label: 'nav_transactions', icon: null },
+    { href: '/goals', label: 'nav_goals', icon: Target },
     {
-        label: 'Learn Finance',
+        label: 'nav_learn_finance',
         icon: GraduationCap,
         submenu: [
-            { href: '/literacy', label: 'All Courses' },
-            { href: '/literacy/calculators/sip', label: 'SIP Calculator' },
-            { href: '/literacy/calculators/tax', label: 'Tax Calculator' },
+            { href: '/literacy', label: 'nav_literacy' },
+            { href: '/literacy/calculators/sip', label: 'calc_sip' },
+            { href: '/literacy/calculators/tax', label: 'calc_tax' },
         ]
     },
-    { href: '/chat', label: 'AI Chat', icon: MessageSquare },
+    { href: '/chat', label: 'nav_ai_chat', icon: MessageSquare },
 ];
 
 export function TopNavigation() {
+    const { t } = useTranslation();
     const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
@@ -48,19 +51,19 @@ export function TopNavigation() {
             : 'bg-white shadow-sm border-b border-gray-100'
             }`}>
             <div className="mm-container">
-                <div className="flex items-center justify-between h-20">
+                <div className="flex items-center justify-between h-16">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-mm-purple to-mm-lavender rounded-xl flex items-center justify-center">
+                    <Link href="/" className="flex items-center gap-3 whitespace-nowrap min-w-max overflow-visible">
+                        <div className="w-10 h-10 bg-gradient-to-br from-mm-purple to-mm-lavender rounded-xl flex items-center justify-center shrink-0">
                             <span className="text-white font-bold text-xl">BB</span>
                         </div>
-                        <span className={`font-display font-bold text-xl ${isChatPage ? 'text-white' : 'text-mm-purple'}`}>
+                        <span className={`font-display font-bold text-lg whitespace-nowrap ${isChatPage ? 'text-white' : 'text-mm-purple'}`}>
                             Budget Bandhu
                         </span>
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden lg:flex items-center gap-2">
+                    <div className="hidden lg:flex items-center gap-1">
                         {navItems.map((item, index) => (
                             <div key={index} className="relative">
                                 {item.submenu ? (
@@ -69,12 +72,12 @@ export function TopNavigation() {
                                         onMouseEnter={() => setOpenSubmenu(item.label)}
                                         onMouseLeave={() => setOpenSubmenu(null)}
                                     >
-                                        <button className={`flex items-center gap-1 px-4 py-2 rounded-full transition-colors ${isChatPage
+                                        <button className={`flex items-center gap-1 px-4 py-2 rounded-full transition-colors whitespace-nowrap ${isChatPage
                                             ? 'text-white hover:bg-white/10'
                                             : 'text-mm-black hover:bg-gray-50'
                                             }`}>
                                             {item.icon && <item.icon className="w-4 h-4" />}
-                                            <span>{item.label}</span>
+                                            <span className="whitespace-nowrap">{t(item.label)}</span>
                                             <ChevronDown className="w-4 h-4" />
                                         </button>
 
@@ -93,7 +96,7 @@ export function TopNavigation() {
                                                             href={subItem.href}
                                                             className="block px-4 py-3 text-sm text-mm-black hover:bg-gray-50 transition-colors"
                                                         >
-                                                            {subItem.label}
+                                                            {t(subItem.label)}
                                                         </Link>
                                                     ))}
                                                 </motion.div>
@@ -102,8 +105,8 @@ export function TopNavigation() {
                                     </div>
                                 ) : (
                                     <Link
-                                        href={item.href}
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${isActive(item.href)
+                                        href={item.href || '#'}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors whitespace-nowrap ${(item.href && isActive(item.href))
                                             ? 'bg-mm-purple text-white'
                                             : isChatPage
                                                 ? 'text-white hover:bg-white/10'
@@ -111,7 +114,7 @@ export function TopNavigation() {
                                             }`}
                                     >
                                         {item.icon && <item.icon className="w-4 h-4" />}
-                                        <span>{item.label}</span>
+                                        <span className="whitespace-nowrap">{t(item.label)}</span>
                                     </Link>
                                 )}
                             </div>
@@ -126,8 +129,8 @@ export function TopNavigation() {
                             <User className={`w-5 h-5 ${isChatPage ? 'text-white' : 'text-mm-black'}`} />
                         </Link>
 
-                        <Link href="/auth/login" className="mm-btn mm-btn-primary">
-                            GET STARTED
+                        <Link href="/auth/login" className="mm-btn mm-btn-primary whitespace-nowrap px-5">
+                            {t('btn_get_started')}
                         </Link>
                     </div>
 
@@ -169,7 +172,7 @@ export function TopNavigation() {
                                             >
                                                 <span className="flex items-center gap-2">
                                                     {item.icon && <item.icon className="w-5 h-5" />}
-                                                    {item.label}
+                                                    {t(item.label)}
                                                 </span>
                                                 <ChevronDown className={`w-5 h-5 transition-transform ${openSubmenu === item.label ? 'rotate-180' : ''}`} />
                                             </button>
@@ -189,7 +192,7 @@ export function TopNavigation() {
                                                                 onClick={() => setMobileMenuOpen(false)}
                                                                 className="block px-4 py-2 rounded-lg text-sm text-mm-black hover:bg-gray-50 transition-colors"
                                                             >
-                                                                {subItem.label}
+                                                                {t(subItem.label)}
                                                             </Link>
                                                         ))}
                                                     </motion.div>
@@ -198,15 +201,15 @@ export function TopNavigation() {
                                         </div>
                                     ) : (
                                         <Link
-                                            href={item.href}
+                                            href={item.href || '#'}
                                             onClick={() => setMobileMenuOpen(false)}
-                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive(item.href)
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${(item.href && isActive(item.href))
                                                 ? 'bg-mm-purple text-white'
                                                 : 'text-mm-black hover:bg-gray-50'
                                                 }`}
                                         >
                                             {item.icon && <item.icon className="w-5 h-5" />}
-                                            <span>{item.label}</span>
+                                            <span>{t(item.label)}</span>
                                         </Link>
                                     )}
                                 </div>
@@ -215,9 +218,9 @@ export function TopNavigation() {
                             <Link
                                 href="/auth/login"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="mm-btn mm-btn-primary w-full mt-4"
+                                className="mm-btn mm-btn-primary w-full mt-4 whitespace-nowrap"
                             >
-                                GET STARTED
+                                {t('btn_get_started')}
                             </Link>
                         </div>
                     </motion.div>

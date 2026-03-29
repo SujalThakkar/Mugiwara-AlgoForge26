@@ -1,0 +1,1995 @@
+﻿
+> src\lib\translations.ts:
+258:    en: {
+  src\lib\translations.ts:
+259:        
+nav_dashboard: 
+'Dashboard',
+  src\lib\translations.ts:
+260:        nav_budget: 
+'Budget',
+  src\lib\translations.ts:
+261:        
+nav_transactions: 
+'Transactions',
+  src\lib\translations.ts:
+262:        nav_goals: 
+'Goals',
+  src\lib\translations.ts:
+263:        
+nav_learn_finance: 'Learn 
+Finance',
+  src\lib\translations.ts:
+264:        nav_ai_chat: 
+'AI Chat',
+  src\lib\translations.ts:
+265:        
+hero_title_line1: 'YOUR 
+WEALTH',
+  src\lib\translations.ts:
+266:        
+hero_title_line2: 'IN 
+CONTROL',
+  src\lib\translations.ts:
+267:        
+hero_subtitle: 'Take 
+charge of your financial 
+future with AI-powered 
+insights, smart 
+budgeting, and 
+personalized 
+recommendations.',
+  src\lib\translations.ts:
+268:        
+btn_get_started: 'GET 
+STARTED',
+  src\lib\translations.ts:
+269:        
+btn_learn_more: 'LEARN 
+MORE',
+  src\lib\translations.ts:
+270:        
+stats_active_users: 
+'Active Users',
+  src\lib\translations.ts:
+271:        
+stats_money_managed: 
+'Money Managed',
+  src\lib\translations.ts:
+272:        stats_rating: 
+'User Rating',
+  src\lib\translations.ts:
+273:        
+finances_title_line1: 
+'YOUR FINANCES',
+  src\lib\translations.ts:
+274:        
+finances_title_line2: 
+'UNDER CONTROL',
+  src\lib\translations.ts:
+275:        
+card_total_balance: 
+'Total Balance',
+  src\lib\translations.ts:
+276:        
+card_monthly_savings: 
+'Monthly Savings',
+  src\lib\translations.ts:
+277:        
+card_trust_score: 'Trust 
+Score',
+  src\lib\translations.ts:
+278:        
+card_savings_rate: 
+'Savings Rate',
+  src\lib\translations.ts:
+279:        
+section_analytics: 'Your 
+Financial Dashboard',
+  src\lib\translations.ts:
+280:        
+section_features: 
+'EVERYTHING YOU NEED',
+  src\lib\translations.ts:
+281:        
+feature_smart_goals: 
+'Smart Goals',
+  src\lib\translations.ts:
+282:        
+feature_budget_shield: 
+'Budget Shield',
+  src\lib\translations.ts:
+283:        
+feature_auto_save: 
+'Auto-Save',
+  src\lib\translations.ts:
+284:        
+feature_smart_desc: 'Set 
+and track financial goals 
+with AI insights',
+  src\lib\translations.ts:
+285:        
+feature_shield_desc: 
+'Stay protected from 
+overspending',
+  src\lib\translations.ts:
+286:        
+feature_auto_save_desc: 
+'Intelligent savings 
+recommendations',
+  src\lib\translations.ts:
+287:        
+cta_ready_to_start: 
+'START YOUR',
+  src\lib\translations.ts:
+288:        cta_subtitle: 
+'JOURNEY TODAY',
+  src\lib\translations.ts:
+289:        
+ai_welcome_msg: "Hey 
+there! ?? I'm your AI 
+financial buddy. I can 
+help you with budgeting, 
+insights, and more. What 
+would you like to know?",
+  src\lib\translations.ts:
+290:        
+ai_status_online: 
+'ONLINE',
+  src\lib\translations.ts:
+291:        
+ai_status_thinking: 
+'PROCESSING...',
+  src\lib\translations.ts:
+292:        
+ai_status_speaking: 
+'SPEAKING...',
+  src\lib\translations.ts:
+293:        
+ai_input_placeholder: 
+'Ask about your 
+finances...',
+  src\lib\translations.ts:
+294:        
+health_excellent: 
+'Excellent',
+  src\lib\translations.ts:
+295:        health_good: 
+'Good',
+  src\lib\translations.ts:
+296:        
+health_caution: 'Caution',
+  src\lib\translations.ts:
+297:        
+health_critical: 
+'Critical',
+  src\lib\translations.ts:
+298:        
+health_msg_excellent: 
+'You are well within 
+budget! Keep it up! ??',
+  src\lib\translations.ts:
+299:        
+health_msg_good: 
+'Spending on track. Stay 
+mindful! ??',
+  src\lib\translations.ts:
+300:        
+health_msg_caution: 
+'Approaching budget 
+limit. Watch spending! 
+??',
+  src\lib\translations.ts:
+301:        
+health_msg_critical: 
+'Budget nearly exhausted! 
+Reduce spending! ??',
+  src\lib\translations.ts:
+302:        
+budget_health_title: 
+'Budget Health',
+  src\lib\translations.ts:
+303:        
+budget_status_label: 
+"This month's status",
+  src\lib\translations.ts:
+304:        
+budget_used_label: 
+'Budget Used',
+  src\lib\translations.ts:
+305:        
+total_budget_label: 
+'Total Budget',
+  src\lib\translations.ts:
+306:        spent_label: 
+'Spent',
+  src\lib\translations.ts:
+307:        
+remaining_label: 
+'Remaining',
+  src\lib\translations.ts:
+308:        bills_title: 
+'Upcoming Bills',
+  src\lib\translations.ts:
+309:        
+bills_pending_count: 
+'bills pending',
+  src\lib\translations.ts:
+310:        bills_none: 
+'No bills yet',
+  src\lib\translations.ts:
+311:        
+bills_total_due: 'Total 
+Due',
+  src\lib\translations.ts:
+312:        
+bills_due_label: 'Due',
+  src\lib\translations.ts:
+313:        
+bills_cta_text: 'Tell 
+Bandhu about new bills in 
+the chat',
+  src\lib\translations.ts:
+314:        
+insights_title: 'Smart 
+Insights',
+  src\lib\translations.ts:
+315:        
+insights_subtitle: 
+'AI-powered analysis',
+  src\lib\translations.ts:
+316:        
+insights_active_count: 
+'Active',
+  src\lib\translations.ts:
+317:        
+insights_weekly_summary: 
+'Weekly Summary',
+  src\lib\translations.ts:
+318:        
+insight_saving_potential: 
+'Save up to',
+  src\lib\translations.ts:
+319:        
+emergency_fund_title: 
+'Emergency Fund',
+  src\lib\translations.ts:
+320:        
+financial_safety_net: 
+'Your financial safety 
+net',
+  src\lib\translations.ts:
+321:        status_fair: 
+'Fair',
+  src\lib\translations.ts:
+322:        months_label: 
+'months',
+  src\lib\translations.ts:
+323:        
+of_target_label: 'of 
+target',
+  src\lib\translations.ts:
+324:        
+current_balance_label: 
+'Current Balance',
+  src\lib\translations.ts:
+325:        
+target_amount_label: 
+'Target Amount',
+  src\lib\translations.ts:
+326:        
+coverage_period_label: 
+'Coverage Period',
+  src\lib\translations.ts:
+327:        status_label: 
+'Status',
+  src\lib\translations.ts:
+328:        
+accumulating_data: 
+'Accumulating goal 
+data...',
+  src\lib\translations.ts:
+329:        
+spending_breakdown_title: 
+'Spending Breakdown',
+  src\lib\translations.ts:
+330:        
+by_category_subtitle: 'By 
+category this month',
+  src\lib\translations.ts:
+331:        
+hover_explore_label: 
+'Hover to explore',
+  src\lib\translations.ts:
+332:        cat_shopping: 
+'Shopping',
+  src\lib\translations.ts:
+333:        cat_food: 
+'Food & Dining',
+  src\lib\translations.ts:
+334:        
+cat_transport: 
+'Transport',
+  src\lib\translations.ts:
+335:        cat_bills: 
+'Bills & Utilities',
+  src\lib\translations.ts:
+336:        cat_housing: 
+'Housing',
+  src\lib\translations.ts:
+337:        
+cat_healthcare: 
+'Healthcare',
+  src\lib\translations.ts:
+338:        cat_others: 
+'Others',
+  src\lib\translations.ts:
+339:        
+tax_optimizer_title: 'Tax 
+Optimizer',
+  src\lib\translations.ts:
+340:        
+section_80c_deductions: 
+'Section 80C Deductions',
+  src\lib\translations.ts:
+341:        
+status_maxed_out: 'Maxed 
+Out!',
+  src\lib\translations.ts:
+342:        
+status_almost_there: 
+'Almost There',
+  src\lib\translations.ts:
+343:        
+status_good_progress: 
+'Good Progress',
+  src\lib\translations.ts:
+344:        
+status_needs_attention: 
+'Needs Attention',
+  src\lib\translations.ts:
+345:        
+of_limit_label: 'of 
+limit',
+  src\lib\translations.ts:
+346:        
+tax_saved_label: 'Tax 
+Saved',
+  src\lib\translations.ts:
+347:        
+slab_bracket_label: 'at 
+your tax bracket',
+  src\lib\translations.ts:
+348:        
+remaining_limit_label: 
+'Remaining Limit',
+  src\lib\translations.ts:
+349:        
+save_more_tax_label: 
+'Save more in tax',
+  src\lib\translations.ts:
+350:        fy_label: 
+'FY',
+  src\lib\translations.ts:
+351:        due_label: 
+'Due',
+  src\lib\translations.ts:
+352:        
+fy_elapsed_label: 'of FY 
+elapsed',
+  src\lib\translations.ts:
+353:        
+your_investments_title: 
+'Your Investments',
+  src\lib\translations.ts:
+354:        
+add_investment_btn: 'Add 
+Investment',
+  src\lib\translations.ts:
+355:        
+no_investments_found: 'No 
+80C investments found 
+this FY.',
+  src\lib\translations.ts:
+356:        
+auto_appear_msg: 
+'Transactions with 
+ELSS/PPF/NPS will 
+auto-appear here.',
+  src\lib\translations.ts:
+357:        
+tax_recommendation_title: 
+'Tax Saving 
+Recommendation',
+  src\lib\translations.ts:
+358:        
+tax_rec_maxed: 
+"Excellent! You've maxed 
+out your 80C deductions. 
+Consider 80D or NPS for 
+more!",
+  src\lib\translations.ts:
+359:        
+tax_rec_close: "You're 
+close! Invest the 
+remaining to save more in 
+tax.",
+  src\lib\translations.ts:
+360:        
+tax_rec_start: "Investing 
+your remaining limit 
+could save you 
+significant tax. Consider 
+PPF or ELSS!",
+  src\lib\translations.ts:
+361:        
+explore_options_btn: 
+'Explore Options',
+  src\lib\translations.ts:
+362:        
+time_machine_title: 'Time 
+Machine',
+  src\lib\translations.ts:
+363:        
+compare_journey_subtitle: 
+'Compare your journey',
+  src\lib\translations.ts:
+364:        
+ai_forecast_label: 'AI 
+Forecast',
+  src\lib\translations.ts:
+365:        next_30_days: 
+'Next 30 Days',
+  src\lib\translations.ts:
+366:        
+current_period_label: 
+'Current',
+  src\lib\translations.ts:
+367:        
+predicted_income: 'Pred. 
+Income',
+  src\lib\translations.ts:
+368:        
+predicted_expenses: 
+'Pred. Expenses',
+  src\lib\translations.ts:
+369:        
+predicted_savings: 'Pred. 
+Savings',
+  src\lib\translations.ts:
+370:        
+predicted_total: 'Pred. 
+Total',
+  src\lib\translations.ts:
+371:        
+vs_last_month: 'vs last 
+month',
+  src\lib\translations.ts:
+372:        
+top_category_label: 'Top 
+Category',
+  src\lib\translations.ts:
+373:        income_label: 
+'Income',
+  src\lib\translations.ts:
+374:        
+expenses_label: 
+'Expenses',
+  src\lib\translations.ts:
+375:        
+savings_label: 'Savings',
+  src\lib\translations.ts:
+376:        
+projected_total_label: 
+'Projected Total',
+  src\lib\translations.ts:
+377:        
+my_wallet_title: 'My 
+Wallet',
+  src\lib\translations.ts:
+378:        
+total_balance_label: 
+'Total Balance',
+  src\lib\translations.ts:
+379:        
+this_month_trend: 'this 
+month',
+  src\lib\translations.ts:
+380:        
+quick_actions_title: 
+'Quick Actions',
+  src\lib\translations.ts:
+381:        
+add_money_btn: 'Add 
+Money',
+  src\lib\translations.ts:
+382:        transfer_btn: 
+'Transfer',
+  src\lib\translations.ts:
+383:        
+pay_bills_btn: 'Pay 
+Bills',
+  src\lib\translations.ts:
+384:        
+view_details_btn: 'View 
+Details',
+  src\lib\translations.ts:
+385:        
+month_spent_label: 'MONTH 
+SPENT',
+  src\lib\translations.ts:
+386:        
+month_saved_label: 'MONTH 
+SAVED',
+  src\lib\translations.ts:
+387:        
+savings_rate_label: 
+'SAVINGS RATE',
+  src\lib\translations.ts:
+388:        
+spending_trend_title: 
+'Spending Trend',
+  src\lib\translations.ts:
+389:        
+last_30_days_analytics: 
+'Last 30 days analytics',
+  src\lib\translations.ts:
+390:        
+daily_average_label: 
+'Daily Average',
+  src\lib\translations.ts:
+391:        
+highest_label: 'Highest',
+  src\lib\translations.ts:
+392:        lowest_label: 
+'Lowest',
+  src\lib\translations.ts:
+393:        
+spending_increased_msg: 
+'?? Spending increased 
+compared to last period',
+  src\lib\translations.ts:
+394:        
+spending_decreased_msg: 
+'?? Great! You reduced 
+spending compared to last 
+period',
+  src\lib\translations.ts:
+395:        
+status_loading: 
+'LOADING...',
+  src\lib\translations.ts:
+396:        
+status_live_data: 'LIVE 
+DATA',
+  src\lib\translations.ts:
+397:        
+card_available: 
+'Available',
+  src\lib\translations.ts:
+398:        card_pending: 
+'Pending',
+  src\lib\translations.ts:
+399:        
+card_payment_history: 
+'Payment History',
+  src\lib\translations.ts:
+400:        
+label_investments: 
+'Investments',
+  src\lib\translations.ts:
+401:        
+label_deposits: 
+'Deposits',
+  src\lib\translations.ts:
+402:        
+label_top_category: 'Top 
+Category',
+  src\lib\translations.ts:
+403:        financial_safe
+ty_subtitle: 'Track, 
+analyze, and optimize 
+your spending',
+  src\lib\translations.ts:
+404:        
+ai_insights_title: 
+'AI-Powered Insights',
+  src\lib\translations.ts:
+405:        
+ai_insights_subtitle: 
+'Smart analysis to 
+optimize your finances',
+  src\lib\translations.ts:
+406:        
+weekly_summary_title: 
+'Weekly Summary',
+  src\lib\translations.ts:
+407:        
+transactions_title: 'YOUR 
+MONEY',
+  src\lib\translations.ts:
+408:        
+transactions_subtitle: 
+'EVERY RUPEE TRACKED',
+  src\lib\translations.ts:
+409:        
+transactions_desc: 'Track 
+and manage your recent 
+spending with AI-powered 
+insights',
+  src\lib\translations.ts:
+410:        
+label_merchant: 
+'Merchant',
+  src\lib\translations.ts:
+411:        label_amount: 
+'Amount',
+  src\lib\translations.ts:
+412:        label_date: 
+'Date',
+  src\lib\translations.ts:
+413:        label_type: 
+'Type',
+  src\lib\translations.ts:
+414:        
+label_category: 
+'Category',
+  src\lib\translations.ts:
+415:        
+label_description: 
+'Description',
+  src\lib\translations.ts:
+416:        
+btn_scan_receipt: 'Scan 
+Receipt',
+  src\lib\translations.ts:
+417:        
+btn_upload_csv: 'Upload 
+CSV',
+  src\lib\translations.ts:
+418:        
+btn_voice_log: 'Voice 
+Log',
+  src\lib\translations.ts:
+419:        
+btn_add_transaction: 'Add 
+Transaction',
+  src\lib\translations.ts:
+420:        
+scan_receipt_title: 'Scan 
+Receipt',
+  src\lib\translations.ts:
+421:        
+scan_extracted_details: 
+'Extracted Details',
+  src\lib\translations.ts:
+422:        
+upload_failed_title: 
+'Upload Failed',
+  src\lib\translations.ts:
+423:        recent_transac
+tions_title: 'Recent 
+Transactions',
+  src\lib\translations.ts:
+424:        
+suspicious_detected: 
+'Suspicious 
+Transaction(s) Detected',
+  src\lib\translations.ts:
+425:        
+ml_flagged_desc: 'ML 
+flagged unusual spending 
+patterns',
+  src\lib\translations.ts:
+426:        btn_refresh: 
+'Refresh',
+  src\lib\translations.ts:
+427:        
+btn_export_csv: 'Export 
+CSV',
+  src\lib\translations.ts:
+428:        btn_retry: 
+'Retry',
+  src\lib\translations.ts:
+429:        nav_profile: 
+'Profile',
+  src\lib\translations.ts:
+430:        nav_settings: 
+'Settings',
+  src\lib\translations.ts:
+431:        nav_friends: 
+'Friends',
+  src\lib\translations.ts:
+432:        
+nav_gamification: 'Game 
+Center',
+  src\lib\translations.ts:
+433:        nav_literacy: 
+'Literacy',
+  src\lib\translations.ts:
+434:        nav_escrow: 
+'Escrow',
+  src\lib\translations.ts:
+435:        tap_to_stop: 
+'Tap anywhere to stop',
+  src\lib\translations.ts:
+436:        
+your_progress: 'Your 
+Progress',
+  src\lib\translations.ts:
+437:        
+interactive_calculator: 
+'Interactive Calculator',
+  src\lib\translations.ts:
+438:        
+enroll_to_unlock: 'Enroll 
+to unlock',
+  src\lib\translations.ts:
+439:        
+friend_leaderboard: 
+'Friend Leaderboard',
+  src\lib\translations.ts:
+440:        savings_rate: 
+'Savings Rate',
+  src\lib\translations.ts:
+441:        your_rank: 
+'Your Rank',
+  src\lib\translations.ts:
+442:        this_week: 
+'This Week',
+  src\lib\translations.ts:
+443:        
+previous_label: 
+'Previous',
+  src\lib\translations.ts:
+444:        
+current_label: 'Current',
+  src\lib\translations.ts:
+445:        
+gross_savings: 'Gross 
+Savings',
+  src\lib\translations.ts:
+446:        
+forecast_savings: 
+'Forecast savings',
+  src\lib\translations.ts:
+447:        hard_savings: 
+'Hard savings',
+  src\lib\translations.ts:
+448:        target_label: 
+'Target',
+  src\lib\translations.ts:
+449:        choose_icon: 
+'Choose Icon',
+  src\lib\translations.ts:
+450:        goal_name: 
+'Goal Name',
+  src\lib\translations.ts:
+451:        
+target_amount: 'Target 
+Amount',
+  src\lib\translations.ts:
+452:        target_date: 
+'Target Date',
+  src\lib\translations.ts:
+453:        color_theme: 
+'Color Theme',
+  src\lib\translations.ts:
+454:        
+msg_fill_fields: 'Please 
+fill in required fields',
+  src\lib\translations.ts:
+455:        
+msg_success_add: 
+'Transaction added 
+successfully! ??',
+  src\lib\translations.ts:
+456:        
+msg_error_save: 'Failed 
+to save transaction',
+  src\lib\translations.ts:
+457:        
+label_new_transaction: 
+'New Transaction',
+  src\lib\translations.ts:
+458:        label_scanned_
+transaction: 'Scanned 
+Transaction',
+  src\lib\translations.ts:
+459:        
+placeholder_description: 
+'Store name or item...',
+  src\lib\translations.ts:
+460:        
+msg_ai_category: 
+'Category auto-detected 
+by AI',
+  src\lib\translations.ts:
+461:        
+status_saving: 
+'Saving...',
+  src\lib\translations.ts:
+462:        budget_title: 
+'YOUR BUDGET',
+  src\lib\translations.ts:
+463:        
+budget_subtitle: 'UNDER 
+CONTROL',
+  src\lib\translations.ts:
+464:        budget_desc: 
+'Manage your limits and 
+optimize your savings 
+with AI-powered insights',
+  src\lib\translations.ts:
+465:        
+label_total_spent: 'Total 
+Spent',
+  src\lib\translations.ts:
+466:        label_out_of: 
+'Out of',
+  src\lib\translations.ts:
+467:        label_income: 
+'income',
+  src\lib\translations.ts:
+468:        
+label_safe_to_spend: 
+'Safe to Spend',
+  src\lib\translations.ts:
+469:        
+label_through_budget: 
+'through budget',
+  src\lib\translations.ts:
+470:        
+label_savings_rate: 
+'Savings Rate',
+  src\lib\translations.ts:
+471:        msg_excellent_
+performance: 'Excellent 
+performance! ??',
+  src\lib\translations.ts:
+472:        
+label_spending_vs_budget: 
+'Spending vs Budget',
+  src\lib\translations.ts:
+473:        
+label_category_limits: 
+'Category Limits',
+  src\lib\translations.ts:
+474:        btn_edit_all: 
+'Edit All',
+  src\lib\translations.ts:
+475:        
+status_loading_ai: 
+'LOADING AI...',
+  src\lib\translations.ts:
+476:        
+label_policylearner_ai: 
+'POLICYLEARNER AI',
+  src\lib\translations.ts:
+477:        
+label_optimize_savings: 
+'Optimize Your Monthly 
+Savings',
+  src\lib\translations.ts:
+478:        label_ai_recom
+mendations_desc: 
+'AI-powered 
+recommendations based on 
+your spending patterns',
+  src\lib\translations.ts:
+479:        
+label_emergency_fund: 
+'Emergency Fund 
+Adjustment',
+  src\lib\translations.ts:
+480:        
+btn_apply_changes: 'Apply 
+Changes',
+  src\lib\translations.ts:
+481:        
+msg_processed: 
+'processed!',
+  src\lib\translations.ts:
+482:        
+msg_anomalies_detected: 
+'anomalies detected',
+  src\lib\translations.ts:
+483:        
+label_bulk_import: 'Bulk 
+import with ML 
+processing',
+  src\lib\translations.ts:
+484:        
+label_categorizer: 
+'Categorizer',
+  src\lib\translations.ts:
+485:        
+label_anomaly_detection: 
+'Anomaly Detection',
+  src\lib\translations.ts:
+486:        label_receipt_
+auto_detect: 'Auto-detect 
+amount & category',
+  src\lib\translations.ts:
+487:        placeholder_vo
+ice_example: '"Spent ?200 
+on Coffee"',
+  src\lib\translations.ts:
+488:        
+label_transactions_found: 
+'transactions found',
+  src\lib\translations.ts:
+489:        
+label_add_your: 'Add 
+Your',
+  src\lib\translations.ts:
+490:        
+label_manual_entry_desc: 
+'Keep your financial 
+records up to date with 
+quick manual entry',
+  src\lib\translations.ts:
+491:        status_analyzi
+ng_spending: 'Analyzing 
+your spending...',
+  src\lib\translations.ts:
+492:        
+status_generating_recs: 
+'PolicyLearner is 
+generating personalized 
+recommendations',
+  src\lib\translations.ts:
+493:        
+msg_budget_good: 'Budget 
+Looking Good!',
+  src\lib\translations.ts:
+494:        
+msg_no_adjustments: 'No 
+adjustments needed right 
+now',
+  src\lib\translations.ts:
+495:        
+tooltip_refresh: 'Refresh 
+recommendations',
+  src\lib\translations.ts:
+496:        
+label_ai_recs: 'AI Budget 
+Recommendations',
+  src\lib\translations.ts:
+497:        
+label_suggestions_from: 
+'suggestions from 
+PolicyLearner',
+  src\lib\translations.ts:
+498:        
+label_savings_potential: 
+'Savings Potential',
+  src\lib\translations.ts:
+499:        
+label_current: 'Current',
+  src\lib\translations.ts:
+500:        
+label_suggested: 
+'Suggested',
+  src\lib\translations.ts:
+501:        
+tooltip_accept: 'Accept 
+recommendation',
+  src\lib\translations.ts:
+502:        
+tooltip_reject: 'Reject 
+recommendation',
+  src\lib\translations.ts:
+503:        
+msg_ai_feedback_note: 
+'Your feedback helps 
+PolicyLearner improve 
+future recommendations',
+  src\lib\translations.ts:
+504:    },
+  src\lib\translations.ts:
+505:    hi: {
+  src\lib\translations.ts:
+506:        
+nav_dashboard: '????????',
+  src\lib\translations.ts:
+507:        nav_budget: 
+'???',
+  src\lib\translations.ts:
+508:        
+nav_transactions: 
+'???-???',
+  src\lib\translations.ts:
+509:        nav_goals: 
+'??????',
+  src\lib\translations.ts:
+510:        
+nav_learn_finance: '????? 
+?????',
+  src\lib\translations.ts:
+511:        nav_ai_chat: 
+'AI ???',
+  src\lib\translations.ts:
+512:        
+hero_title_line1: '???? 
+??',
+  src\lib\translations.ts:
+513:        
+hero_title_line2: '???? 
+???????? ???',
+  src\lib\translations.ts:
+514:        
+hero_subtitle: 
+'AI-??????? ???????????, 
+??????? ?????? ?? 
+????????? ????????? ?? 
+??? ???? ??????? ?????? 
+?? ?????????? ????',
+  src\lib\translations.ts:
+515:        
+btn_get_started: '???? 
+????',
+  src\lib\translations.ts:
+516:        
+btn_learn_more: '???? 
+?????',
+  src\lib\translations.ts:
+517:        
+stats_active_users: 
+'?????? ??????????',
+  src\lib\translations.ts:
+518:        
+stats_money_managed: 
+'???????? ??',
+  src\lib\translations.ts:
+519:        stats_rating: 
+'?????????? ??????',
+  src\lib\translations.ts:
+520:        
+finances_title_line1: 
+'???? ?????',
+  src\lib\translations.ts:
+521:        
+finances_title_line2: 
+'???????? ???',
+  src\lib\translations.ts:
+522:        
+card_total_balance: '??? 
+???',
+  src\lib\translations.ts:
+523:        
+card_monthly_savings: 
+'????? ???',
+  src\lib\translations.ts:
+524:        
+card_trust_score: '?????? 
+?????',
+  src\lib\translations.ts:
+525:        
+card_savings_rate: '??? 
+??',
+  src\lib\translations.ts:
+526:        
+section_analytics: '???? 
+??????? ????????',
+  src\lib\translations.ts:
+527:        
+section_features: '?? ??? 
+?? ???? ?????',
+  src\lib\translations.ts:
+528:        
+feature_smart_goals: 
+'??????? ??????',
+  src\lib\translations.ts:
+529:        
+feature_budget_shield: 
+'??? ?????',
+  src\lib\translations.ts:
+530:        
+feature_auto_save: 
+'???-???',
+  src\lib\translations.ts:
+531:        
+feature_smart_desc: 'AI 
+??????????? ?? ??? 
+??????? ?????? ????????? 
+???? ?? ????? ????',
+  src\lib\translations.ts:
+532:        
+feature_shield_desc: 
+'???? ???? ???? ?? 
+???????? ????',
+  src\lib\translations.ts:
+533:        
+feature_auto_save_desc: 
+'????????? ??? ?????????',
+  src\lib\translations.ts:
+534:        
+cta_ready_to_start: '???? 
+??????',
+  src\lib\translations.ts:
+535:        cta_subtitle: 
+'?? ?? ???? ????',
+  src\lib\translations.ts:
+536:        
+ai_welcome_msg: "??????! 
+?? ??? ???? AI ??????? 
+????? ???? ??? ???, 
+??????????? ?? ???? ??? 
+?? ??? ???? ?????? ?? 
+???? ???? ?? ???? ????? 
+????????",
+  src\lib\translations.ts:
+537:        
+ai_status_online: 
+'??????',
+  src\lib\translations.ts:
+538:        
+ai_status_thinking: 
+'??????????...',
+  src\lib\translations.ts:
+539:        
+ai_status_speaking: '??? 
+??? ???...',
+  src\lib\translations.ts:
+540:        
+ai_input_placeholder: 
+'???? ????? ?? ???? ??? 
+?????...',
+  src\lib\translations.ts:
+541:        
+health_excellent: 
+'????????',
+  src\lib\translations.ts:
+542:        health_good: 
+'?????',
+  src\lib\translations.ts:
+543:        
+health_caution: '???????',
+  src\lib\translations.ts:
+544:        
+health_critical: '?????',
+  src\lib\translations.ts:
+545:        
+health_msg_excellent: '?? 
+??? ?? ???? ???! ??? ???? 
+????! ??',
+  src\lib\translations.ts:
+546:        
+health_msg_good: '???? 
+??? ???? ??? ??? ????? 
+????! ??',
+  src\lib\translations.ts:
+547:        
+health_msg_caution: '??? 
+???? ?? ????? ???? ?? 
+???? ????! ??',
+  src\lib\translations.ts:
+548:        
+health_msg_critical: '??? 
+???? ??????! ???? ?? 
+????! ??',
+  src\lib\translations.ts:
+549:        
+budget_health_title: '??? 
+?????????',
+  src\lib\translations.ts:
+550:        
+budget_status_label: '?? 
+????? ?? ??????',
+  src\lib\translations.ts:
+551:        
+budget_used_label: '??? 
+????? ???? ???',
+  src\lib\translations.ts:
+552:        
+total_budget_label: '??? 
+???',
+  src\lib\translations.ts:
+553:        spent_label: 
+'???? ???? ???',
+  src\lib\translations.ts:
+554:        
+remaining_label: '???',
+  src\lib\translations.ts:
+555:        bills_title: 
+'????? ???',
+  src\lib\translations.ts:
+556:        
+bills_pending_count: '??? 
+?????',
+  src\lib\translations.ts:
+557:        bills_none: 
+'??? ??? ??? ???? ??',
+  src\lib\translations.ts:
+558:        
+bills_total_due: '??? 
+???',
+  src\lib\translations.ts:
+559:        
+bills_due_label: '???',
+  src\lib\translations.ts:
+560:        
+bills_cta_text: '??? ??? 
+???? ?? ?? ????? ?? ???? 
+??? ?????',
+  src\lib\translations.ts:
+561:        
+insights_title: '??????? 
+???????????',
+  src\lib\translations.ts:
+562:        
+insights_subtitle: 
+'AI-??????? ????????',
+  src\lib\translations.ts:
+563:        
+insights_active_count: 
+'??????',
+  src\lib\translations.ts:
+564:        
+insights_weekly_summary: 
+'????????? ??????',
+  src\lib\translations.ts:
+565:        
+insight_saving_potential: 
+'?? ?????',
+  src\lib\translations.ts:
+566:        
+emergency_fund_title: 
+'????????? ???',
+  src\lib\translations.ts:
+567:        
+financial_safety_net: 
+'???? ??????? ??????? 
+???',
+  src\lib\translations.ts:
+568:        status_fair: 
+'???',
+  src\lib\translations.ts:
+569:        months_label: 
+'?????',
+  src\lib\translations.ts:
+570:        
+of_target_label: '?????? 
+??',
+  src\lib\translations.ts:
+571:        
+current_balance_label: 
+'??????? ???',
+  src\lib\translations.ts:
+572:        
+target_amount_label: 
+'?????? ????',
+  src\lib\translations.ts:
+573:        
+coverage_period_label: 
+'????? ????',
+  src\lib\translations.ts:
+574:        status_label: 
+'??????',
+  src\lib\translations.ts:
+575:        
+accumulating_data: 
+'?????? ???? ????? ???? 
+?? ??? ??...',
+  src\lib\translations.ts:
+576:        
+spending_breakdown_title: 
+'???? ?? ?????',
+  src\lib\translations.ts:
+577:        
+by_category_subtitle: '?? 
+????? ?????? ?? ??????',
+  src\lib\translations.ts:
+578:        
+hover_explore_label: 
+'????? ?? ??? ???? ????',
+  src\lib\translations.ts:
+579:        cat_shopping: 
+'???????',
+  src\lib\translations.ts:
+580:        cat_food: 
+'???? ?? ???-???',
+  src\lib\translations.ts:
+581:        
+cat_transport: '??????',
+  src\lib\translations.ts:
+582:        cat_bills: 
+'??? ?? ??????????',
+  src\lib\translations.ts:
+583:        cat_housing: 
+'????',
+  src\lib\translations.ts:
+584:        
+cat_healthcare: 
+'????????? ????',
+  src\lib\translations.ts:
+585:        cat_others: 
+'????',
+  src\lib\translations.ts:
+586:        
+tax_optimizer_title: 
+'????? ???????????',
+  src\lib\translations.ts:
+587:        
+section_80c_deductions: 
+'???? 80C ?????',
+  src\lib\translations.ts:
+588:        
+status_maxed_out: 
+'??????!',
+  src\lib\translations.ts:
+589:        
+status_almost_there: '?? 
+??????? ???? ???',
+  src\lib\translations.ts:
+590:        
+status_good_progress: 
+'????? ??????',
+  src\lib\translations.ts:
+591:        
+status_needs_attention: 
+'????? ???? ?? ?????',
+  src\lib\translations.ts:
+592:        
+of_limit_label: '???? ??',
+  src\lib\translations.ts:
+593:        
+tax_saved_label: '????? 
+??? ?????',
+  src\lib\translations.ts:
+594:        
+slab_bracket_label: '???? 
+????? ????? ??',
+  src\lib\translations.ts:
+595:        
+remaining_limit_label: 
+'??? ????',
+  src\lib\translations.ts:
+596:        
+save_more_tax_label: 
+'????? ??? ?? ?????',
+  src\lib\translations.ts:
+597:        fy_label: 
+'??????? ????',
+  src\lib\translations.ts:
+598:        due_label: 
+'??? ????',
+  src\lib\translations.ts:
+599:        
+fy_elapsed_label: 
+'??????? ???? ??? ????',
+  src\lib\translations.ts:
+600:        
+your_investments_title: 
+'???? ?????',
+  src\lib\translations.ts:
+601:        
+add_investment_btn: 
+'????? ??????',
+  src\lib\translations.ts:
+602:        
+no_investments_found: '?? 
+???? ??? 80C ????? ???? 
+?????',
+  src\lib\translations.ts:
+603:        
+auto_appear_msg: 
+'ELSS/PPF/NPS ???? 
+???-??? ???? ????? ????? 
+??????',
+  src\lib\translations.ts:
+604:        
+tax_recommendation_title: 
+'????? ??? ?? ???????',
+  src\lib\translations.ts:
+605:        
+tax_rec_maxed: '????????! 
+???? ???? 80C ????? ?? 
+?????? ??? ??? ???? ??? 
+???? ??? ?? ??? 80D ?? 
+NPS ?? ????? ????!',
+  src\lib\translations.ts:
+606:        
+tax_rec_close: '?? ???? 
+???! ?? ????? ????? ?? 
+??? ??? ???? ?? ????? 
+?????',
+  src\lib\translations.ts:
+607:        
+tax_rec_start: '???? ??? 
+???? ?? ????? ???? ?? ?? 
+???? ????? ??? ???? ???? 
+PPF ?? ELSS ?? ????? 
+????!',
+  src\lib\translations.ts:
+608:        
+explore_options_btn: 
+'?????? ?????',
+  src\lib\translations.ts:
+609:        
+time_machine_title: '???? 
+????',
+  src\lib\translations.ts:
+610:        
+compare_journey_subtitle: 
+'???? ?????? ?? ????? 
+????',
+  src\lib\translations.ts:
+611:        
+ai_forecast_label: 'AI 
+???????????',
+  src\lib\translations.ts:
+612:        next_30_days: 
+'???? 30 ???',
+  src\lib\translations.ts:
+613:        
+current_period_label: 
+'???????',
+  src\lib\translations.ts:
+614:        
+predicted_income: 
+'???????? ??',
+  src\lib\translations.ts:
+615:        
+predicted_expenses: 
+'???????? ????',
+  src\lib\translations.ts:
+616:        
+predicted_savings: 
+'???????? ???',
+  src\lib\translations.ts:
+617:        
+predicted_total: 
+'???????? ???',
+  src\lib\translations.ts:
+618:        
+vs_last_month: '????? 
+????? ?? ????? ???',
+  src\lib\translations.ts:
+619:        
+top_category_label: 
+'????? ??????',
+  src\lib\translations.ts:
+620:        income_label: 
+'??',
+  src\lib\translations.ts:
+621:        
+expenses_label: '????',
+  src\lib\translations.ts:
+622:        
+savings_label: '???',
+  src\lib\translations.ts:
+623:        
+projected_total_label: 
+'???????? ???',
+  src\lib\translations.ts:
+624:        
+my_wallet_title: '???? 
+?????',
+  src\lib\translations.ts:
+625:        
+total_balance_label: '??? 
+???',
+  src\lib\translations.ts:
+626:        
+this_month_trend: '?? 
+?????',
+  src\lib\translations.ts:
+627:        
+quick_actions_title: 
+'?????? ????????',
+  src\lib\translations.ts:
+628:        
+add_money_btn: '???? 
+??????',
+  src\lib\translations.ts:
+629:        transfer_btn: 
+'????????',
+  src\lib\translations.ts:
+630:        
+pay_bills_btn: '??? 
+??????',
+  src\lib\translations.ts:
+631:        
+view_details_btn: '????? 
+?????',
+  src\lib\translations.ts:
+632:        
+month_spent_label: '????? 
+????',
+  src\lib\translations.ts:
+633:        
+month_saved_label: '????? 
+???',
+  src\lib\translations.ts:
+634:        
+savings_rate_label: '??? 
+??',
+  src\lib\translations.ts:
+635:        
+spending_trend_title: 
+'???? ?? ?????',
+  src\lib\translations.ts:
+636:        
+last_30_days_analytics: 
+'????? 30 ????? ?? 
+????????',
+  src\lib\translations.ts:
+637:        
+daily_average_label: 
+'????? ???',
+  src\lib\translations.ts:
+638:        
+highest_label: '??????',
+  src\lib\translations.ts:
+639:        lowest_label: 
+'???????',
+  src\lib\translations.ts:
+640:        
+spending_increased_msg: 
+'?? ????? ???? ?? ????? 
+??? ???? ??? ??? ??',
+  src\lib\translations.ts:
+641:        
+spending_decreased_msg: 
+'?? ???? ??????! ???? 
+????? ???? ?? ????? ??? 
+???? ?? ???? ??',
+  src\lib\translations.ts:
+642:        
+status_loading: '??? ?? 
+??? ??...',
+  src\lib\translations.ts:
+643:        
+status_live_data: '???? 
+????',
+  src\lib\translations.ts:
+644:        
+card_available: '??????',
+  src\lib\translations.ts:
+645:        card_pending: 
+'???????',
+  src\lib\translations.ts:
+646:        
+card_payment_history: 
+'?????? ??????',
+  src\lib\translations.ts:
+647:        
+label_investments: 
+'?????',
+  src\lib\translations.ts:
+648:        
+label_deposits: '???',
+  src\lib\translations.ts:
+649:        
+label_top_category: 
+'????? ??????',
+  src\lib\translations.ts:
+650:        financial_safe
+ty_subtitle: '???? ?????? 
+?? ?????, ???????? ?? 
+???????? ????',
+  src\lib\translations.ts:
+651:        
+ai_insights_title: 
+'AI-??????? ???????????',
+  src\lib\translations.ts:
+652:        
+ai_insights_subtitle: 
+'???? ????? ?? ???????? 
+???? ?? ??? ??????? 
+????????',
+  src\lib\translations.ts:
+653:        
+weekly_summary_title: 
+'????????? ??????',
+  src\lib\translations.ts:
+654:        
+transactions_title: '???? 
+????',
+  src\lib\translations.ts:
+655:        
+transactions_subtitle: 
+'?? ????? ?? ?????',
+  src\lib\translations.ts:
+656:        
+transactions_desc: 
+'AI-??????? ??????????? 
+?? ??? ???? ??? ?? ?????? 
+?? ????? ?? ???????? 
+????',
+  src\lib\translations.ts:
+657:        
+label_merchant: 
+'????????',
+  src\lib\translations.ts:
+658:        label_amount: 
+'????',
+  src\lib\translations.ts:
+659:        label_date: 
+'?????',
+  src\lib\translations.ts:
+660:        label_type: 
+'??????',
+  src\lib\translations.ts:
+661:        
+label_category: '??????',
+  src\lib\translations.ts:
+662:        
+label_description: 
+'?????',
+  src\lib\translations.ts:
+663:        
+btn_scan_receipt: '???? 
+????? ????',
+  src\lib\translations.ts:
+664:        
+btn_upload_csv: 'CSV 
+????? ????',
+  src\lib\translations.ts:
+665:        
+btn_voice_log: '???? ???',
+  src\lib\translations.ts:
+666:        
+btn_add_transaction: 
+'???-??? ??????',
+  src\lib\translations.ts:
+667:        
+scan_receipt_title: '???? 
+????? ????',
+  src\lib\translations.ts:
+668:        
+scan_extracted_details: 
+'?????? ?? ???????',
+  src\lib\translations.ts:
+669:        
+upload_failed_title: 
+'????? ????',
+  src\lib\translations.ts:
+670:        recent_transac
+tions_title: '??? ?? 
+???-???',
+  src\lib\translations.ts:
+671:        
+suspicious_detected: 
+'??????? ???-??? ?? ??? 
+???',
+  src\lib\translations.ts:
+672:        
+ml_flagged_desc: 'ML ?? 
+???????? ???? ?????? ?? 
+??????? ????',
+  src\lib\translations.ts:
+673:        btn_refresh: 
+'??????? ????',
+  src\lib\translations.ts:
+674:        
+btn_export_csv: 'CSV 
+??????? ????',
+  src\lib\translations.ts:
+675:        btn_retry: 
+'???? ?????? ????',
+  src\lib\translations.ts:
+676:        nav_profile: 
+'?????????',
+  src\lib\translations.ts:
+677:        nav_settings: 
+'????????',
+  src\lib\translations.ts:
+678:        nav_friends: 
+'?????',
+  src\lib\translations.ts:
+679:        
+nav_gamification: '??? 
+?????',
+  src\lib\translations.ts:
+680:        nav_literacy: 
+'????????',
+  src\lib\translations.ts:
+681:        nav_escrow: 
+'???????',
+  src\lib\translations.ts:
+682:        tap_to_stop: 
+'????? ?? ??? ???? ?? ??? 
+????',
+  src\lib\translations.ts:
+683:        
+your_progress: '???? 
+??????',
+  src\lib\translations.ts:
+684:        
+interactive_calculator: 
+'?????????? ?????????',
+  src\lib\translations.ts:
+685:        
+enroll_to_unlock: '????? 
+???? ?? ??? ??????? ????',
+  src\lib\translations.ts:
+686:        
+friend_leaderboard: 
+'????? ?????????',
+  src\lib\translations.ts:
+687:        savings_rate: 
+'??? ??',
+  src\lib\translations.ts:
+688:        your_rank: 
+'???? ????',
+  src\lib\translations.ts:
+689:        this_week: 
+'?? ??????',
+  src\lib\translations.ts:
+690:        
+previous_label: '?????',
+  src\lib\translations.ts:
+691:        
+current_label: '???????',
+  src\lib\translations.ts:
+692:        
+gross_savings: '??? ???',
+  src\lib\translations.ts:
+693:        
+forecast_savings: 
+'??????????? ???',
+  src\lib\translations.ts:
+694:        hard_savings: 
+'???? ???',
+  src\lib\translations.ts:
+695:        target_label: 
+'??????',
+  src\lib\translations.ts:
+696:        choose_icon: 
+'???? ?????',
+  src\lib\translations.ts:
+697:        goal_name: 
+'?????? ?? ???',
+  src\lib\translations.ts:
+698:        
+target_amount: '?????? 
+????',
+  src\lib\translations.ts:
+699:        target_date: 
+'?????? ????',
+  src\lib\translations.ts:
+700:        color_theme: 
+'??? ???',
+  src\lib\translations.ts:
+701:        
+msg_fill_fields: '????? 
+?????? ?????? ????',
+  src\lib\translations.ts:
+702:        
+msg_success_add: '???-??? 
+??????????? ????? ???! 
+??',
+  src\lib\translations.ts:
+703:        
+msg_error_save: '???-??? 
+?????? ??? ????',
+  src\lib\translations.ts:
+704:        
+label_new_transaction: 
+'??? ???-???',
+  src\lib\translations.ts:
+705:        label_scanned_
+transaction: '????? ???? 
+??? ???-???',
+  src\lib\translations.ts:
+706:        
+placeholder_description: 
+'????? ?? ??? ?? ????...',
+  src\lib\translations.ts:
+707:        
+msg_ai_category: 'AI 
+?????? ?????? ?? ??????',
+  src\lib\translations.ts:
+708:        
+status_saving: '???? ??? 
+??...',
+  src\lib\translations.ts:
+709:    },
+  src\lib\translations.ts:
+710:    mr: {
+  src\lib\translations.ts:
+711:        
+nav_dashboard: '????????',
+  src\lib\translations.ts:
+712:        nav_budget: 
+'????',
+  src\lib\translations.ts:
+713:        
+nav_transactions: 
+'???????',
+  src\lib\translations.ts:
+714:        nav_goals: 
+'?????',
+  src\lib\translations.ts:
+715:        
+nav_learn_finance: 
+'?????? ??????',
+  src\lib\translations.ts:
+716:        nav_ai_chat: 
+'AI ???',
+  src\lib\translations.ts:
+717:        
+hero_title_line1: '????? 
+???????',
+  src\lib\translations.ts:
+718:        
+hero_title_line2: 
+'??????? ??????????',
+  src\lib\translations.ts:
+719:        
+hero_subtitle: 'AI-?????? 
+???????????, ??????? 
+??????? ??? ???????? 
+?????????? ??????? ?????? 
+????????? ???????? ????.',
+  src\lib\translations.ts:
+720:        
+btn_get_started: '???? 
+???',
+  src\lib\translations.ts:
+721:        
+btn_learn_more: '???? 
+????? ????',
+  src\lib\translations.ts:
+722:        
+stats_active_users: 
+'?????? ?????????',
+  src\lib\translations.ts:
+723:        
+stats_money_managed: 
+'??????????? ????',
+  src\lib\translations.ts:
+724:        stats_rating: 
+'?????????????? ??????',
+  src\lib\translations.ts:
+725:        
+finances_title_line1: 
+'????? ?????',
+  src\lib\translations.ts:
+726:        
+finances_title_line2: 
+'??????????',
+  src\lib\translations.ts:
+727:        
+card_total_balance: '???? 
+??????',
+  src\lib\translations.ts:
+728:        
+card_monthly_savings: 
+'????? ???',
+  src\lib\translations.ts:
+729:        
+card_trust_score: '?????? 
+?????',
+  src\lib\translations.ts:
+730:        
+card_savings_rate: '??? 
+??',
+  src\lib\translations.ts:
+731:        
+section_analytics: '????? 
+?????? ????????',
+  src\lib\translations.ts:
+732:        
+section_features: 
+'???????? ?????? ?????? 
+????',
+  src\lib\translations.ts:
+733:        
+feature_smart_goals: 
+'??????? ?????',
+  src\lib\translations.ts:
+734:        
+feature_budget_shield: 
+'???? ?????',
+  src\lib\translations.ts:
+735:        
+feature_auto_save: 
+'???-?????',
+  src\lib\translations.ts:
+736:        
+feature_smart_desc: 'AI 
+????????????? ?????? 
+????? ??? ??? ??? ????? 
+???',
+  src\lib\translations.ts:
+737:        
+feature_shield_desc: 
+'???????? ???? 
+??????????? ???????? 
+????',
+  src\lib\translations.ts:
+738:        
+feature_auto_save_desc: 
+'????????? ??? ???????',
+  src\lib\translations.ts:
+739:        
+cta_ready_to_start: 
+'????? ??????',
+  src\lib\translations.ts:
+740:        cta_subtitle: 
+'??? ???? ???',
+  src\lib\translations.ts:
+741:        
+ai_welcome_msg: "???????! 
+?? ?? ????? AI ?????? 
+????? ???. ?? ???????? 
+????, ??????????? ??? 
+???? ???? ????? ??? ??? 
+????. ???????? ??? ????? 
+??????? ??????",
+  src\lib\translations.ts:
+742:        
+ai_status_online: 
+'??????',
+  src\lib\translations.ts:
+743:        
+ai_status_thinking: 
+'????????? ???? ???...',
+  src\lib\translations.ts:
+744:        
+ai_status_speaking: '???? 
+???...',
+  src\lib\translations.ts:
+745:        
+ai_input_placeholder: 
+'??????? ?????? ????? 
+??????...',
+  src\lib\translations.ts:
+746:        
+health_excellent: 
+'????????',
+  src\lib\translations.ts:
+747:        health_good: 
+'??????',
+  src\lib\translations.ts:
+748:        
+health_caution: 
+'????????',
+  src\lib\translations.ts:
+749:        
+health_critical: '?????',
+  src\lib\translations.ts:
+750:        
+health_msg_excellent: 
+'?????? ????????? ????! 
+???? ???? ????! ??',
+  src\lib\translations.ts:
+751:        
+health_msg_good: '???? 
+????? ???????? ???. ???? 
+????! ??',
+  src\lib\translations.ts:
+752:        
+health_msg_caution: '???? 
+??????????? ???. ??????? 
+???? ????! ??',
+  src\lib\translations.ts:
+753:        
+health_msg_critical: 
+'???? ?????? ????? ???! 
+???? ??? ???! ??',
+  src\lib\translations.ts:
+754:        
+budget_health_title: 
+'???? ??????',
+  src\lib\translations.ts:
+755:        
+budget_status_label: '?? 
+????????? ??????',
+  src\lib\translations.ts:
+756:        
+budget_used_label: 
+'???????? ????',
+  src\lib\translations.ts:
+757:        
+total_budget_label: '???? 
+????',
+  src\lib\translations.ts:
+758:        spent_label: 
+'???? ????',
+
+

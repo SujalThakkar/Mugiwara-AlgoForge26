@@ -5,13 +5,14 @@ import { CategoryAllocation } from "@/components/budget/CategoryAllocation";
 import { ComparisonChart } from "@/components/budget/ComparisonChart";
 import { BudgetSlider } from "@/components/budget/BudgetSlider";
 import { BudgetRecommendations } from "@/components/budget/BudgetRecommendations";
-import { Logo3D } from "@/components/shared/Logo3D";
 import { mockData } from "@/lib/api/mock-data";
 import { useBudget } from "@/lib/hooks/useMLApi";
 import { useUserStore } from "@/lib/store/useUserStore";
 import { Target, TrendingDown, IndianRupee, PieChart, Sparkles, TrendingUp, Loader2 } from "lucide-react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { formatCurrency } from "@/lib/utils";
+import { useTranslation } from "@/lib/hooks/useTranslation";
+import { TranslationKey } from "@/lib/translations";
 
 // Demo user ID
 const DEMO_USER_ID = "696a022c3c758e29b2ca8d50";
@@ -31,6 +32,7 @@ export default function BudgetPage() {
         refetch,
         submitFeedback
     } = useBudget(activeUserId);
+    const { t } = useTranslation();
 
     // Use API data if available, fallback to mock
     const budgetData = apiBudget ? {
@@ -73,9 +75,6 @@ export default function BudgetPage() {
     );
 
     return (
-        <>
-            {/* Fullscreen 3D Logo Canvas */}
-            <Logo3D />
 
             <div className="space-y-0">
                 {/* SECTION 1: Hero - Mint Background */}
@@ -93,12 +92,12 @@ export default function BudgetPage() {
                             className="mb-16"
                         >
                             <h1 className="mm-section-heading text-center">
-                                YOUR BUDGET
+                                {t('budget_title')}
                                 <br />
-                                UNDER CONTROL
+                                {t('budget_subtitle')}
                             </h1>
                             <p className="text-center text-xl text-gray-700 mt-6 max-w-2xl mx-auto">
-                                Manage your limits and optimize your savings with AI-powered insights
+                                {t('budget_desc')}
                             </p>
                         </motion.div>
 
@@ -114,10 +113,10 @@ export default function BudgetPage() {
                                 <div className="w-16 h-16 bg-mm-purple/10 rounded-2xl flex items-center justify-center mb-6">
                                     <IndianRupee className="w-8 h-8 text-mm-purple" />
                                 </div>
-                                <p className="text-sm text-gray-600 font-semibold uppercase tracking-wide mb-2">Total Spent</p>
+                                <p className="text-sm text-gray-600 font-semibold uppercase tracking-wide mb-2">{t('label_total_spent')}</p>
                                 <h2 className="text-4xl font-black text-mm-purple mb-3">{formatCurrency(totalSpent)}</h2>
                                 <p className="text-sm text-gray-500">
-                                    Out of {formatCurrency(budgetData.totalIncome)} income
+                                    {t('label_out_of')} {formatCurrency(budgetData.totalIncome)} {t('label_income')}
                                 </p>
                             </motion.div>
 
@@ -129,12 +128,12 @@ export default function BudgetPage() {
                                 className="mm-card-colored mm-card-green mm-card-medium card-3d"
                             >
                                 <div className="text-6xl mb-4">💰</div>
-                                <p className="text-sm font-semibold uppercase tracking-wide mb-2">Safe to Spend</p>
+                                <p className="text-sm font-semibold uppercase tracking-wide mb-2">{t('label_safe_to_spend')}</p>
                                 <h2 className="text-4xl font-black mb-3">{formatCurrency(totalAllocated - totalSpent)}</h2>
                                 <div className="flex items-center gap-2">
                                     <TrendingUp className="w-4 h-4" />
                                     <span className="text-sm font-semibold">
-                                        {((totalSpent / totalAllocated) * 100).toFixed(0)}% through budget
+                                        {((totalSpent / totalAllocated) * 100).toFixed(0)}% {t('label_through_budget')}
                                     </span>
                                 </div>
                             </motion.div>
@@ -147,9 +146,9 @@ export default function BudgetPage() {
                                 className="mm-card mm-card-medium card-3d bg-gradient-to-br from-mm-purple to-mm-lavender text-white"
                             >
                                 <Sparkles className="w-12 h-12 mb-6" />
-                                <p className="text-sm font-semibold uppercase tracking-wide mb-2 opacity-90">Savings Rate</p>
+                                <p className="text-sm font-semibold uppercase tracking-wide mb-2 opacity-90">{t('label_savings_rate')}</p>
                                 <h2 className="text-5xl font-black mb-3">{savingsRate.toFixed(1)}%</h2>
-                                <p className="text-sm opacity-90">Excellent performance! 🎯</p>
+                                <p className="text-sm opacity-90">{t('msg_excellent_performance')}</p>
                             </motion.div>
                         </div>
                     </div>
@@ -175,7 +174,7 @@ export default function BudgetPage() {
                                     <div className="w-12 h-12 bg-mm-green/10 rounded-xl flex items-center justify-center">
                                         <PieChart className="w-6 h-6 text-mm-green" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-mm-black">Spending vs Budget</h3>
+                                    <h3 className="text-2xl font-bold text-mm-black">{t('label_spending_vs_budget')}</h3>
                                 </div>
                                 <ComparisonChart />
                             </motion.div>
@@ -194,9 +193,9 @@ export default function BudgetPage() {
                                         <div className="w-12 h-12 bg-mm-purple/10 rounded-xl flex items-center justify-center">
                                             <Target className="w-6 h-6 text-mm-purple" />
                                         </div>
-                                        <h3 className="text-2xl font-bold text-mm-black">Category Limits</h3>
+                                        <h3 className="text-2xl font-bold text-mm-black">{t('label_category_limits')}</h3>
                                     </div>
-                                    <button className="mm-btn-secondary text-sm">Edit All</button>
+                                    <button className="mm-btn-secondary text-sm">{t('btn_edit_all')}</button>
                                 </div>
                                 <CategoryAllocation allocations={budgetData.allocations as any} />
                             </motion.div>
@@ -219,17 +218,15 @@ export default function BudgetPage() {
                         >
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full text-sm font-bold text-mm-purple shadow-lg mb-6">
                                 <Sparkles className="w-4 h-4" />
-                                {loading ? 'LOADING AI...' : 'POLICYLEARNER AI'}
+                                {loading ? t('status_loading_ai') : t('label_policylearner_ai')}
                             </div>
 
                             <h2 className="text-5xl md:text-6xl font-black text-mm-black mb-6 leading-tight">
-                                Optimize Your
-                                <br />
-                                Monthly Savings
+                                {t('label_optimize_savings')}
                             </h2>
 
                             <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-                                AI-powered recommendations based on your spending patterns
+                                {t('label_ai_recommendations_desc')}
                             </p>
                         </motion.div>
 
@@ -246,17 +243,16 @@ export default function BudgetPage() {
                         {/* Manual Adjustment Fallback */}
                         <div className="bg-white p-8 rounded-3xl shadow-xl max-w-xl mx-auto mt-8">
                             <BudgetSlider
-                                label="Emergency Fund Adjustment"
+                                label={t('label_emergency_fund')}
                                 value={adjustmentValue}
                                 onChange={setAdjustmentValue}
                             />
                             <button className="mm-btn mm-btn-primary w-full mt-6 text-lg">
-                                Apply Changes
+                                {t('btn_apply_changes')}
                             </button>
                         </div>
                     </div>
                 </section>
             </div>
-        </>
     );
 }

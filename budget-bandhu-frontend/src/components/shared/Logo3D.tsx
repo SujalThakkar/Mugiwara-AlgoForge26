@@ -1,250 +1,317 @@
-'use client';
+'use client'
 
-import { Suspense, useRef, useState, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, PerspectiveCamera, Environment, Float, Image } from '@react-three/drei';
-import * as THREE from 'three';
+import React, { useRef, useState, useEffect, useCallback, memo, Suspense } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { useGLTF, OrbitControls } from '@react-three/drei'
+import { motion, AnimatePresence } from 'framer-motion'
+import * as THREE from 'three'
 
-function Logo3DModel({ targetPosition, targetScale }: { targetPosition: THREE.Vector3; targetScale: number }) {
-    const { scene } = useGLTF('/logo.glb');
-    const meshRef = useRef<THREE.Group>(null);
-    const mouseRef = useRef({ x: 0, y: 0 });
-    const targetRotationRef = useRef({ x: 0, y: 0 });
-    const currentPosition = useRef(new THREE.Vector3(0, 0, 0));
-    const currentScale = useRef(1);
-    const idleRotation = useRef(0);
-
-    // Track mouse position globally
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
-        };
-
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
-    }, []);
-
-    // Animation frame loop with CONTINUOUS animations
-    useFrame((state) => {
-        if (!meshRef.current) return;
-
-        // Smooth position transition (MetaMask "jumping" effect)
-        currentPosition.current.lerp(targetPosition, 0.1);
-        meshRef.current.position.copy(currentPosition.current);
-
-        // Smooth scale transition with gentle pulsing
-        const pulseScale = 1 + Math.sin(state.clock.elapsedTime * 0.5) * 0.02; // Gentle pulse
-        currentScale.current = THREE.MathUtils.lerp(currentScale.current, targetScale * pulseScale, 0.1);
-        meshRef.current.scale.setScalar(currentScale.current);
-
-        // Mouse tracking rotation (±0.5 Y, ±0.3 X like MetaMask)
-        const targetRotationY = mouseRef.current.x * 0.5;
-        const targetRotationX = mouseRef.current.y * 0.3;
-
-        targetRotationRef.current.y = THREE.MathUtils.lerp(
-            targetRotationRef.current.y,
-            targetRotationY,
-            0.05
-        );
-
-        targetRotationRef.current.x = THREE.MathUtils.lerp(
-            targetRotationRef.current.x,
-            targetRotationX,
-            0.05
-        );
-
-        // Add continuous idle rotation on Y-axis
-        idleRotation.current += 0.001; // Very slow continuous rotation
-
-        meshRef.current.rotation.y = targetRotationRef.current.y + idleRotation.current;
-        meshRef.current.rotation.x = targetRotationRef.current.x;
-
-        // Gentle floating effect (up and down)
-        const floatOffset = Math.sin(state.clock.elapsedTime * 0.3) * 0.05;
-        meshRef.current.position.y += floatOffset;
-    });
-
-    return <primitive ref={meshRef} object={scene} />;
+// ═══════════════════════════════════════
+// 1. CORE 3D SETUP — ROTATING MODEL
+// ═══════════════════════════════════════
+interface RotatingModelProps {
+  url: string
+  onLoad?: () => void
+  rotationSpeed?: number
 }
 
-// Loading component with 2D fallback
-function LoadingFallback() {
-    return (
-        <group>
-            {/* Fallback to 2D image while 3D model loads */}
-            <Image
-                url="/piggy-bank-logo.png"
-                scale={3}
-                transparent
-                opacity={0.8}
-            />
-            <mesh>
-                {/* Subtle pulse to indicate loading */}
-                <sphereGeometry args={[1.2, 32, 32]} />
-                <meshBasicMaterial color="#8B5CF6" wireframe transparent opacity={0.1} />
-            </mesh>
-        </group>
-    );
-}
+const RotatingModel = memo(function RotatingModel({ 
+  url, 
+  onLoad, 
+  rotationSpeed = 0.6 
+}: RotatingModelProps) {
+  // Use GLTF with optional Draco (if handled by @react-three/drei's useGLTF default)
+  const { scene } = useGLTF(url)
+  const meshRef = useRef<THREE.Group>(null)
 
-export function Logo3D() {
-    const [mounted, setMounted] = useState(false);
-    const [targetPosition, setTargetPosition] = useState(new THREE.Vector3(0, 0, 0));
-    const [targetScale, setTargetScale] = useState(1.5);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        setMounted(true);
-
-        // Preload with progress tracking
-        const loadModel = async () => {
-            try {
-                // WARNING: 'logo.glb' is ~90MB. Ideally should be compressed to <5MB.
-                await useGLTF.preload('/logo.glb');
-                setIsLoading(false);
-            } catch (error) {
-                console.error('Error loading 3D model:', error);
-                setIsLoading(false);
-            }
-        };
-        loadModel();
-
-        // MetaMask anchor-based positioning system with MULTIPLE targets
-        const updateLogoPosition = () => {
-            const scrollY = window.scrollY;
-            const viewportHeight = window.innerHeight;
-            const documentHeight = document.documentElement.scrollHeight;
-
-            // Find all logo targets
-            const heroTarget = document.querySelector('[data-logo-target="hero"]') as HTMLElement;
-            const cardTarget = document.querySelector('[data-logo-target="card"]') as HTMLElement;
-            const analyticsTarget = document.querySelector('[data-logo-target="analytics"]') as HTMLElement;
-            const featuresTarget = document.querySelector('[data-logo-target="features"]') as HTMLElement;
-            const ctaTarget = document.querySelector('[data-logo-target="cta"]') as HTMLElement;
-
-            // ALWAYS have a fallback - use hero if nothing else
-            let activeTarget: HTMLElement = heroTarget || document.body;
-            let scale: number = 1.0;
-
-            if (!heroTarget) {
-                // If no targets found, keep logo visible in center
-                setTargetPosition(new THREE.Vector3(0, 0, 0));
-                setTargetScale(1.0);
-                return;
-            }
-
-            // Calculate scroll thresholds for each section
-            const heroBottom = heroTarget.offsetTop + heroTarget.offsetHeight;
-            const cardBottom = cardTarget ? cardTarget.offsetTop + cardTarget.offsetHeight : heroBottom;
-            const analyticsBottom = analyticsTarget ? analyticsTarget.offsetTop + analyticsTarget.offsetHeight : cardBottom;
-            const featuresBottom = featuresTarget ? featuresTarget.offsetTop + featuresTarget.offsetHeight : analyticsBottom;
-
-            // Determine active target based on scroll position
-            if (scrollY < heroBottom - viewportHeight / 2) {
-                activeTarget = heroTarget;
-                scale = 1.5;
-            } else if (cardTarget && scrollY < cardBottom - viewportHeight / 2) {
-                activeTarget = cardTarget;
-                scale = 1.0;
-            } else if (analyticsTarget && scrollY < analyticsBottom - viewportHeight / 2) {
-                activeTarget = analyticsTarget;
-                scale = 0.7;
-            } else if (featuresTarget && scrollY < featuresBottom - viewportHeight / 2) {
-                activeTarget = featuresTarget;
-                scale = 0.9;
-            } else if (ctaTarget) {
-                activeTarget = ctaTarget;
-                scale = 0.5;
-            } else {
-                // Fallback - keep visible even at bottom of page
-                activeTarget = heroTarget;
-                scale = 0.8;
-            }
-
-            // Convert DOM position to 3D world coordinates
-            const rect = activeTarget.getBoundingClientRect();
-
-            // Ensure logo stays visible even if target is off-screen
-            const clampedTop = Math.max(0, Math.min(rect.top + rect.height / 2, viewportHeight));
-            const clampedLeft = Math.max(0, Math.min(rect.left + rect.width / 2, window.innerWidth));
-
-            const x = (clampedLeft / window.innerWidth) * 2 - 1;
-            const y = -(clampedTop / viewportHeight) * 2 + 1;
-
-            setTargetPosition(new THREE.Vector3(x * 3, y * 2, 0));
-            setTargetScale(scale);
-        };
-
-        // Update on scroll and resize
-        updateLogoPosition();
-        window.addEventListener('scroll', updateLogoPosition);
-        window.addEventListener('resize', updateLogoPosition);
-
-        // Initial update after mount
-        const timer = setTimeout(updateLogoPosition, 100);
-
-        return () => {
-            window.removeEventListener('scroll', updateLogoPosition);
-            window.removeEventListener('resize', updateLogoPosition);
-            clearTimeout(timer);
-        };
-    }, []);
-
-    if (!mounted) {
-        return null;
+  useEffect(() => {
+    if (scene) {
+      onLoad?.()
     }
+  }, [scene, onLoad])
 
-    return (
-        <>
-            {/* Loading indicator */}
-            {isLoading && (
-                <div className="fixed top-24 right-8 z-[101] bg-white px-4 py-2 rounded-full shadow-lg border border-gray-200">
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-mm-purple border-t-transparent rounded-full animate-spin" />
-                        <span className="text-sm text-gray-600">Loading 3D logo...</span>
-                    </div>
-                </div>
-            )}
+  useFrame((state, delta) => {
+    if (meshRef.current) {
+      // Delta-time based rotation for frame-rate independence
+      meshRef.current.rotation.y += delta * rotationSpeed
+    }
+  })
 
-            <div
-                className="fixed top-0 left-0 w-screen h-screen z-[99]"
-                style={{ pointerEvents: 'none' }}
-            >
-                <Canvas
-                    camera={{ position: [0, 0, 5], fov: 50 }}
-                    gl={{
-                        alpha: true,
-                        antialias: true,
-                        powerPreference: "high-performance"
-                    }}
-                    style={{ background: 'transparent', pointerEvents: 'none' }}
-                >
-                    <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
+  return (
+    <primitive
+      ref={meshRef}
+      object={scene}
+      scale={[1.8, 1.8, 1.8]}
+      position={[0, -0.5, 0]}
+    />
+  )
+})
 
-                    {/* MetaMask-style Lighting */}
-                    <ambientLight intensity={0.6} />
-                    <directionalLight position={[10, 10, 5]} intensity={1.2} />
-                    <pointLight position={[-10, -10, -5]} intensity={0.5} color="#10B981" />
-                    <spotLight
-                        position={[0, 10, 0]}
-                        angle={0.3}
-                        penumbra={1}
-                        intensity={1}
-                    />
+// ═══════════════════════════════════════
+// 2. LIGHTING SETUP FOR PURPLE MODEL
+// ═══════════════════════════════════════
+function Lighting() {
+  return (
+    <>
+      <ambientLight intensity={1.5} />
+      
+      {/* Target purple pop with key and rim lights */}
+      <directionalLight
+        position={[5, 5, 5]}
+        intensity={2}
+        castShadow={false}
+      />
+      
+      <directionalLight
+        position={[-3, -2, -3]}
+        intensity={0.8}
+        color="#c4b5fd"
+      />
+      
+      <pointLight
+        position={[2, 3, 2]}
+        intensity={1.5}
+        color="#a855f7"
+      />
+      
+      <pointLight
+        position={[-2, -1, 2]}
+        intensity={0.8}
+        color="#2dd4bf"
+      />
 
-                    <Environment preset="city" />
-
-                    <Suspense fallback={<LoadingFallback />}>
-                        <Logo3DModel targetPosition={targetPosition} targetScale={targetScale} />
-                    </Suspense>
-                </Canvas>
-            </div>
-        </>
-    );
+      <pointLight 
+        position={[0, 5, 0]} 
+        intensity={1} 
+        color="#a855f7" 
+      />
+    </>
+  )
 }
 
-// Lazy preload - only load when needed
+// ═══════════════════════════════════════
+// 3. LOGO3D CANVAS COMPONENT
+// ═══════════════════════════════════════
+interface Logo3DCanvasProps {
+  rotationSpeed?: number
+  onLoad?: () => void
+}
+
+function Logo3DCanvas({ rotationSpeed = 0.6, onLoad }: Logo3DCanvasProps) {
+  return (
+    <Canvas
+      frameloop="always"
+      camera={{ position: [0, 0, 4], fov: 45 }}
+      gl={{
+        alpha: true,
+        antialias: true,
+        powerPreference: 'high-performance',
+      }}
+      performance={{ min: 0.5 }}
+      style={{ width: '100%', height: '100%', background: 'transparent' }}
+      dpr={[1, 2]}
+    >
+      <Lighting />
+      <Suspense fallback={null}>
+        <RotatingModel 
+          url="/logo.glb" 
+          onLoad={onLoad} 
+          rotationSpeed={rotationSpeed} 
+        />
+      </Suspense>
+      <OrbitControls
+        enableZoom={false}
+        enablePan={false}
+        enableRotate={false}
+      />
+    </Canvas>
+  )
+}
+
+// ═══════════════════════════════════════
+// 4. MAIN EXPORT — STATE MACHINE
+// ═══════════════════════════════════════
+interface Logo3DProps {
+  heroMode?: boolean
+}
+
+type Stage = 'preloader' | 'flight' | 'corner'
+
+export function Logo3D({ heroMode = false }: Logo3DProps) {
+  const [stage, setStage] = useState<Stage>('preloader')
+  const [modelLoaded, setModelLoaded] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  
+  // Ref to resolve the loading promise
+  const modelLoadedResolverRef = useRef<((value: unknown) => void) | null>(null)
+
+  // ═══════════════════════════════════════
+  // HEROMODE BYPASS
+  // ═══════════════════════════════════════
+  if (heroMode) {
+    return (
+      <div className="w-full h-full relative">
+        <Logo3DCanvas rotationSpeed={0.5} />
+      </div>
+    )
+  }
+
+  // ═══════════════════════════════════
+  // STATE TRANSITION LOGIC
+  // ═══════════════════════════════════
+  useEffect(() => {
+    // Minimum 4.5s preloader time
+    const minTimer = new Promise(res => setTimeout(res, 4500))
+    
+    // Model load promise
+    const loadPromise = new Promise(res => {
+      if (modelLoaded) res(null)
+      else modelLoadedResolverRef.current = res
+    })
+
+    // Transition preloader -> flight -> corner
+    Promise.all([minTimer, loadPromise]).then(() => {
+      setStage('flight')
+      
+      // Page content visible trigger
+      document.body.classList.add('page-visible')
+      
+      // Flight duration 1.2s before settling into corner
+      setTimeout(() => {
+        setStage('corner')
+      }, 1200)
+    })
+  }, [modelLoaded])
+
+  const handleModelLoad = useCallback(() => {
+    setModelLoaded(true)
+    if (modelLoadedResolverRef.current) {
+      modelLoadedResolverRef.current(null)
+    }
+  }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  return (
+    <>
+      {/* STATE 1: PRELOADER OVERLAY */}
+      <AnimatePresence>
+        {stage === 'preloader' && (
+          <motion.div
+            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center p-4 overflow-hidden"
+            style={{
+              background: 'radial-gradient(ellipse at center, #1a0a3d 0%, #0d0520 60%, #080310 100%)'
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* Visual spacer for centered canvas */}
+            <div className="flex flex-col items-center">
+               <div className="w-[300px] h-[300px]" /> {/* Reserved space */}
+               
+               {/* Loading Bar */}
+               <div className="w-[240px] h-[3px] bg-white/10 rounded-full mt-4 relative overflow-hidden">
+                 <motion.div
+                   className="absolute inset-0 bg-gradient-to-r from-[#7c3aed] to-[#2dd4bf]"
+                   initial={{ width: '0%' }}
+                   animate={{ width: '100%' }}
+                   transition={{ duration: 4.5, ease: 'easeInOut' }}
+                 />
+               </div>
+
+               {/* Brand Text */}
+               <motion.h1
+                 className="text-[20px] font-[800] text-white mt-[16px]"
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 transition={{ delay: 0.3 }}
+               >
+                 Budget Bandhu
+               </motion.h1>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* PERSISTENT CANVAS CONTAINER — NO UNMOUNTING */}
+      <motion.div
+        layout
+        initial={false}
+        className="fixed z-[1000] will-change-transform"
+        animate={stage === 'preloader' ? {
+          top: '50%',
+          left: '50%',
+          x: '-50%',
+          y: '-50%',
+          width: 300,
+          height: 300,
+          position: 'fixed' as any
+        } : {
+          bottom: 24,
+          right: 24,
+          top: 'auto',
+          left: 'auto',
+          x: 0,
+          y: 0,
+          width: 110,
+          height: 110,
+          position: 'fixed' as any
+        }}
+        transition={{
+          duration: 1.2,
+          ease: [0.25, 0.46, 0.45, 0.94],
+          width: { duration: 1.0 },
+          height: { duration: 1.0 },
+        }}
+      >
+        <motion.div
+          className={`w-full h-full relative flex items-center justify-center
+            ${stage === 'corner' ? 'cursor-pointer' : ''}`}
+          animate={stage === 'corner' ? {
+            y: [0, -6, 0]
+          } : {}}
+          transition={stage === 'corner' ? {
+            duration: 3,
+            repeat: Infinity,
+            ease: 'easeInOut'
+          } : {}}
+          onMouseEnter={() => stage === 'corner' && setIsHovered(true)}
+          onMouseLeave={() => stage === 'corner' && setIsHovered(false)}
+          onClick={() => stage === 'corner' && scrollToTop()}
+          whileHover={stage === 'corner' ? { 
+            scale: 1.1, 
+            boxShadow: '0 12px 40px rgba(124,58,237,0.4)' 
+          } : {}}
+          whileTap={stage === 'corner' ? { scale: 0.9 } : {}}
+        >
+          {/* Use higher rotation in corner/loaded states */}
+          <Logo3DCanvas 
+            rotationSpeed={stage === 'preloader' ? 0.4 : 0.6} 
+            onLoad={handleModelLoad} 
+          />
+
+          {/* Tooltip Pill */}
+          <AnimatePresence>
+            {(stage === 'corner' && isHovered) && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: -60 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute whitespace-nowrap bg-[#7c3aed] text-white text-[12px] font-bold px-3 py-1.5 rounded-full shadow-lg pointer-events-none"
+              >
+                Financial Score: 782
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </motion.div>
+    </>
+  )
+}
+
+// Global preloader to start fetching immediately
 if (typeof window !== 'undefined') {
-    useGLTF.preload('/logo.glb');
+  useGLTF.preload('/logo.glb')
 }

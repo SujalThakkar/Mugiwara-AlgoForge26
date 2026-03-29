@@ -1,18 +1,24 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { translations, TranslationKey } from '../translations';
 
 export type LanguageCode = 'en' | 'hi' | 'mr' | 'ta' | 'te' | 'bn' | 'gu' | 'kn' | 'ml' | 'pa';
 
 interface LanguageState {
     currentLanguage: LanguageCode;
     setLanguage: (lang: LanguageCode) => void;
+    t: (key: TranslationKey) => string;
 }
 
 export const useLanguageStore = create<LanguageState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             currentLanguage: 'en',
             setLanguage: (lang) => set({ currentLanguage: lang }),
+            t: (key) => {
+                const lang = get().currentLanguage;
+                return translations[lang][key] || translations['en'][key] || key;
+            },
         }),
         {
             name: 'budgetbandhu-language',

@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 interface SpendingSparklineProps {
     data: Array<{ date: string; amount: number }>;
@@ -10,10 +11,11 @@ interface SpendingSparklineProps {
 }
 
 export function SpendingSparkline({ data, forecastConfidence }: SpendingSparklineProps) {
+    const { t } = useTranslation();
     if (!data || data.length === 0) {
         return (
             <div className="flex items-center justify-center h-[420px] bg-gray-100 rounded-3xl border border-gray-200">
-                <p className="text-gray-500 font-medium">Accumulating spending data...</p>
+                <p className="text-gray-500 font-medium">{t('accumulating_data')}</p>
             </div>
         );
     }
@@ -72,8 +74,8 @@ export function SpendingSparkline({ data, forecastConfidence }: SpendingSparklin
                                 <Activity className="w-5 h-5 text-gray-900" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-gray-900">Spending Trend</h3>
-                                <p className="text-sm text-gray-700">Last 30 days analytics</p>
+                                <h3 className="text-xl font-bold text-gray-900">{t('spending_trend_title')}</h3>
+                                <p className="text-sm text-gray-700">{t('last_30_days_analytics')}</p>
                             </div>
                         </div>
                         {/* LSTM Badge — shown when forecast confidence is available */}
@@ -105,7 +107,7 @@ export function SpendingSparkline({ data, forecastConfidence }: SpendingSparklin
                     className="flex items-center justify-between mb-4"
                 >
                     <div>
-                        <p className="text-xs text-gray-600 mb-1 uppercase tracking-wider font-semibold">Daily Average</p>
+                        <p className="text-xs text-gray-600 mb-1 uppercase tracking-wider font-semibold">{t('daily_average_label')}</p>
                         <p className="text-3xl font-black text-gray-900">
                             ₹{average.toLocaleString('en-IN')}
                         </p>
@@ -139,11 +141,11 @@ export function SpendingSparkline({ data, forecastConfidence }: SpendingSparklin
                     className="flex justify-between mb-4 text-sm"
                 >
                     <div className="px-3 py-1.5 rounded-lg bg-gray-900/10">
-                        <span className="text-gray-600">Highest: </span>
+                        <span className="text-gray-600">{t('highest_label')}: </span>
                         <span className="font-bold text-gray-900">₹{max.toLocaleString('en-IN')}</span>
                     </div>
                     <div className="px-3 py-1.5 rounded-lg bg-gray-900/10">
-                        <span className="text-gray-600">Lowest: </span>
+                        <span className="text-gray-600">{t('lowest_label')}: </span>
                         <span className="font-bold text-gray-900">₹{min.toLocaleString('en-IN')}</span>
                     </div>
                 </motion.div>
@@ -195,8 +197,8 @@ export function SpendingSparkline({ data, forecastConfidence }: SpendingSparklin
                 >
                     <span className="text-sm text-gray-700">
                         {isPositive
-                            ? '📈 Spending increased compared to last period'
-                            : '📉 Great! You reduced spending compared to last period'
+                            ? t('spending_increased_msg')
+                            : t('spending_decreased_msg')
                         }
                     </span>
                 </motion.div>

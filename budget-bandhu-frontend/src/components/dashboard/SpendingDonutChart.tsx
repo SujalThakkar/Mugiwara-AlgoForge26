@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from 'recharts';
 import { ShoppingBag, Utensils, Car, Home, Heart, Zap, TrendingUp, Sparkles } from 'lucide-react';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 interface SpendingCategory {
     name: string;
@@ -19,26 +20,27 @@ interface SpendingDonutChartProps {
 }
 
 export function SpendingDonutChart({ data: categoryBreakdown }: SpendingDonutChartProps) {
+    const { t } = useTranslation();
     const PieComponent = Pie as any;
     const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
     if (!categoryBreakdown || Object.keys(categoryBreakdown).length === 0) {
         return (
             <div className="flex items-center justify-center h-[420px] bg-gray-100 rounded-3xl border border-gray-200">
-                <p className="text-gray-500 font-medium">Accumulating category data...</p>
+                <p className="text-gray-500 font-medium">{t('accumulating_data')}</p>
             </div>
         );
     }
 
     const getCategoryDetails = (category: string) => {
         switch (category) {
-            case 'Shopping': return { icon: ShoppingBag, color: '#EC4899' };
-            case 'Food & Dining': return { icon: Utensils, color: '#F59E0B' };
-            case 'Transport': return { icon: Car, color: '#3B82F6' };
-            case 'Bills & Utilities': return { icon: Zap, color: '#10B981' };
-            case 'Housing': return { icon: Home, color: '#8B5CF6' };
-            case 'Healthcare': return { icon: Heart, color: '#EF4444' };
-            default: return { icon: TrendingUp, color: '#6B7280' };
+            case 'Shopping': return { icon: ShoppingBag, color: '#EC4899', label: t('cat_shopping') };
+            case 'Food & Dining': return { icon: Utensils, color: '#F59E0B', label: t('cat_food') };
+            case 'Transport': return { icon: Car, color: '#3B82F6', label: t('cat_transport') };
+            case 'Bills & Utilities': return { icon: Zap, color: '#10B981', label: t('cat_bills') };
+            case 'Housing': return { icon: Home, color: '#8B5CF6', label: t('cat_housing') };
+            case 'Healthcare': return { icon: Heart, color: '#EF4444', label: t('cat_healthcare') };
+            default: return { icon: TrendingUp, color: '#6B7280', label: t('cat_others') };
         }
     };
 
@@ -48,7 +50,7 @@ export function SpendingDonutChart({ data: categoryBreakdown }: SpendingDonutCha
             .map(([name, stats]) => {
                 const details = getCategoryDetails(name);
                 return {
-                    name,
+                    name: details.label,
                     value: stats.total,
                     color: details.color,
                     icon: details.icon,
@@ -63,7 +65,7 @@ export function SpendingDonutChart({ data: categoryBreakdown }: SpendingDonutCha
     chartData.forEach(item => item.percentage = (item.value / totalSpending) * 100);
 
     const data = chartData.length > 0 ? chartData : [
-        { name: 'No Data', value: 1, color: '#E5E7EB', icon: TrendingUp, percentage: 100 }
+        { name: t('bills_none'), value: 1, color: '#E5E7EB', icon: TrendingUp, percentage: 100 }
     ];
 
     const renderActiveShape = (props: any) => {
@@ -129,8 +131,8 @@ export function SpendingDonutChart({ data: categoryBreakdown }: SpendingDonutCha
                         <Sparkles className="w-6 h-6 text-purple-700" />
                     </motion.div>
                     <div>
-                        <h3 className="text-xl font-bold text-gray-900">Spending Breakdown</h3>
-                        <p className="text-sm text-purple-700/70">By category this month</p>
+                        <h3 className="text-xl font-bold text-gray-900">{t('spending_breakdown_title')}</h3>
+                        <p className="text-sm text-purple-700/70">{t('by_category_subtitle')}</p>
                     </div>
                 </div>
                 <motion.div
@@ -139,7 +141,7 @@ export function SpendingDonutChart({ data: categoryBreakdown }: SpendingDonutCha
                     transition={{ delay: 0.6 }}
                     className="text-right px-4 py-2 rounded-xl bg-white/40 backdrop-blur-sm"
                 >
-                    <p className="text-xs text-purple-700/70 uppercase tracking-wider">Total Spent</p>
+                    <p className="text-xs text-purple-700/70 uppercase tracking-wider">{t('bills_total_due')}</p>
                     <p className="text-2xl font-black text-gray-900">
                         ₹{totalSpending.toLocaleString('en-IN')}
                     </p>
@@ -202,7 +204,7 @@ export function SpendingDonutChart({ data: categoryBreakdown }: SpendingDonutCha
                             ) : (
                                 <>
                                     <div className="text-2xl font-black text-gray-900">100%</div>
-                                    <p className="text-xs text-gray-500">Hover to explore</p>
+                                    <p className="text-xs text-gray-500">{t('hover_explore_label')}</p>
                                 </>
                             )}
                         </div>

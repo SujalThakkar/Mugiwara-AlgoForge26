@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { HeroSection } from "@/components/metamask-ui/HeroSection";
 import { Logo3D } from "@/components/shared/Logo3D";
-import { OpeningAnimation } from "@/components/animations/OpeningAnimation";
 import { RotatingCard } from "@/components/animations/RotatingCard";
 import BounceDashboardCards from "@/components/animations/BounceDashboardCards";
 import { SpendingSparkline } from "@/components/dashboard/SpendingSparkline";
@@ -19,6 +18,7 @@ import { TaxOptimizerDashboard } from "@/components/dashboard/TaxOptimizerDashbo
 import { useDashboard, useBudget, useGoals, useBills, useTax80C } from "@/lib/hooks/useMLApi";
 import { mlApi } from "@/lib/api/ml-api";
 import { useUserStore } from "@/lib/store/useUserStore";
+import { useTranslation } from "@/lib/hooks/useTranslation";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { TrendingUp, Wallet, Target, Sparkles, PiggyBank, Shield, Loader2 } from "lucide-react";
 import { NumericFormat } from "react-number-format";
@@ -28,6 +28,7 @@ const DEMO_USER_ID = "696a022c3c758e29b2ca8d50";
 const MM_EASING = [0.16, 1, 0.3, 1] as const;
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   // Get user from store or use demo
   const { userId } = useUserStore();
   const activeUserId = userId || DEMO_USER_ID;
@@ -171,9 +172,6 @@ export default function DashboardPage() {
 
   return (
     <>
-      {/* Opening Purple Animation - Shows once per session */}
-      <OpeningAnimation duration={1800} />
-
       {/* Fullscreen 3D Logo Canvas - Always On Top (MetaMask Style) */}
       <Logo3D />
 
@@ -202,9 +200,9 @@ export default function DashboardPage() {
             >
               <div className="flex items-center gap-4 mb-4">
                 <h2 className="mm-section-heading text-center lg:text-left max-w-2xl">
-                  YOUR FINANCES
+                  {t('finances_title_line1')}
                   <br />
-                  UNDER CONTROL
+                  {t('finances_title_line2')}
                 </h2>
                 {/* Live Data Indicator */}
                 {loading ? (
@@ -233,7 +231,7 @@ export default function DashboardPage() {
                       <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mb-4">
                         <Wallet className="w-7 h-7 text-white" />
                       </div>
-                      <h3 className="text-xl font-bold text-white">Total Balance</h3>
+                      <h3 className="text-xl font-bold text-white">{t('card_total_balance')}</h3>
                     </div>
                     <div>
                       <div className="text-4xl font-bold text-white mb-2">
@@ -272,7 +270,7 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between h-full mm-card-main-content">
                     <div>
                       <Sparkles className="w-10 h-10 text-white mb-2" />
-                      <h3 className="text-lg font-bold text-white">Trust Score</h3>
+                      <h3 className="text-lg font-bold text-white">{t('card_trust_score')}</h3>
                     </div>
                     <div className="text-5xl font-bold text-white">{Math.round(dashboardData.financialScore)}</div>
                   </div>
@@ -296,7 +294,7 @@ export default function DashboardPage() {
                   <div className="flex flex-col h-full justify-between mm-card-main-content">
                     <div>
                       <div className="text-6xl mb-4">💰</div>
-                      <h3 className="text-2xl font-bold text-white mb-3">Monthly Savings</h3>
+                      <h3 className="text-2xl font-bold text-white mb-3">{t('card_monthly_savings')}</h3>
                     </div>
                     <div>
                       <div className="text-4xl font-bold text-white mb-2">
@@ -311,7 +309,7 @@ export default function DashboardPage() {
                       <div className="text-3xl font-bold text-white">
                         {typeof dashboardData.savingsRate === 'number' ? dashboardData.savingsRate.toFixed(1) : dashboardData.savingsRate}%
                       </div>
-                      <div className="text-sm text-white/80">Savings Rate</div>
+                      <div className="text-sm text-white/80">{t('card_savings_rate')}</div>
                     </div>
                   </div>
 
@@ -379,7 +377,7 @@ export default function DashboardPage() {
               transition={{ duration: 0.8 }}
               className="text-center mb-12"
             >
-              <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">Your Financial Dashboard</h2>
+              <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">{t('section_analytics')}</h2>
               <p className="text-xl text-gray-700">Track, analyze, and optimize your spending</p>
             </motion.div>
 
@@ -566,14 +564,14 @@ export default function DashboardPage() {
               }}
               className="mm-section-heading mb-32 text-center"
             >
-              EVERYTHING YOU NEED
+              {t('section_features')}
             </motion.h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
-                { icon: <Target className="w-12 h-12" />, title: "Smart Goals", desc: "Set and track financial goals with AI insights" },
-                { icon: <Shield className="w-12 h-12" />, title: "Budget Shield", desc: "Stay protected from overspending" },
-                { icon: <PiggyBank className="w-12 h-12" />, title: "Auto-Save", desc: "Intelligent savings recommendations" },
+                { icon: <Target className="w-12 h-12" />, title: t('feature_smart_goals'), desc: t('feature_smart_desc') },
+                { icon: <Shield className="w-12 h-12" />, title: t('feature_budget_shield'), desc: t('feature_shield_desc') },
+                { icon: <PiggyBank className="w-12 h-12" />, title: t('feature_auto_save'), desc: t('feature_auto_save_desc') },
               ].map((feature, i) => (
                 <motion.div
                   key={i}
@@ -608,12 +606,12 @@ export default function DashboardPage() {
               transition={{ duration: 0.8, ease: MM_EASING }}
             >
               <h2 className="mm-mega-heading mb-12">
-                START YOUR
+                {t('cta_ready_to_start')}
                 <br />
-                JOURNEY TODAY
+                {t('cta_subtitle')}
               </h2>
               <button className="mm-btn mm-btn-primary text-xl px-12 py-6">
-                GET STARTED
+                {t('btn_get_started')}
               </button>
             </motion.div>
           </div>

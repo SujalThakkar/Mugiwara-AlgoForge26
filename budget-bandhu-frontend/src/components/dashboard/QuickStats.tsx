@@ -10,11 +10,14 @@ interface QuickStatsProps {
     savingsRate: number;
 }
 
+import { useTranslation } from '@/lib/hooks/useTranslation';
+
 export function QuickStats({ monthSpent, monthSaved, savingsRate }: QuickStatsProps) {
+    const { t } = useTranslation();
     const stats = [
         {
             id: 1,
-            label: 'MONTH SPENT',
+            label: t('month_spent_label'),
             value: monthSpent,
             emoji: '💸',
             trend: 'down',
@@ -23,7 +26,7 @@ export function QuickStats({ monthSpent, monthSaved, savingsRate }: QuickStatsPr
         },
         {
             id: 2,
-            label: 'MONTH SAVED',
+            label: t('month_saved_label'),
             value: monthSaved,
             emoji: '💰',
             trend: 'up',
@@ -32,7 +35,7 @@ export function QuickStats({ monthSpent, monthSaved, savingsRate }: QuickStatsPr
         },
         {
             id: 3,
-            label: 'SAVINGS RATE',
+            label: t('savings_rate_label'),
             value: savingsRate,
             emoji: '📈',
             trend: 'up',

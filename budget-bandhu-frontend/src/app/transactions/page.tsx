@@ -7,6 +7,7 @@ import { VoiceInput } from "@/components/transactions/VoiceInput";
 import { CSVUpload } from "@/components/transactions/CSVUpload";
 import { AddTransactionModal } from "@/components/transactions/AddTransactionModal";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
+import { useTranslation } from "@/lib/hooks/useTranslation";
 import { useUserStore } from "@/lib/store/useUserStore";
 import { useTransactions } from "@/lib/hooks/useMLApi";
 import { Search, Plus, Mic, Download, Camera, Upload, AlertTriangle, Loader2 } from "lucide-react";
@@ -21,6 +22,7 @@ const DEMO_USER_ID = "696a022c3c758e29b2ca8d50";
 const MM_EASING = [0.16, 1, 0.3, 1] as const;
 
 export default function TransactionsPage() {
+    const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState("");
     const [isHoveringScan, setIsHoveringScan] = useState(false);
     const [isHoveringVoice, setIsHoveringVoice] = useState(false);
@@ -140,7 +142,7 @@ export default function TransactionsPage() {
                         exit={{ opacity: 0, y: -50 }}
                         className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-xl shadow-lg"
                     >
-                        <p className="font-semibold">✅ {uploadSuccess.count} transactions processed!</p>
+                        <p className="font-semibold">✅ {uploadSuccess.count} {t('transactions_title')} processed!</p>
                         {uploadSuccess.anomalies > 0 && (
                             <p className="text-sm opacity-90">🔍 {uploadSuccess.anomalies} anomalies detected</p>
                         )}
@@ -160,12 +162,12 @@ export default function TransactionsPage() {
                         className="mb-16"
                     >
                         <h1 className="mm-section-heading text-center">
-                            YOUR MONEY
+                            {t('transactions_title')}
                             <br />
-                            EVERY RUPEE TRACKED
+                            {t('transactions_subtitle')}
                         </h1>
                         <p className="text-center text-xl text-gray-700 mt-6 max-w-2xl mx-auto">
-                            Track and manage your recent spending with AI-powered insights
+                            {t('transactions_desc')}
                         </p>
 
                         {/* Stats from API */}
@@ -177,7 +179,7 @@ export default function TransactionsPage() {
                             >
                                 <div className="text-center">
                                     <p className="text-3xl font-bold text-mm-purple">{stats.total_transactions}</p>
-                                    <p className="text-sm text-gray-500">Transactions</p>
+                                    <p className="text-sm text-gray-500">{t('transactions_title')}</p>
                                 </div>
                                 <div className="text-center">
                                     <p className="text-3xl font-bold text-red-500">{stats.total_anomalies}</p>
@@ -185,7 +187,7 @@ export default function TransactionsPage() {
                                 </div>
                                 <div className="text-center">
                                     <p className="text-3xl font-bold text-green-500">{Object.keys(stats.category_breakdown || {}).length}</p>
-                                    <p className="text-sm text-gray-500">Categories</p>
+                                    <p className="text-sm text-gray-500">{t('label_category')}</p>
                                 </div>
                             </motion.div>
                         )}
@@ -217,7 +219,7 @@ export default function TransactionsPage() {
                                 <div className="flex flex-col gap-3">
                                     <div className="flex items-center gap-2">
                                         <Upload className="w-[1.875rem] h-[1.875rem]" />
-                                        <h3 className="text-3xl font-semibold leading-tight">Upload CSV</h3>
+                                        <h3 className="text-3xl font-semibold leading-tight">{t('btn_upload_csv')}</h3>
                                     </div>
                                     <p className="text-lg opacity-90 font-medium">Bulk import with ML processing</p>
                                 </div>
@@ -261,7 +263,7 @@ export default function TransactionsPage() {
                                         animate={isHoveringScan ? { x: 3 } : { x: 0 }}
                                     >
                                         <Camera className="w-[1.875rem] h-[1.875rem]" />
-                                        <h3 className="text-3xl font-semibold leading-tight">Scan Receipt</h3>
+                                        <h3 className="text-3xl font-semibold leading-tight">{t('btn_scan_receipt')}</h3>
                                     </motion.div>
                                     <p className="text-lg opacity-90 leading-relaxed font-medium">Auto-detect amount & category</p>
                                 </div>
@@ -294,7 +296,7 @@ export default function TransactionsPage() {
                                             animate={isHoveringVoice ? { y: -2 } : { y: 0 }}
                                         >
                                             <Mic className="w-[1.875rem] h-[1.875rem]" />
-                                            <h3 className="text-3xl font-semibold leading-tight">Voice Log</h3>
+                                            <h3 className="text-3xl font-semibold leading-tight">{t('btn_voice_log')}</h3>
                                         </motion.div>
                                     </div>
                                     <p className="text-lg opacity-90 leading-relaxed font-medium">"Spent ₹200 on Coffee"</p>
@@ -332,7 +334,7 @@ export default function TransactionsPage() {
                         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6" />
                         <Input
                             className="pl-16 h-16 rounded-2xl bg-white border-gray-200 text-lg shadow-sm"
-                            placeholder="Search by merchant or category..."
+                            placeholder={t('btn_refresh') + "..."}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -349,11 +351,11 @@ export default function TransactionsPage() {
                         <div className="flex items-center justify-between mb-8">
                             <div>
                                 <div className="flex items-center gap-3">
-                                    <h3 className="text-2xl font-bold text-mm-black">Recent Transactions</h3>
+                                    <h3 className="text-2xl font-bold text-mm-black">{t('recent_transactions_title')}</h3>
                                     {loading && <Loader2 className="w-5 h-5 animate-spin text-mm-purple" />}
                                     {apiTransactions.length > 0 && (
                                         <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                                            LIVE DATA
+                                            {t('status_live_data')}
                                         </span>
                                     )}
                                 </div>
@@ -365,11 +367,11 @@ export default function TransactionsPage() {
                                     className="mm-btn mm-btn-secondary flex items-center gap-2"
                                 >
                                     <Loader2 className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                                    Refresh
+                                    {t('btn_refresh')}
                                 </button>
                                 <button className="mm-btn mm-btn-secondary flex items-center gap-2">
                                     <Download className="w-4 h-4" />
-                                    Export CSV
+                                    {t('btn_export_csv')}
                                 </button>
                             </div>
                         </div>
@@ -379,7 +381,7 @@ export default function TransactionsPage() {
                             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
                                 <AlertTriangle className="w-5 h-5 text-red-500" />
                                 <p className="text-red-600">{error}</p>
-                                <button onClick={refetch} className="ml-auto text-sm text-red-600 underline">Retry</button>
+                                <button onClick={refetch} className="ml-auto text-sm text-red-600 underline">{t('btn_retry')}</button>
                             </div>
                         )}
 
@@ -396,9 +398,9 @@ export default function TransactionsPage() {
                                     </div>
                                     <div>
                                         <p className="font-semibold text-amber-800">
-                                            {apiTransactions.filter(t => t.is_anomaly).length} Suspicious Transaction(s) Detected
+                                            {apiTransactions.filter(t => t.is_anomaly).length} {t('suspicious_detected')}
                                         </p>
-                                        <p className="text-sm text-amber-600">ML flagged unusual spending patterns</p>
+                                        <p className="text-sm text-amber-600">{t('ml_flagged_desc')}</p>
                                     </div>
                                 </div>
                             </motion.div>
@@ -431,7 +433,7 @@ export default function TransactionsPage() {
                             className="mm-btn mm-btn-primary text-lg px-12 py-6"
                         >
                             <Plus className="w-6 h-6" />
-                            Add Transaction
+                            {t('btn_add_transaction')}
                         </button>
                     </motion.div>
                 </div>
