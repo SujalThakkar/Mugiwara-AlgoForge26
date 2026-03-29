@@ -112,7 +112,7 @@ class EpisodicMemoryStore:
                 import asyncio
                 loop = asyncio.get_event_loop()
                 vec  = await loop.run_in_executor(None, self._embed, text_to_embed)
-                embedding = _to_float_list(vec)
+                embedding = _to_float_list(vec)[:_EMBED_DIM]
             except Exception as exc:
                 logger.warning(f"[EPISODIC] Embedding failed (storing without): {exc}")
 
@@ -256,7 +256,7 @@ class EpisodicMemoryStore:
                 "$vectorSearch": {
                     "index"        : _VECTOR_INDEX,
                     "path"         : "embedding",
-                    "queryVector"  : query_embedding,
+                    "queryVector"  : query_embedding[:_EMBED_DIM],
                     "numCandidates": k * 5,
                     "limit"        : k,
                     "filter"       : {

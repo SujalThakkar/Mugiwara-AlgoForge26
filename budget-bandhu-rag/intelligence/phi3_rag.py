@@ -294,12 +294,14 @@ class Phi3RAG(IntelligenceComponent):
         q = query.lower()
         episodic = context.get('episodic', [])
         
+        def _summ(m) -> str:
+            if isinstance(m, dict):
+                return m.get('trigger_description', m.get('event_summary', ''))
+            return getattr(m, 'trigger_description', getattr(m, 'event_summary', ''))
+
         # Extract goal summaries from episodic memory
-        goals = [m.get('event_summary', '') for m in episodic
-                 if 'goal' in m.get('event_summary', '').lower()
-                 or 'saving' in m.get('event_summary', '').lower()
-                 or 'travel' in m.get('event_summary', '').lower()
-                 or 'europe' in m.get('event_summary', '').lower()]
+        goals = [_summ(m) for m in episodic
+                 if any(w in _summ(m).lower() for w in ['goal', 'saving', 'travel', 'europe'])]
 
         # Goal recall  
         if any(w in q for w in ['goal', 'travel', 'europe', 'saving', 'progress', 'target']):
@@ -327,7 +329,7 @@ class Phi3RAG(IntelligenceComponent):
 
         # Budget query
         if any(w in q for w in ['budget', 'spent', 'spend', 'expense', 'month']):
-            recent = [m.get('event_summary', '') for m in episodic[:3]]
+            recent = [_summ(m) for m in episodic[:3]]
             ctx_text = "; ".join(recent) if recent else "no recent data"
             return (
                 f"Based on your recent transactions ({ctx_text}): "
@@ -407,8 +409,9 @@ class Phi3RAG(IntelligenceComponent):
             "1. ALWAYS use ₹ (Indian Rupee). NEVER use $ or USD.\n"
             "2. Use Indian formatting: ₹1,00,000 | lakh | crore\n"
             "3. All tax/finance figures must be India-specific.\n"
-            "4. If a user states 'My salary is X', it is their MONTHLY in-hand income. NEVER divide it by 12.\n"
-            "5. If unsure of a figure, say 'Verify at incometax.gov.in'.\n"
+            "4. RELEVANCE: Only mention user data points (salary, spending, past events) if they are DIRECTLY RELEVANT to the user's question. Do NOT acknowledge irrelevant data points just because they are in the context.\n"
+            "5. If a user states 'My salary is X', it is their MONTHLY in-hand income. NEVER divide it by 12.\n"
+            "6. If unsure of a TAX or DEDUCTION figure, say 'Verify at incometax.gov.in'. For personal spending, just say you don't have the data.\n"
         )
 
         # ── Verified KB chunks ────────────────────────────────────
@@ -432,9 +435,12 @@ class Phi3RAG(IntelligenceComponent):
         parts.append("\n=== USER FINANCIAL DATA ===")
         has_data = False
         
-        # 1. Master Profile
+        # 1. Master Profile (Only if personal context is needed)
         prof = context.get("user_profile", {})
-        if prof:
+        personal_terms = ['my', 'me', 'i ', 'salary', 'income', 'spend', 'expense', 'budget', 'balance', 'worth']
+        is_personal = any(w in query.lower() for w in personal_terms)
+        
+        if prof and is_personal:
             income = prof.get("income", 0)
             name = prof.get("name", "User")
             if income > 0:
@@ -443,18 +449,26 @@ class Phi3RAG(IntelligenceComponent):
 
         # Semantic memory (user profile / preferences)
         for mem in context.get("semantic", [])[:3]:
-            attr = mem.get("attribute_type", mem.get("key", ""))
-            val  = mem.get("value", mem.get("val", ""))
+            if isinstance(mem, dict):
+                attr = mem.get("attribute_type", mem.get("key", mem.get("attribute", "")))
+                val  = mem.get("value", mem.get("val", ""))
+            else:
+                attr = getattr(mem, "attribute", getattr(mem, "key", ""))
+                val  = getattr(mem, "value", getattr(mem, "val", ""))
             if attr and val:
                 parts.append(f"User Profile — {attr}: {val}")
                 has_data = True
 
         # Episodic memory (recent events / past transactions)
         for mem in context.get("episodic", [])[:4]:
-            summary = mem.get("event_summary", mem.get("summary", ""))
+            if isinstance(mem, dict):
+                summary = mem.get("trigger_description", mem.get("summary", mem.get("event_summary", "")))
+                ts = mem.get("created_at", mem.get("timestamp", ""))
+            else:
+                summary = getattr(mem, "trigger_description", getattr(mem, "summary", ""))
+                ts = getattr(mem, "created_at", getattr(mem, "timestamp", ""))
             if summary:
-                ts = mem.get("timestamp", "")[:10]
-                parts.append(f"Past Event [{ts}]: {summary}")
+                parts.append(f"Past Event [{str(ts)[:10]}]: {summary}")
                 has_data = True
 
         # Working memory (current session state)
@@ -467,7 +481,10 @@ class Phi3RAG(IntelligenceComponent):
 
         # Procedural memory (spending habits / patterns)
         for pattern in context.get("procedural", [])[:2]:
-            desc = pattern.get("description", pattern.get("pattern", ""))
+            if isinstance(pattern, dict):
+                desc = pattern.get("description", pattern.get("pattern", ""))
+            else:
+                desc = getattr(pattern, "pattern", getattr(pattern, "description", ""))
             if desc:
                 parts.append(f"Spending Pattern: {desc}")
                 has_data = True

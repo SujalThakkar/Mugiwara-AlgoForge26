@@ -153,14 +153,61 @@ async def goal_eta(goal: dict, transactions: list[dict]) -> dict:
 
 class MLClient:
     """Wrapper used by AgentController to interact with the external ML service."""
-    async def post(self, endpoint: str, json_data: dict) -> dict:
-        async with httpx.AsyncClient(timeout=30) as client:
+    
+    def __init__(self):
+        self.base_url = ML_BASE_URL
+        self.headers = COMMON_HEADERS
+
+    async def post(self, endpoint: str, json_data: dict, timeout: int = 30) -> dict:
+        async with httpx.AsyncClient(timeout=timeout) as client:
             r = await client.post(
-                f"{ML_BASE_URL}{endpoint}",
-                headers=COMMON_HEADERS,
+                f"{self.base_url}{endpoint}",
+                headers=self.headers,
                 json=json_data
             )
             r.raise_for_status()
             return r.json()
+
+    async def analyze_csv(self, csv_bytes: bytes, user_id: str) -> dict:
+        """Call full 4-model pipeline on raw CSV bytes."""
+        async with httpx.AsyncClient(timeout=60) as client:
+            r = await client.post(
+                f"{self.base_url}/ml/analyze",
+                headers={"ngrok-skip-browser-warning": "true"},
+                files={"file": ("transactions.csv", csv_bytes, "text/csv")},
+                data={"user_id": user_id}
+            )
+            r.raise_for_status()
+            return r.json()
+
+    async def analyze_data(self, user_id: str, transactions: list[dict]) -> dict:
+        """Analyze transaction data for categories, anomalies, income est, and forecast."""
+        return await self.post("/ml/analyze", {"user_id": user_id, "transactions": transactions}, timeout=45)
+
+    async def categorize(self, descriptions: list[str]) -> dict:
+        """Bulk categorization of descriptions."""
+        enriched_descs = [enrich_description(d) for d in descriptions]
+        return await self.post("/ml/categorize", {"descriptions": enriched_descs})
+
+    async def detect_anomalies(self, transactions: list[dict]) -> dict:
+        """Bulk anomaly detection."""
+        return await self.post("/ml/anomalies", {"transactions": transactions})
+
+    async def get_forecast(self, user_id: str) -> dict:
+        """Fetch forecast for user."""
+        return await self.post("/ml/forecast", {"user_id": user_id})
+
+# For backward compatibility with existing imports
+async def analyze_csv(csv_bytes: bytes, user_id: str) -> dict:
+    return await MLClient().analyze_csv(csv_bytes, user_id)
+
+async def analyze_data(user_id: str, transactions: list[dict]) -> dict:
+    return await MLClient().analyze_data(user_id, transactions)
+
+async def categorize(descriptions: list[str]) -> dict:
+    return await MLClient().categorize(descriptions)
+
+async def detect_anomalies(transactions: list[dict]) -> dict:
+    return await MLClient().detect_anomalies(transactions)
 
 
