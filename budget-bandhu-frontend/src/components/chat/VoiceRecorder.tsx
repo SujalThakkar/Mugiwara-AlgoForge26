@@ -6,6 +6,8 @@ import { Mic, MicOff, Send, Globe, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { translateText, VOICE_LANGUAGES } from '@/lib/utils/translate';
 
+import { createPortal } from 'react-dom';
+
 interface VoiceRecorderProps {
     onTranscript: (original: string, translated: string, gcode: string) => void;
     disabled?: boolean;
@@ -18,10 +20,15 @@ export function VoiceRecorder({ onTranscript, disabled }: VoiceRecorderProps) {
     const [selectedLang, setSelectedLang] = useState(VOICE_LANGUAGES[0]); // Default: Hindi/English
     const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
     const [isTranslating, setIsTranslating] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
     const recognitionRef = useRef<any>(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Update recognition language when selection changes
     useEffect(() => {
@@ -115,7 +122,7 @@ export function VoiceRecorder({ onTranscript, disabled }: VoiceRecorderProps) {
             setIsTranslating(true);
             // Translate to English before sending
             const translated = await translateText(transcript.trim(), selectedLang.gcode, 'en');
-            onTranscript(transcript.trim(), translated, selectedLang.gcode);
+            onTranscript(transcript.trim(), translated, selectedLang.code);
             setTranscript('');
             setIsTranslating(false);
         }
@@ -126,6 +133,84 @@ export function VoiceRecorder({ onTranscript, disabled }: VoiceRecorderProps) {
         const secs = seconds % 60;
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
+
+    const modalContent = (
+        <AnimatePresence>
+            {isRecording && (
+                <>
+                    {/* Darker localized Backdrop for focus */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100000] bg-black/60 backdrop-blur-md pointer-events-auto"
+                        onClick={stopRecording}
+                    />
+                    
+                    <motion.div
+                        initial={{ y: -100, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -100, opacity: 0 }}
+                        className="fixed top-[15%] left-1/2 -translate-x-1/2 z-[100001] w-[90%] max-w-sm pointer-events-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="bg-[#0f172a] border-2 border-emerald-500/50 rounded-[3rem] p-10 shadow-[0_0_80px_rgba(16,185,129,0.4)] relative overflow-hidden">
+                            <div className="flex flex-col items-center">
+                                <motion.div
+                                    className="relative w-28 h-28 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(16,185,129,0.4)]"
+                                    animate={{
+                                        scale: [1, 1.05, 1],
+                                        boxShadow: ["0 0 30px rgba(16,185,129,0.4)", "0 0 60px rgba(16,185,129,0.6)", "0 0 30px rgba(16,185,129,0.4)"]
+                                    }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                >
+                                    <Mic className="w-12 h-12 text-white" />
+                                    
+                                    <motion.div
+                                        className="absolute inset-0 rounded-full border-4 border-emerald-400/40"
+                                        animate={{ scale: [1, 1.6], opacity: [0.6, 0] }}
+                                        transition={{ duration: 1.5, repeat: Infinity }}
+                                    />
+                                </motion.div>
+
+                                <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-widest">Listening</h3>
+                                <div className="flex items-center gap-2 mb-6">
+                                    <Globe className="w-4 h-4 text-emerald-400" />
+                                    <span className="text-emerald-400 font-mono text-sm font-black tracking-tighter">{selectedLang.name.toUpperCase()}</span>
+                                </div>
+                                
+                                <div className="text-5xl font-mono font-black text-white mb-8 tabular-nums">
+                                    {formatDuration(duration)}
+                                </div>
+
+                                <AnimatePresence>
+                                    {transcript && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="w-full p-6 bg-black/40 border border-emerald-500/20 rounded-3xl mb-8 max-h-40 overflow-y-auto custom-scrollbar"
+                                        >
+                                            <p className="text-sm sm:text-base text-slate-200 italic text-center font-medium leading-relaxed">
+                                                "{transcript}"
+                                            </p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                <button
+                                    onClick={stopRecording}
+                                    className="w-full py-5 bg-white text-black font-black uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95 hover:bg-emerald-400 hover:text-white"
+                                >
+                                    <div className="w-5 h-5 bg-black rounded-sm group-hover:bg-white" />
+                                    STOP RECORDING
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
+    );
 
     return (
         <div className="flex items-center gap-2">
@@ -168,99 +253,8 @@ export function VoiceRecorder({ onTranscript, disabled }: VoiceRecorderProps) {
                 </AnimatePresence>
             </div>
 
-            {/* Recording Modal/Indicator */}
-            <AnimatePresence>
-                {isRecording && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
-                        onClick={stopRecording}
-                    >
-                        <motion.div
-                            initial={{ y: 20 }}
-                            animate={{ y: 0 }}
-                            className="bg-slate-900 border border-emerald-500/30 rounded-[2.5rem] p-10 max-w-sm w-full shadow-[0_0_50px_rgba(16,185,129,0.2)]"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="flex flex-col items-center mb-8">
-                                <motion.div
-                                    className="relative w-28 h-28 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(16,185,129,0.4)]"
-                                    animate={{
-                                        scale: [1, 1.05, 1],
-                                        boxShadow: [
-                                            "0 0 30px rgba(16,185,129,0.4)",
-                                            "0 0 60px rgba(16,185,129,0.6)",
-                                            "0 0 30px rgba(16,185,129,0.4)"
-                                        ]
-                                    }}
-                                    transition={{
-                                        duration: 2,
-                                        repeat: Infinity,
-                                        ease: "easeInOut",
-                                    }}
-                                >
-                                    <Mic className="w-14 h-14 text-white" />
-
-                                    {/* Rotating Rings */}
-                                    {[0, 1, 2].map((i) => (
-                                        <motion.div
-                                            key={i}
-                                            className="absolute inset-0 rounded-full border border-emerald-500/30"
-                                            initial={{ scale: 1, opacity: 0.6 }}
-                                            animate={{
-                                                scale: [1, 2.2, 2.8],
-                                                opacity: [0.6, 0.2, 0],
-                                            }}
-                                            transition={{
-                                                duration: 2.5,
-                                                repeat: Infinity,
-                                                delay: i * 0.5,
-                                                ease: "easeOut",
-                                            }}
-                                        />
-                                    ))}
-                                </motion.div>
-
-                                <h3 className="text-2xl font-black text-white tracking-tight mb-2 uppercase">Listening...</h3>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Globe className="w-4 h-4 text-emerald-400" />
-                                    <span className="text-emerald-400 font-mono text-sm tracking-widest">{selectedLang.name}</span>
-                                </div>
-                                <div className="text-4xl font-mono font-black text-white/90 mb-4 bg-slate-800/50 px-6 py-2 rounded-2xl border border-slate-700">
-                                    {formatDuration(duration)}
-                                </div>
-                                <p className="text-sm text-slate-500 font-medium">Click button to stop and translate</p>
-                            </div>
-
-                            {/* Live Text Preview with subtle animation */}
-                            <AnimatePresence>
-                                {transcript && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="p-5 bg-black/40 border border-slate-800 rounded-3xl mb-8 relative overflow-hidden group"
-                                    >
-                                        <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
-                                        <p className="text-sm text-slate-300 leading-relaxed font-medium italic italic">"{transcript}"</p>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-
-                            <button
-                                onClick={stopRecording}
-                                className="w-full h-16 bg-white text-black font-black uppercase tracking-tighter rounded-full hover:bg-emerald-400 transition-all shadow-xl flex items-center justify-center gap-3 text-lg"
-                            >
-                                <div className="w-6 h-6 border-2 border-black/20 rounded-sm flex items-center justify-center">
-                                    <div className="w-2.5 h-2.5 bg-black rounded-sm group-hover:bg-black transition-colors"></div>
-                                </div>
-                                STOP RECORDING
-                            </button>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {/* Render Modal via Portal to avoid clipping by parent backdrop-filters */}
+            {mounted && createPortal(modalContent, document.body)}
 
             {/* Translation Progress Indicator */}
             {isTranslating && (

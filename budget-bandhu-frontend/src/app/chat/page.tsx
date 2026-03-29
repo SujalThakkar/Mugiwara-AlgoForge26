@@ -36,8 +36,90 @@ export default function ChatPage() {
 
     const [selectedLanguage, setSelectedLanguage] = useState('en'); // Defaults to English but updated by VoiceRecorder
 
+    const [isTranslating, setIsTranslating] = useState(false);
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    // Voice Settings
+    const ELEVEN_LABS_API_KEY = 'ea21421a4314844a637bb85f41e670833a8f97a813fc6692a014c2c7fa72ff1e';
+    const ELEVEN_LABS_VOICE_ID = '8i52rsySWGYoU4SRQCex';
+
+    // Text-to-Speech Engine (ULTRA-STABLE FOR PRESENTATION)
+    const speak = (text: string, langCode: string) => {
+        if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+        // 1. Clean up Text (Very Important)
+        const cleanText = text
+            .replace(/[\*\_\#\!\>\[\]\(\)\`]/g, '') // Remove MD chars
+            .replace(/\n+/g, ' ')                  // Newlines to spaces
+            .replace(/\//g, ' ')                   // Strip problematic slashes
+            .trim();
+
+        if (!cleanText) return;
+
+        // 2. Language Optimization
+        let targetLang = langCode;
+        if (langCode.startsWith('hi')) targetLang = 'hi-IN';
+        else if (langCode.startsWith('mr')) targetLang = 'mr-IN';
+        else if (langCode.startsWith('gu')) targetLang = 'gu-IN';
+        else if (langCode.startsWith('bn')) targetLang = 'bn-IN';
+        else if (langCode.startsWith('ta')) targetLang = 'ta-IN';
+        else if (langCode.startsWith('te')) targetLang = 'te-IN';
+        else if (langCode.startsWith('kn')) targetLang = 'kn-IN';
+        else if (langCode.startsWith('ml')) targetLang = 'ml-IN';
+
+        // 3. Prepare the utterance
+        const speakNow = () => {
+            window.speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = targetLang;
+
+            const voices = window.speechSynthesis.getVoices();
+            
+            // Intelligent Voice Selection
+            // Priority: 1. Exact BCP-47 match, 2. Base code match (e.g. 'mr'), 3. Default
+            const baseCode = targetLang.split('-')[0];
+            let selectedVoice = voices.find(v => v.lang === targetLang) || 
+                               voices.find(v => v.lang.startsWith(baseCode)) || 
+                               null;
+
+            // English specific high-quality search
+            if (!selectedVoice && targetLang.startsWith('en')) {
+                selectedVoice = voices.find(v => v.name.includes('Google')) || voices[0];
+            }
+
+            if (selectedVoice) utterance.voice = selectedVoice;
+
+            utterance.pitch = 1.0;
+            utterance.rate = 1.0;
+            utterance.volume = 1.0;
+
+            utterance.onstart = () => setIsSpeaking(true);
+            utterance.onend = () => setIsSpeaking(false);
+            utterance.onerror = () => setIsSpeaking(false);
+
+            window.speechSynthesis.speak(utterance);
+        };
+
+        // 4. Handle Voice Loading
+        if (window.speechSynthesis.getVoices().length === 0) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.onvoiceschanged = null; // Prevent multi-calls
+                speakNow();
+            };
+        } else {
+            speakNow();
+        }
+    };
+
+    // Keep this for future ElevenLabs testing if needed, but not as primary
+    const speakElevenLabs = async (text: string, langCode: string) => {
+        // Disabled for presentation stability
+        console.warn("ElevenLabs disabled for stability. Using native browser TTS.");
+        speak(text, langCode);
+    };
 
     // Chat initialization and history logic handles guest/demo users automatically
 
@@ -74,17 +156,22 @@ export default function ChatPage() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, isTyping]);
 
-    const handleSend = async (text?: string, isVoiceTranslation?: boolean) => {
-        const messageText = text || input;
-        if (!messageText.trim() || isTyping) return;
+    const handleSend = async (text?: string, isVoiceData: boolean = false, voiceTranslatedText?: string, voiceLang?: string) => {
+        // STATE MANAGEMENT
+        let originalText = text || input;
+        let englishText = voiceTranslatedText || "";
+        let lang = voiceLang || selectedLanguage;
+
+        if (!originalText.trim() || isTyping) return;
         
         const activeUserId = userId || 'demo_user';
 
-        // 1. Add User Message (Show original text in chat)
+        // 1. UI DISPLAY (USER MESSAGE)
+        // Immediately display originalText in chat UI
         const userMessage: ChatMessage = {
             id: `msg_${Date.now()}`,
             role: 'user',
-            content: messageText,
+            content: originalText, // DO NOT display translated English here
             timestamp: new Date().toISOString(),
             type: 'text',
         };
@@ -94,30 +181,60 @@ export default function ChatPage() {
         setIsTyping(true);
 
         try {
-            // 2. Send to API (Always English for backend)
-            // If it's a voice translation, 'text' is already English.
-            // If it's manual input, we might need to translate it if the user language is not English? 
-            // In this specific task, the user primarily wants Voice -> English.
-            const textToSend = isVoiceTranslation ? text : messageText;
+            // 2. TRANSLATION (FOR BACKEND ONLY)
+            if (!isVoiceData && !lang.startsWith('en')) {
+                setIsTranslating(true);
+                try {
+                    const gcode = lang.split('-')[0];
+                    englishText = await translateText(originalText, gcode, 'en');
+                } catch (e) {
+                    console.error('Manual input translation failed:', e);
+                    englishText = originalText; // Fallback
+                } finally {
+                    setIsTranslating(false);
+                }
+            } else if (!isVoiceData && lang.startsWith('en')) {
+                englishText = originalText;
+            }
 
-            const response = await mlApi.chat.send(activeUserId, textToSend || '', sessionId);
+            // 3. SEND TO BACKEND (Payload uses translated_text)
+            const payload = {
+                original_text: originalText,
+                translated_text: englishText,
+                language: lang
+            };
+
+            const response = await mlApi.chat.send(activeUserId, payload, sessionId);
 
             // Update session ID if returned
             if (response.session_id) {
                 setSessionId(response.session_id);
             }
 
-            // 3. Translate Response back to user's language
-            let finalResponseContent = response.response;
-            if (selectedLanguage !== 'en') {
-                finalResponseContent = await translateText(response.response, 'en', selectedLanguage);
+            // 4. BACKEND RESPONSE is in English: response.response
+            const responseTextEnglish = response.response;
+
+            // 5. TRANSLATE RESPONSE back to user's language
+            let responseTextUserLang = responseTextEnglish;
+            if (!lang.startsWith('en')) {
+                setIsTranslating(true);
+                try {
+                    const gcode = lang.split('-')[0];
+                    responseTextUserLang = await translateText(responseTextEnglish, 'en', gcode);
+                } catch (translationError) {
+                    console.error('AI Response Translation failed:', translationError);
+                    responseTextUserLang = responseTextEnglish; // Fallback: show English as backup
+                } finally {
+                    setIsTranslating(false);
+                }
             }
 
-            // 4. Add Assistant Message
+            // 6. UI DISPLAY (BOT MESSAGE)
+            // Show ONLY responseTextUserLang
             const aiMessage: ChatMessage = {
                 id: `msg_${Date.now()}_ai`,
                 role: 'assistant',
-                content: finalResponseContent,
+                content: responseTextUserLang,
                 timestamp: new Date().toISOString(),
                 type: 'text',
                 metadata: {
@@ -127,16 +244,15 @@ export default function ChatPage() {
 
             setMessages(prev => [...prev, aiMessage]);
 
-            // Trigger speaking
-            setIsSpeaking(true);
-            setTimeout(() => setIsSpeaking(false), 3000);
+            // 7. TEXT TO SPEECH (IMPORTANT)
+            speak(responseTextUserLang, lang);
 
         } catch (error) {
             console.error('Chat error:', error);
             const errorMsg = "Sorry, I'm having trouble connecting to the brain. Please try again.";
             let translatedError = errorMsg;
-            if (selectedLanguage !== 'en') {
-                translatedError = await translateText(errorMsg, 'en', selectedLanguage);
+            if (lang !== 'en') {
+                translatedError = await translateText(errorMsg, 'en', lang);
             }
 
             setMessages(prev => [...prev, {
@@ -148,15 +264,19 @@ export default function ChatPage() {
             }]);
         } finally {
             setIsTyping(false);
+            setIsTranslating(false);
         }
     };
 
-    const handleVoiceTranscript = (original: string, translated: string, gcode: string) => {
-        setSelectedLanguage(gcode); // Sync language for response translation
-        // Show original in input (or just send it)
-        setInput(original);
-        // Automatically send the translated English version to backend
-        handleSend(translated, true);
+    const handleVoiceTranscript = (original: string, translated: string, langCode: string) => {
+        // langCode is 'hi-IN', 'mr-IN', etc.
+        // gcode for translation is 'hi', 'mr', etc.
+        const gcode = langCode.split('-')[0];
+        
+        setSelectedLanguage(langCode);
+        
+        // Pass both original and translated to handleSend
+        handleSend(original, true, translated, langCode);
     };
 
     const handleQuickAction = (actionId: string) => {
@@ -205,34 +325,46 @@ export default function ChatPage() {
                         ))}
 
                         {isTyping && (
-                            <div className="flex justify-start">
-                                <div className="bg-slate-800 rounded-2xl p-4 rounded-tl-none border border-slate-700">
-                                    <TypingIndicator />
+                            <div className="flex flex-col gap-2">
+                                <div className="flex justify-start">
+                                    <div className="bg-slate-800 rounded-2xl p-4 rounded-tl-none border border-slate-700">
+                                        <TypingIndicator />
+                                    </div>
                                 </div>
+                                {isTranslating && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="text-[10px] text-emerald-400 font-mono ml-4 flex items-center gap-2"
+                                    >
+                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+                                        TRANSLATING...
+                                    </motion.div>
+                                )}
                             </div>
                         )}
 
                         <div ref={messagesEndRef} />
                     </div>
 
-                    {/* Quick Actions */}
-                    <div className="chat-quick-actions p-4 flex gap-2 overflow-x-auto">
+                    {/* Quick Action Items - Fixed Quick Actions */}
+                    <div className="chat-quick-actions p-4 flex gap-2 overflow-x-auto custom-scrollbar">
                         {quickActions.map((action) => (
                             <button
                                 key={action.id}
                                 onClick={() => handleQuickAction(action.id)}
-                                className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-xl border border-slate-700 text-xs sm:text-sm whitespace-nowrap transition-all"
+                                className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 hover:bg-emerald-600/20 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 rounded-xl border border-slate-700/50 text-xs sm:text-sm whitespace-nowrap transition-all group"
                                 disabled={isTyping}
                             >
-                                <action.icon className="w-4 h-4" />
+                                <action.icon className="w-4 h-4 group-hover:scale-110 transition-transform" />
                                 {action.label}
                             </button>
                         ))}
                     </div>
 
                     {/* Input Area */}
-                    <div className="chat-input-area p-4 bg-slate-950 border-t border-slate-800">
-                        <div className="chat-input-box flex items-center gap-2 bg-slate-900 rounded-xl p-2 border border-slate-800 focus-within:border-emerald-500/50 transition-colors">
+                    <div className="chat-input-area p-4 bg-slate-950/80 backdrop-blur-md border-t border-slate-800/50">
+                        <div className="chat-input-box flex items-center gap-2 bg-slate-900/50 rounded-2xl p-2 border border-slate-800 focus-within:border-emerald-500/30 transition-all shadow-inner">
                             <input
                                 ref={inputRef}
                                 type="text"
@@ -241,7 +373,7 @@ export default function ChatPage() {
                                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                                 placeholder={t('ai_input_placeholder')}
                                 disabled={isTyping}
-                                className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder-slate-500"
+                                className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder-slate-600 px-4"
                             />
 
                             <VoiceRecorder onTranscript={handleVoiceTranscript} disabled={isTyping} />
@@ -249,34 +381,74 @@ export default function ChatPage() {
                             <button
                                 onClick={() => handleSend()}
                                 disabled={!input.trim() || isTyping}
-                                className="p-2 bg-emerald-600 rounded-lg text-white hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="p-3 bg-gradient-to-br from-emerald-600 to-teal-700 rounded-xl text-white hover:from-emerald-500 hover:to-teal-600 disabled:opacity-30 disabled:grayscale transition-all shadow-lg active:scale-95"
                             >
                                 <Send className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <p className="text-center text-xs text-slate-500 mt-2">
-                            ⚠️ AI responses are powered by Phi-3.5 and may not always be accurate.
+                        <p className="text-center text-[10px] text-slate-600 mt-3 font-medium uppercase tracking-widest opacity-50">
+                            Powered by Phi-3.5 • Multilingual Engine Active
                         </p>
                     </div>
                 </div>
 
                 {/* Right Side - Finance Advisor 3D Panel */}
-                <div className="chat-advisor-panel hidden md:flex flex-col w-[350px] bg-black border-l border-slate-800 relative">
-
+                <div className="chat-advisor-panel hidden md:flex flex-col w-[380px] bg-black border-l border-slate-800/50 relative overflow-hidden">
+                    {/* Background Detail */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[100px] rounded-full -mr-32 -mt-32" />
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 blur-[100px] rounded-full -ml-32 -mb-32" />
 
                     {/* 3D Finance Advisor */}
-                    <div className="flex-1 relative flex items-center justify-center bg-gradient-to-b from-slate-900 to-black">
-                        <FinanceAdvisor3D isThinking={isTyping} isSpeaking={isSpeaking} />
+                    <div className="flex-1 relative flex items-center justify-center">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)]" />
+                        <FinanceAdvisor3D isThinking={isTyping || isTranslating} isSpeaking={isSpeaking} />
                     </div>
 
-                    {/* Status Indicator */}
-                    <div className="p-6 border-t border-slate-800 bg-slate-900/50">
-                        <div className="flex items-center gap-3">
-                            <div className={`w-3 h-3 rounded-full ${isTyping ? 'bg-amber-400 animate-pulse' : isSpeaking ? 'bg-green-500 animate-pulse' : 'bg-emerald-500'}`} />
-                            <span className="text-slate-300 font-medium font-mono uppercase tracking-wider text-sm">
-                                {isTyping ? 'PROCESSING...' : isSpeaking ? 'SPEAKING...' : 'ONLINE'}
-                            </span>
+                    {/* Status Indicator Panel */}
+                    <div className="p-8 border-t border-slate-800/50 bg-slate-950/50 backdrop-blur-sm">
+                        <div className="flex flex-col gap-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-2.5 h-2.5 rounded-full ${
+                                        isTranslating ? 'bg-blue-400 animate-pulse' :
+                                        isTyping ? 'bg-amber-400 animate-pulse' : 
+                                        isSpeaking ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 
+                                        'bg-slate-600'
+                                    }`} />
+                                    <span className="text-slate-400 font-bold font-mono uppercase tracking-[0.2em] text-[10px]">
+                                        {isTranslating ? 'Translating' : isTyping ? 'Thinking' : isSpeaking ? 'Speaking' : 'Standby'}
+                                    </span>
+                                </div>
+                                <div className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[9px] text-slate-500 font-mono">
+                                    v3.5L
+                                </div>
+                            </div>
+
+                            {/* Activity Progress Bar */}
+                            {(isTyping || isTranslating || isSpeaking) && (
+                                <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                                    <motion.div 
+                                        className={`h-full ${isTranslating ? 'bg-blue-500' : isSpeaking ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                                        animate={{
+                                            x: ["-100%", "100%"]
+                                        }}
+                                        transition={{
+                                            duration: 1.5,
+                                            repeat: Infinity,
+                                            ease: "linear"
+                                        }}
+                                        style={{ width: '40%' }}
+                                    />
+                                </div>
+                            )}
+
+                            <div className="flex items-center gap-2 text-slate-500 text-[10px] font-medium italic">
+                                <span>Selected:</span>
+                                <span className={selectedLanguage !== 'en' ? 'text-emerald-400 not-italic font-bold' : ''}>
+                                    {selectedLanguage.toUpperCase()}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

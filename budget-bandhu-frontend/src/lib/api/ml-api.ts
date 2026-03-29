@@ -54,7 +54,10 @@ async function ragCallApi<T>(endpoint: string, fallbackData: T, options?: Reques
         });
 
         if (!response.ok) {
-            console.warn(`[RAG API Fallback] ${endpoint} returned ${response.status}`, await response.text().catch(() => ''));
+            // Only warn for unexpected errors, 404 (Not Found) is expected for new users/history
+            if (response.status !== 404) {
+                console.warn(`[RAG API Fallback] ${endpoint} returned ${response.status}`, await response.text().catch(() => ''));
+            }
             return fallbackData;
         }
 
