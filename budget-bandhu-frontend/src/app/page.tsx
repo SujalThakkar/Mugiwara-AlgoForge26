@@ -24,7 +24,7 @@ import { TrendingUp, Wallet, Target, Sparkles, PiggyBank, Shield, Loader2 } from
 import { NumericFormat } from "react-number-format";
 
 // Demo user ID - replace with actual user from auth
-const DEMO_USER_ID = "696a022c3c758e29b2ca8d50";
+const DEMO_USER_ID = "917558497556"; // Updated to mobile number ID
 const MM_EASING = [0.16, 1, 0.3, 1] as const;
 
 export default function DashboardPage() {
@@ -97,7 +97,7 @@ export default function DashboardPage() {
 
 
   // Find Emergency Fund goal
-  const emergencyFundGoal = goals.find(g => g.name.toLowerCase().includes('emergency') || g.priority === 'high');
+  const emergencyFundGoal = goals.find(g => g.name.toLowerCase().includes('emergency') || g.priority === 'high') || goals[0];
 
   // Calculate budget progress — prefer live allocations from dashboard API
   // dashboard.py now returns budget_summary.allocations with live $group aggregation

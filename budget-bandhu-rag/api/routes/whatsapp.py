@@ -61,9 +61,12 @@ async def handle_whatsapp_message(from_number: str, body: str, num_media: int) -
             logger.error("[WHATSAPP] Database not connected")
             return "⚠️ Database connection error. Please try again later."
 
-        # 1. Clean Phone to 10 digits (Standard for this DB)
+        # 1. Clean Phone (Standard for this DB: preserve 91 + 10 digits to match frontend)
         raw_digits = "".join(filter(str.isdigit, from_number))
-        phone = raw_digits[-10:] if len(raw_digits) >= 10 else raw_digits
+        if len(raw_digits) >= 12 and raw_digits.startswith("91"):
+            phone = raw_digits[-12:] 
+        else:
+            phone = raw_digits[-10:] if len(raw_digits) >= 10 else raw_digits
         
         # 2. Check User
         user = await db["users"].find_one({"_id": phone})
